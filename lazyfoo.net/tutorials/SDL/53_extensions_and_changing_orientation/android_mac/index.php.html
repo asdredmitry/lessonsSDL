@@ -1,0 +1,230 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+	<head>
+
+		<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+		<META NAME=KEYWORDS CONTENT="SDL 2 C++ Tutorial 2D Mac Install SDL_image SDL_ttf SDL_mixer Android">
+		<META NAME=DESCRIPTION CONTENT="Install SDL2_image/SDL2_ttf/SDL2_mixer on Mac Android Studio.">
+
+		<title>Lazy Foo' Productions - Setting up SDL_image on Mac Android Studio 3.0.1</title>
+
+		<link REL="stylesheet" TYPE="text/css" href="../../../../layout/lazy.css">
+
+	</head>
+
+	<body>
+
+		<div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../../../OpenGL/index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../../index.php.html">News</a>
+<a class="nav" href="../../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>
+		<div class="content">
+
+			<div class="tutPreface"><h1 class="tutHead">Setting up SDL_image on Mac Android Studio 3.0.1</h1>
+            <h6>Last Updated 9/29/17</h6>
+			</div>
+
+			<div class="tutText">
+			<a class="tutLink" name="1" href="index.php.html#1">1)</a> First, download the SDL_image source on <a class="tutLink" href="https://www.libsdl.org/projects/SDL_image/">this page</a>. 
+			<div class="tutImg"><img src="download.png"></div>
+         Extract the source code so it's at "~/androidlib/SDL2_image-2.0.2"<br/>
+			<br/>
+<a class="tutLink" name="2" href="index.php.html#2">2)</a> Download the <a class="tutLink" href="../53_extensions_and_changing_orientation.zip">demo source/assets</a>. Copy the directory inside to
+"~/androidprojects/SDL_Tutorial/app/src/main/assets". Remember: if the application needs to load "53_extensions_and_changing_orientation/portrait.png" it needs to be at
+"~/androidprojects/SDL_Tutorial/app/src/main/assets/53_extensions_and_changing_orientation/portrait.png" when building.<br/>
+			<br/>
+			<a class="tutLink" name="3" href="index.php.html#3">3)</a> Copy demo source to "~/androidprojects/SDL_Tutorial/app/src/main/jni/src/53_extensions_and_changing_orientation.cpp". Open the game make file at 
+"~/androidprojects/SDL_Tutorial/app/src/main/jni/src/Android.mk" and change local source files to include the new demo source file:
+<h5>
+LOCAL_SRC_FILES := $(SDL_PATH)/src/main/android/SDL_android_main.c \
+53_extensions_and_changing_orientation.cpp
+</h5>
+
+Open up Android Studio and try to build. You'll get an error:
+<h5>			
+fatal error: 'SDL_image.h' file not found
+</h5>
+
+			This error means that our game source file can't find SDL_image.h which makes sense since we haven't set it up yet.<br>
+			<br>			
+			<a class="tutLink" name="4" href="index.php.html#4">4)</a> SDL_image is just another shared object library that needs to be built along SDL2 and our C++ application. So that means we need to create a symbolic link to the SDL_image
+			source code. Go to the JNI directory inside the project using this command:
+			<h5>cd ~/androidprojects/SDL_Tutorial/app/src/main/jni</h5>
+
+			And create a symbolic link directory to the SDL2_image source directory we extracted (<b>REMEMBER: This path will vary depending on your version of SDL_image</b>):
+			<h5>ln -s ~/androidlib/SDL2_image-2.0.2 SDL2_image</h5>
+			Build again, you'll get the same error but at least SDL2_image has a symbolic link in the project now.<br>
+			<br>
+			<a class="tutLink" name="5" href="index.php.html#5">5)</a> There may be a symbolic link to SDL_image in the JNI folder but our demo application doesn't know where it is. To fix this error open up 
+"~/androidprojects/SDL_Tutorial/app/src/main/jni/src/Android.mk" and change
+			<h5>LOCAL_C_INCLUDES := $(LOCAL_PATH)/$(SDL_PATH)/include</h5>
+			to
+			<h5>LOCAL_C_INCLUDES := $(LOCAL_PATH)/$(SDL_PATH)/include $(LOCAL_PATH)/../SDL2_image/</h5>
+			So now our demo application can find the SDL_image headers. Build again and you'll get a new error:
+	
+			<h5>Error:(120) undefined reference to `IMG_Load'
+			Error:(432) undefined reference to `IMG_Init'
+			Error:(477) undefined reference to `IMG_Quit'
+			</h5>
+
+			<a class="tutLink" name="6" href="index.php.html#6">6)</a> Those last errors were linker errors. While SDL_image managed to compile and our game managed to compile, we didn't tell the NDK to link our game against SDL_image. In
+			"~/androidprojects/SDL_Tutorial/app/src/main/jni/src/Android.mk" change
+			<h5>LOCAL_SHARED_LIBRARIES := SDL2</h5>
+			to
+			<h5>LOCAL_SHARED_LIBRARIES := SDL2 SDL2_image</h5>
+			
+			
+			Build again. Hopefully you should get the application to build, but you may get an error.<br>
+			<br>
+			<a class="tutLink" name="7" href="index.php.html#7">7)</a> You may have gotten a No rule to make target error for IMG_WIC.c. This is the webp library being a pain in the butt. We're just going to yank it out. Open up
+
+			Open "~/androidlib/SDL2_image-2.0.2/Android.mk" and change:
+			<h5>SUPPORT_WEBP ?= true</h5>
+			to
+			<h5>SUPPORT_WEBP ?= false</h5>
+
+			Delete the line that says
+			<h5>IMG_WIC.c       \</h5>
+			    
+			and just straight up delete the "~/androidlib/SDL2_image-2.0.2/external/libwebp-0.6.0" directory.
+			
+			Build again and you should get no errors.<br>
+			<br>
+			<a class="tutLink" name="8" href="index.php.html#8">8)</a> The application should now build but <b>IT WILL NOT WORK</b>. We need to get our Java activity load the SDL extension library. Open 
+			"~/androidprojects/SDL_Tutorial/app/src/main/java/org/libsdl/app/SDLActivity.java" and look for this section:
+			</div>
+
+<div class="tutCode">    protected String[] getLibraries() {
+        return new String[] {
+            "SDL2",
+            // "SDL2_image",
+            // "SDL2_mixer",
+            // "SDL2_net",
+            // "SDL2_ttf",
+            "main"
+        };
+    }
+</div>
+
+			<div class="tutText">
+			Uncomment the libraries you'll be using so they'll be loaded.<br>
+			<br>
+			<a class="tutLink" name="9" href="index.php.html#9">9)</a> Build and run. The application should run and rotate. Now that the application built, it's time to go over the source code.
+			</div>
+
+			<div class="tutFooter">
+			<a class="tutLink" href="../index2.php.html">Extensions and Changing Orientation Part 2: Handling Orientation Changes</a><br>
+			</div>
+
+		</div>
+
+		<div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../../../OpenGL/index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../../index.php.html">News</a>
+<a class="nav" href="../../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+	</body>
+</html>

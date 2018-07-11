@@ -1,0 +1,580 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+	<head>
+
+		<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+
+		<title>Lazy Foo' Productions - Texture Blitting and Texture Padding</title>
+		<META NAME=KEYWORDS CONTENT="freeGLUT glut C++ OpenGL Tutorial 2D Windows Linux Mac Texture Blitting Padding">
+		<META NAME=DESCRIPTION CONTENT="Learn to blit one OpenGL texture onto another.">
+
+		<link REL="stylesheet" TYPE="text/css" href="../../../layout/lazy.css">
+
+		<script src="main.js">
+		</script>
+
+	</head>
+
+	<body>
+
+		<div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>		
+		<div class="content">
+
+			<div class="tutPreface"><h1 class="tutHead">Texture Blitting and Texture Padding</h1>
+			<div class="tutImg"><img src="preview.png"></div>
+            <h6>Last Updated 10/04/14</h6>
+			Blitting is the process of copying pixels from one image to another. In this tutorial, we're going to two halves of an image and combine them by blitting the
+			pixel data. We'll also have to manually pad the pixel, since DevIL can't do it for us this time.
+			</div>
+
+<div class="tutCodeHeader">From LTexture.h</div>
+<div class="tutCode">        void createPixels32( GLuint imgWidth, GLuint imgHeight );
+        /*
+        Pre Condition:
+         -A valid OpenGL context
+        Post Condition:
+         -Frees existing texture data
+         -Allocates 32bit pixel data for member pixels
+        Side Effects:
+         -None
+        */
+
+        void copyPixels32( GLuint* pixels, GLuint imgWidth, GLuint imgHeight );
+        /*
+        Pre Condition:
+         -A valid OpenGL context
+        Post Condition:
+         -Copies given pixel data into member pixels
+        Side Effects:
+         -None
+        */
+
+        void padPixels32();
+        /*
+        Pre Condition:
+         -Valid 32bit member pixels
+        Post Condition:
+         -Takes current member pixel data and gives it power of two dimensions
+        Side Effects:
+         -None
+        */
+</div>
+
+<div class="tutText">
+Here are some new 32bit functions to do some new pixel operations. createPixels32() creates a blank set of pixels for us to use, copyPixels32() copies a set of external pixels, and
+padPixels32() pads the member pixels to be power of two.
+</div>
+
+<div class="tutCodeHeader">From LTexture.h</div>
+<div class="tutCode">        void createPixels8( GLuint imgWidth, GLuint imgHeight );
+        /*
+        Pre Condition:
+         -A valid OpenGL context
+        Post Condition:
+         -Frees existing texture data
+         -Allocates 8bit pixel data for member pixels
+        Side Effects:
+         -None
+        */
+
+        void copyPixels8( GLubyte* pixels, GLuint imgWidth, GLuint imgHeight );
+        /*
+        Pre Condition:
+         -A valid OpenGL context
+        Post Condition:
+         -Copies given pixel data into member pixels
+        Side Effects:
+         -None
+        */
+
+        void padPixels8();
+        /*
+        Pre Condition:
+         -Valid 8bit member pixels
+        Post Condition:
+         -Takes current member pixel data and gives it power of two dimensions
+        Side Effects:
+         -None
+        */
+</div>
+
+<div class="tutText">
+Here's the 8bit versions of the previously mention functions.
+</div>
+
+<div class="tutCodeHeader">From LTexture.h</div>
+<div class="tutCode">        void blitPixels32( GLuint x, GLuint y, LTexture& destination );
+        /*
+        Pre Condition:
+         -Available 32bit member and destination pixels
+         -Valid blitting coordinates
+        Post Condition:
+         -Copies member pixels to destination member pixels at given location
+         -Function will misbehave if invalid blitting coordinate or image dimensions
+         are used
+        Side Effects:
+         -None
+        */
+
+        void blitPixels8( GLuint x, GLuint y, LTexture& destination );
+        /*
+        Pre Condition:
+         -Available 8bit member and destination pixels
+         -Valid blitting coordinates
+        Post Condition:
+         -Copies member pixels to destination member pixels at given location
+         -Function will misbehave if invalid blitting coordinate or image dimensions
+         are used
+        Side Effects:
+         -None
+        */
+</div>
+
+<div class="tutText">
+Here are the 32bit and 8bit pixel blitting functions. They copy the image from the member pixels onto the destination LTexture's member pixels.
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">void LTexture::createPixels32( GLuint imgWidth, GLuint imgHeight )
+{
+    //Valid dimensions
+    if( imgWidth > 0 && imgHeight > 0 )
+    {
+        //Get rid of any current texture data
+        freeTexture();
+
+        //Create pixels
+        GLuint size = imgWidth * imgHeight;
+        mPixels32 = new GLuint[ size ];
+
+        //Copy pixel data
+        mImageWidth = imgWidth;
+        mImageHeight = imgHeight;
+        mTextureWidth = mImageWidth;
+        mTextureHeight = mImageWidth;
+
+        //Set pixel formal
+        mPixelFormat = GL_RGBA;
+    }
+}
+</div>
+
+<div class="tutText">
+The function createPixels32() is pretty simple. First it makes sure that a valid set of image dimensions were given. Then it frees any existing texture data because we don't want
+to create a conflict between new and previous texture data.<br>
+<br>
+After that, we allocate the pixel data and set the LTexture attributes.
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">void LTexture::copyPixels32( GLuint* pixels, GLuint imgWidth, GLuint imgHeight )
+{
+    //Pixels have valid dimensions
+    if( imgWidth > 0 && imgHeight > 0 )
+    {
+        //Get rid of any current texture data
+        freeTexture();
+
+        //Copy pixels
+        GLuint size = imgWidth * imgHeight;
+        mPixels32 = new GLuint[ size ];
+        memcpy( mPixels32, pixels, size * 4 );
+
+        //Copy pixel data
+        mImageWidth = imgWidth;
+        mImageHeight = imgHeight;
+        mTextureWidth = mImageWidth;
+        mTextureHeight = mImageWidth;
+
+        //Set pixel format
+        mPixelFormat = GL_RGBA;
+    }
+}
+</div>
+
+<div class="tutText">
+copyPixels32() works similarly to createPixels32() only it does a memcpy() on an external pixel pointer. Since this is RGBA pixel data with 4 bytes per pixel, the size of the
+memory being copied is number of pixels times four.
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">void LTexture::blitPixels32( GLuint x, GLuint y, LTexture& destination )
+{
+    //There are pixels to blit
+    if( mPixels32 != NULL && destination.mPixels32 != NULL )
+    {
+        //Copy pixels rows
+        GLuint* dPixels = destination.mPixels32;
+        GLuint* sPixels = mPixels32;
+        for( int i = 0; i < mImageHeight; ++i )
+        {
+            memcpy( &dPixels[ ( i + y ) * destination.mTextureWidth + x ], &sPixels[ i * mTextureWidth ], mImageWidth * 4 );
+        }
+    }
+}
+</div>
+
+<div class="tutText">
+Before we go over padPixels32(), let's go over blitPixels32() and how pixel blitting works at a byte level.<br>
+<br>
+First we make sure there are pixels to blit with. After that we have a call to memcpy() that copies "sPixels" (source pixels) to "dPixels" (destination pixels) row by row.<br>
+<br>
+Now how do the equations in memcpy() work? Let's say we wanted to copy the pixels on the left to the pixels on the right at the bottom right corner:
+<div class="tutImg"><img src="pixels3.png"> <img src="pixels4.png"></div>
+<br>
+We're blitting the pixels in the top left corner so the offset is x = 1, y = 1. For the first iteration of the loop "i" will equal 0. This means for the first loop we'll get:<br>
+dPixels[ ( 0 + 1 ) * 4 + 1 ] and sPixels[ 0 * 3 ]<br>
+<br>
+So the first row of 3 sPixels gets copied starting at dPixels[ 5 ] which is what you would expect.<br>
+<br>
+For the second iteration of the loop i = 1, x = 1, and y = 1. This gives us:<br>
+dPixels[ ( 1 + 1 ) * 4 + 1 ] and sPixels[ 1 * 3 ]<br>
+<br>
+So source pixels starts copying at 3 to destination pixels at 9. I'm sure you could figure out the last row.<br>
+<br>
+Two things to note: 1) Remember that since it's 32bit pixels, we copy imageWidth * 4 bytes per pixels when copying pixel rows. 2) Also it's the texture width not the image width
+that we use to calculate how many pixels there are per row.<br>
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">void LTexture::padPixels32()
+{
+    //If there are pixels to pad
+    if( mPixels32 != NULL )
+    {
+        //Old texture attributes
+        GLuint oTextureWidth = mTextureWidth;
+        GLuint oTextureHeight = mTextureHeight;
+
+        //Calculate power of two dimensions
+        mTextureWidth = powerOfTwo( mImageWidth );
+        mTextureHeight = powerOfTwo( mImageHeight );
+
+        //The bitmap needs to change
+        if( mTextureWidth != mImageWidth || mTextureHeight != mImageHeight )
+        {
+            //Allocate pixels
+            GLuint size = mTextureWidth * mTextureHeight;
+            GLuint* pixels = new GLuint[ size ];
+
+            //Copy pixels rows
+            for( int i = 0; i < mImageHeight; ++i )
+            {
+                memcpy( &pixels[ i * mTextureWidth ], &mPixels32[ i * oTextureWidth ], mImageWidth * 4 );
+            }
+
+            //Change pixels
+            delete[] mPixels32;
+            mPixels32 = pixels;
+        }
+    }
+}
+</div>
+
+<div class="tutText">
+For padPixels32(), all we do is create 32bit pixel data that is power of two, blit the current pixel data onto the new pixel data, delete the old data and swap the pointers.
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">void LTexture::createPixels8( GLuint imgWidth, GLuint imgHeight )
+{
+    //Valid dimensions
+    if( imgWidth > 0 && imgHeight > 0 )
+    {
+        //Get rid of any current texture data
+        freeTexture();
+
+        //Create pixels
+        GLuint size = imgWidth * imgHeight;
+        mPixels8 = new GLubyte[ size ];
+
+        //Copy pixel data
+        mImageWidth = imgWidth;
+        mImageHeight = imgHeight;
+        mTextureWidth = mImageWidth;
+        mTextureHeight = mImageWidth;
+
+        //Set pixel format
+        mPixelFormat = GL_ALPHA;
+    }
+}
+
+void LTexture::copyPixels8( GLubyte* pixels, GLuint imgWidth, GLuint imgHeight )
+{
+    //Pixels have valid dimensions
+    if( imgWidth > 0 && imgHeight > 0 )
+    {
+        //Get rid of any current texture data
+        freeTexture();
+
+        //Copy pixels
+        GLuint size = imgWidth * imgHeight;
+        mPixels8 = new GLubyte[ size ];
+        memcpy( mPixels8, pixels, size );
+
+        //Copy pixel data
+        mImageWidth = imgWidth;
+        mImageHeight = imgHeight;
+        mTextureWidth = mImageWidth;
+        mTextureHeight = mImageWidth;
+
+        //Set pixel format
+        mPixelFormat = GL_ALPHA;
+    }
+}
+
+void LTexture::padPixels8()
+{
+    //If there are pixels to pad
+    if( mPixels8 != NULL )
+    {
+        //Old texture attributes
+        GLuint oTextureWidth = mTextureWidth;
+        GLuint oTextureHeight = mTextureHeight;
+
+        //Calculate power of two dimensions
+        mTextureWidth = powerOfTwo( mImageWidth );
+        mTextureHeight = powerOfTwo( mImageHeight );
+
+        //The bitmap needs to change
+        if( mTextureWidth != mImageWidth || mTextureHeight != mImageHeight )
+        {
+            //Allocate pixels
+            GLuint size = mTextureWidth * mTextureHeight;
+            GLubyte* pixels = new GLubyte[ size ];
+
+            //Copy pixels rows
+            for( int i = 0; i < mImageHeight; ++i )
+            {
+                memcpy( &pixels[ i * mTextureWidth ], &mPixels8[ i * oTextureWidth ], mImageWidth );
+            }
+
+            //Change pixels
+            delete[] mPixels8;
+            mPixels8 = pixels;
+        }
+    }
+}
+
+void LTexture::blitPixels8( GLuint x, GLuint y, LTexture& destination )
+{
+    //There are pixels to blit
+    if( mPixels8 != NULL && destination.mPixels8 != NULL )
+    {
+        //Copy pixels rows
+        GLubyte* dPixels = destination.mPixels8;
+        GLubyte* sPixels = mPixels8;
+        for( int i = 0; i < mImageHeight; ++i )
+        {
+            memcpy( &dPixels[ ( i + y ) * destination.mTextureWidth + x ], &sPixels[ i * mTextureWidth ], mImageWidth );
+        }
+    }
+}
+
+</div>
+
+<div class="tutText">
+The 8bit versions of these functions work the same except we're using 8bit pointers and memcopy() only copies one byte per pixel.
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">//Loaded textures
+LTexture gLeft;
+LTexture gRight;
+
+//Generated combined texture
+LTexture gCombined;
+</div>
+
+<div class="tutText">
+At the top of LUtil.cpp we declare the two textures we're going to load and the texture we're going to blit them to.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">bool loadMedia()
+{
+    //Load left texture
+    if( !gLeft.loadPixelsFromFile32( "22_texture_blitting_and_texture_padding/left.png" ) )
+    {
+        printf( "Unable to load left texture!\n" );
+        return false;
+    }
+
+    //Load right texture
+    if( !gRight.loadPixelsFromFile32( "22_texture_blitting_and_texture_padding/right.png" ) )
+    {
+        printf( "Unable to load right texture!\n" );
+        return false;
+    }
+
+    //Create blank pixels
+    gCombined.createPixels32( gLeft.imageWidth() + gRight.imageWidth(), gLeft.imageHeight() );
+</div>
+
+<div class="tutText">
+In loadMedia(), we load the two images as pixels and allocate pixel data large enough to hold both of them.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //Blit images
+    gLeft.blitPixels32( 0, 0, gCombined );
+    gRight.blitPixels32( gLeft.imageWidth(), 0, gCombined );
+
+    //Pad and create texture
+    gCombined.padPixels32();
+    gCombined.loadTextureFromPixels32();
+
+    //Get rid of old textures
+    gLeft.freeTexture();
+    gRight.freeTexture();
+
+    return true;
+}
+</div>
+
+<div class="tutText">
+Then we blit the two images onto the blank pixels, pad the pixels so they're power of two, and create the texture.<br>
+<br>
+With both the images blitted onto a new texture, we free the old images.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">void render()
+{
+    //Clear color buffer
+    glClear( GL_COLOR_BUFFER_BIT );
+    glLoadIdentity();
+
+    //Render combined texture
+    gCombined.render( ( SCREEN_WIDTH - gCombined.imageWidth() ) / 2.f, ( SCREEN_HEIGHT - gCombined.imageHeight() ) / 2.f );
+
+    //Update screen
+    glutSwapBuffers();
+}
+</div>
+
+<div class="tutText">
+And finally, we render the generated texture.
+</div>
+
+			<div class="tutFooter">
+			Download the media and source code for this tutorial <a class="tutLink" href="22_texture_blitting_and_texture_padding.zip">here</a>.
+			<br>
+			<a class="leftNav" href="../index.php.html#Texture Blitting and Texture Padding">Back to OpenGL Tutorials</a><br>
+			</div>
+
+		</div>
+
+		<div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+	</body>
+</html>

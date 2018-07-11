@@ -1,0 +1,864 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+<head>
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+
+<title>Lazy Foo' Productions</title>
+
+<link REL="stylesheet" TYPE="text/css" href="../../layout/lazy.css">
+
+<script src="../../layout/lazy.js">
+</script>
+
+</head>
+
+<body>
+
+<div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../tutorials/SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../index.php.html">Articles</a>
+<a class="nav" href="../../tutorials/OpenGL/index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../index.php.html">News</a>
+<a class="nav" href="../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../contact.php.html">Contact</a>
+<a class="nav" href="../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>
+<div class="content">
+
+<div class="tutPreface"><h1 class="tutHead">Making a Level Editor</h1>
+<h6>Last Updated 12/27/11</h6>
+Having to hard code your levels is a pain. Fortunately you can make and save a level with a level editor.
+Here you'll get the basics on how to make one.
+</div>
+
+<div class="tutText">
+In this article we're going to be using the tiling engine from the <a class="tutLink" href="../../SDL_tutorials/lesson29/index.php.html">Tiling tutorial</a>.
+This article assumes you've read it, so if you haven't already, you should read it now.<br>
+<br>
+When it comes to level editors, there's 3 basic things you need. To demonstrate the first two things, I've
+made this video:<br>
+<br>
+<div class="tutImg">
+This is a demo of the debug mode for Sonic the Hedgehog for the Sega Genesis:
+<object width="425" height="350"> <param name="movie" value="http://www.youtube.com/v/qe5DcNbehy8"> </param> <embed src="http://www.youtube.com/v/qe5DcNbehy8" type="application/x-shockwave-flash" width="425" height="350"></embed></object><br>
+The code to activate it is (at the title screen) press C, C, Up, Down, Left, Right, Hold A, Start and keep holding A 'til the first level appears.
+</div>
+<br>
+In this video I goof around with the debug mode. The debug mode is not a full level editor but it has two features
+you want to pay attention to: the ability to choose a game object and place it where you want. With our
+level editor, we're going to be able to choose a tile and place it where we want on our tile map.<br>
+<br>
+Now what is this missing to be able to be a full fledged level editor? Simple, you can't save and load what you
+made. We already covered how to load a tile map in the tiling tutorial, and we'll cover saving in this article.<br>
+<br>
+Now let's get started with our level editor.
+</div>
+
+<div class="tutCode">void set_camera()
+{
+    //Mouse offsets
+    int x = 0, y = 0;
+    
+    //Get mouse offsets
+    SDL_GetMouseState( &x, &y );
+    
+    //Move camera to the left if needed
+    if( x < TILE_WIDTH )
+    {
+        camera.x -= 20;
+    }
+    
+    //Move camera to the right if needed
+    if( x > SCREEN_WIDTH - TILE_WIDTH )
+    {
+        camera.x += 20;
+    }
+    
+    //Move camera up if needed
+    if( y < TILE_WIDTH )
+    {
+        camera.y -= 20;
+    }
+    
+    //Move camera down if needed
+    if( y > SCREEN_HEIGHT - TILE_WIDTH )
+    {
+        camera.y += 20;
+    }
+</div>
+
+<div class="tutText">
+First thing we need to be able to do is move through the tile map. In the tiling tutorial, we used the dot to set
+camera focus. Here we're going to use the mouse to move the camera.<br>
+<br>
+We set the camera by first getting the mouse offsets using SDL_GetMouseState(). If the mouse is at the top edge
+of the screen the camera will scroll up, if the camera is on the right edge of the screen it will scroll to the
+right, etc, etc.
+</div>
+
+<div class="tutCode">    //Keep the camera in bounds.
+    if( camera.x < 0 )
+    {
+        camera.x = 0;    
+    }
+    if( camera.y < 0 )
+    {
+        camera.y = 0;    
+    }
+    if( camera.x > LEVEL_WIDTH - camera.w )
+    {
+        camera.x = LEVEL_WIDTH - camera.w;    
+    }
+    if( camera.y > LEVEL_HEIGHT - camera.h )
+    {
+        camera.y = LEVEL_HEIGHT - camera.h;    
+    } 
+}
+</div>
+
+<div class="tutText">
+And of course after we move the camera we have to keep it in bounds.
+</div>
+
+<div class="tutCode">void put_tile( Tile *tiles[], int tileType )
+{
+    //Mouse offsets
+    int x = 0, y = 0;
+    
+    //Get mouse offsets
+    SDL_GetMouseState( &x, &y );
+    
+    //Adjust to camera
+    x += camera.x;
+    y += camera.y;
+</div>
+
+<div class="tutText">
+Here's is the function we're going to call when we click the mouse to place a tile. It takes in a tile set and
+the type of tile we're going to place.<br>
+<br>
+At the top of put_tile() we get the mouse offsets and then we add camera offsets to them. The reason we do this
+is because when we call SDL_GetMouseState(), we get the mouse offsets with respect to the screen. We want the
+mouse offsets relative to the whole level.<br>
+<br>
+So we add the camera offsets to the mouse offsets because the postion in the level is the mouse offsets plus how
+much the camera has scrolled. 
+</div>
+
+<div class="tutCode">    //Go through tiles
+    for( int t = 0; t < TOTAL_TILES; t++ )
+    {
+        //Get tile's collision box
+        SDL_Rect box = tiles[ t ]->get_box();
+        
+        //If the mouse is inside the tile
+        if( ( x > box.x ) && ( x < box.x + box.w ) && ( y > box.y ) && ( y < box.y + box.h ) )
+        {
+            //Get rid of old tile
+            delete tiles[ t ];
+            
+            //Replace it with new one
+            tiles[ t ] = new Tile( box.x, box.y, tileType );
+        }
+    }
+}
+</div>
+
+<div class="tutText">
+Then we go through the tiles and find which one the user clicked on. Then we delete the old tile and replace it
+with the type of tile we want.
+</div>
+
+<div class="tutCode">bool set_tiles( Tile *tiles[] )
+{
+    //The tile offsets
+    int x = 0, y = 0;
+    
+    //Open the map
+    std::ifstream map( "lazy.map" );
+    
+    //If the map couldn't be loaded
+    if( map == NULL )
+    {
+        //Initialize the tiles
+        for( int t = 0; t < TOTAL_TILES; t++ )
+        {
+            //Put a floor tile
+            tiles[ t ] = new Tile( x, y, t % ( TILE_BLUE + 1 ) );
+            
+            //Move to next tile spot
+            x += TILE_WIDTH;
+        
+            //If we've gone too far
+            if( x >= LEVEL_WIDTH )
+            {
+                //Move back
+                x = 0;
+            
+                //Move to the next row
+                y += TILE_HEIGHT;    
+            }
+        }
+    }
+</div>
+
+<div class="tutText">
+Here's the top set_tiles() function. It's very similar to the one in the tiling tutorial.<br>
+<br>
+What's changed? In the tiling tutorial when there was no tile map file, the program just quit. In this program,
+it's ok not to have a tile map already made because this application is supposed to make new tile maps.<br>
+<br>
+So if there's no map file, we create a tile set made of floor tiles. It puts a red tile, then a green one, then a
+blue one, and then repeats itself until it the tile map is full.
+</div>
+
+<div class="tutCode">else
+    {
+        //Initialize the tiles
+        for( int t = 0; t < TOTAL_TILES; t++ )
+        {
+            //Determines what kind of tile will be made
+            int tileType = -1;
+    
+            //Read tile from map file
+            map >> tileType;
+        
+            //If there was a problem in reading the map
+            if( map.fail() == true )
+            {
+                //Stop loading map
+                map.close();
+                return false;
+            }
+        
+            //If the number is a valid tile number
+            if( ( tileType >= 0 ) && ( tileType < TILE_SPRITES ) )
+            {
+                tiles[ t ] = new Tile( x, y, tileType );    
+            }
+            //If we don't recognize the tile type
+            else 
+            {
+                //Stop loading map
+                map.close();
+                return false;
+            }
+        
+            //Move to next tile spot
+            x += TILE_WIDTH;
+        
+            //If we've gone too far
+            if( x >= LEVEL_WIDTH )
+            {
+                //Move back
+                x = 0;
+            
+                //Move to the next row
+                y += TILE_HEIGHT;    
+            }
+        }
+    
+        //Close the file
+        map.close();
+    }
+    
+    return true;
+}
+</div>
+
+<div class="tutText">
+The rest of the function is pretty much exactly the same as in the tiling tutorial.<br>
+<br>
+It goes through the file, reads a number, then places a tile based on the number in the map file
+and keeps reading from the map file until it's placed all the tiles. 
+</div>
+
+<div class="tutCode">void save_tiles( Tile *tiles[] )
+{
+    //Open the map
+    std::ofstream map( "lazy.map" );
+    
+    //Go through the tiles
+    for( int t = 0; t < TOTAL_TILES; t++ )
+    {
+        //Write tile type to file
+        map << tiles[ t ]->get_type() << " ";
+    }
+    
+    //Close the file
+    map.close();
+}
+</div>
+
+<div class="tutText">
+Saving a tile map we've made is easy. All we do is just go through the tile set and
+write each of the tile's type to the file.
+</div>
+
+<div class="tutCode">int main( int argc, char* args[] )
+{
+    //Quit flag
+    bool quit = false;
+    
+    //Current tile type
+    int currentType = TILE_RED;
+    
+    //The tiles that will be used
+    Tile *tiles[ TOTAL_TILES ];
+    
+    //The frame rate regulator
+    Timer fps;
+    
+    //Initialize
+    if( init() == false )
+    {
+        return 1;
+    }
+    
+    //Load the files
+    if( load_files() == false )
+    {
+        return 1;
+    }
+
+    //Clip the tile sheet
+    clip_tiles();
+    
+    //Set the tiles
+    if( set_tiles( tiles ) == false )
+    {
+        return 1;    
+    }
+</div>
+
+<div class="tutText">
+Here's the top of the main() function. It's pretty much the same as with the tiling tutorial only now we have the
+"currentType" variable, which keeps track of the current tile we're using.
+</div>
+
+<div class="tutCode">        //While there's events to handle
+        while( SDL_PollEvent( &event ) )
+        {
+            //When the user clicks
+            if( event.type == SDL_MOUSEBUTTONDOWN )
+            {
+                //On left mouse click
+                if( event.button.button == SDL_BUTTON_LEFT )
+                {
+                    //Put the tile
+                    put_tile( tiles, currentType );
+                }
+</div>
+
+<div class="tutText">
+Here's the beginning of the event handling loop.<br>
+<br>
+When the user presses the left mouse button, we call our put_tile() function to place a tile.
+</div>
+
+<div class="tutCode">               //On mouse wheel scroll
+                else if( event.button.button == SDL_BUTTON_WHEELUP )
+                {
+                    //Scroll through tiles
+                    currentType--;
+                    
+                    if( currentType < TILE_RED )
+                    {
+                        currentType = TILE_TOPLEFT;
+                    }
+                    
+                    //Show the current tile type
+                    show_type( currentType );
+                }
+                else if( event.button.button == SDL_BUTTON_WHEELDOWN )
+                {
+                    //Scroll through tiles
+                    currentType++;
+                    
+                    if( currentType > TILE_TOPLEFT )
+                    {
+                        currentType = TILE_RED;
+                    }
+                    
+                    //Show the current tile type
+                    show_type( currentType );
+                }
+            }
+
+            //If the user has Xed out the window
+            if( event.type == SDL_QUIT )
+            {
+                //Quit the program
+                quit = true;
+            }
+        }
+</div>
+
+<div class="tutText">
+When the user scrolls up or down on the mouse wheel, we change the current tile type accordingly and update the
+caption to show what's the current tile type.<br>
+<br>
+At then end of the event loop, we handle a user quit like always.
+</div>
+
+<div class="tutCode">void show_type( int tileType )
+{
+    switch( tileType )
+    {
+        case TILE_RED:
+        SDL_WM_SetCaption( "Level Designer. Current Tile: Red Floor", NULL );
+        break;
+        
+        case TILE_GREEN:
+        SDL_WM_SetCaption( "Level Designer. Current Tile: Green Floor", NULL );
+        break;
+        
+        case TILE_BLUE:
+        SDL_WM_SetCaption( "Level Designer. Current Tile: Blue Floor", NULL );
+        break;
+        
+        case TILE_CENTER:
+        SDL_WM_SetCaption( "Level Designer. Current Tile: Center Wall", NULL );
+        break;
+        
+        case TILE_TOP:
+        SDL_WM_SetCaption( "Level Designer. Current Tile: Top Wall", NULL );
+        break;
+        
+        case TILE_TOPRIGHT:
+        SDL_WM_SetCaption( "Level Designer. Current Tile: Top Right Wall", NULL );
+        break;
+        
+        case TILE_RIGHT:
+        SDL_WM_SetCaption( "Level Designer. Current Tile: Right Wall", NULL );
+        break;
+        
+        case TILE_BOTTOMRIGHT:
+        SDL_WM_SetCaption( "Level Designer. Current Tile: Bottom Right Wall", NULL );
+        break;
+        
+        case TILE_BOTTOM:
+        SDL_WM_SetCaption( "Level Designer. Current Tile: Bottom Wall", NULL );
+        break;
+        
+        case TILE_BOTTOMLEFT:
+        SDL_WM_SetCaption( "Level Designer. Current Tile: Bottom Left Wall", NULL );
+        break;
+        
+        case TILE_LEFT:
+        SDL_WM_SetCaption( "Level Designer. Current Tile: Left Wall", NULL );
+        break;
+        
+        case TILE_TOPLEFT:
+        SDL_WM_SetCaption( "Level Designer. Current Tile: Top Left Wall", NULL );
+        break;
+    };    
+}
+</div>
+
+<div class="tutText">
+If you were wondering how the show_type() function works, it's a simple switch block that shows the current tile
+type in the caption.
+</div>
+
+<div class="tutCode">        //Set the camera
+        set_camera();
+        
+        //Show the tiles
+        for( int t = 0; t < TOTAL_TILES; t++ )
+        {
+            tiles[ t ]->show();
+        }
+        
+        //Update the screen
+        if( SDL_Flip( screen ) == -1 )
+        {
+            return 1;    
+        }
+        
+        //Cap the frame rate
+        if( fps.get_ticks() < 1000 / FRAMES_PER_SECOND )
+        {
+            SDL_Delay( ( 1000 / FRAMES_PER_SECOND ) - fps.get_ticks() );
+        }
+    }
+</div>
+
+<div class="tutText">
+Here's the rest of the main loop. Nothing much to see here.
+</div>
+
+<div class="tutCode">    //Save the tile map
+    save_tiles( tiles );
+    
+    //Clean up
+    clean_up( tiles );
+    
+    return 0;    
+}
+</div>
+
+<div class="tutText">
+Lastly, we save the tile map we made and do our clean up at the end of the main() function.
+</div>
+
+<div class="tutText">
+So that's it for the level editor made for this article. The next section of the article assumes you have a
+good handle on inheritance and polymorphism. As I said in the state machines article, if you don't know these OOP
+concepts already you should learn them if you want to make anything complex in C++.<br>
+<br>
+The tiling engine we use here is a simple one. We only have tile objects and their only difference is their sprite
+and being a floor or a wall type. What about more complex level engines?<br>
+<br>
+A common way to organize your different level object classes is to have a base class and have your different
+classes inherit from it.
+</div>
+
+<div class="tutCode">class GameObject
+{
+    //Stuff
+};
+
+class Wall : public GameObject
+{
+    //Stuff
+};
+
+class Door : public GameObject
+{
+    //Stuff
+};
+
+class ThisThing : public GameObject
+{
+    //Stuff
+};
+
+class ThatThing : public GameObject
+{
+    //Stuff
+};
+</div>
+
+<div class="tutText">
+This would be a way to organize your classes for your game. We have a base game object class and we have our
+game objects inherit from it. 
+</div>
+
+<div class="tutCode">void put_tile( std::vector&#060GameObject*&#062 &level, int objectType )
+{
+    //Mouse offsets
+    int x = 0, y = 0;
+    
+    //Get mouse offsets
+    SDL_GetMouseState( &x, &y );
+    
+    //Adjust to camera
+    x += camera.x;
+    y += camera.y;
+
+    //Place object
+    switch( objectType )
+    {
+        case LVLOBJ_THIS:
+        level.push_back( new ThisThing( x, y ) );	
+        break;
+        
+        case LVLOBJ_THAT:
+        level.push_back( new ThatThing( x, y ) );	
+        break;   
+    }
+}
+</div>
+
+<div class="tutText">
+Here's what a placement function might look like. It simply adds in a new game object to the level at the place the
+user specified.<br>
+<br>
+Well placing new objects in the level was easy enough but how do you save the objects?
+</div>
+
+<div class="tutCode">void ThisThing::write_info( std::ofstream &save )
+{
+    //Write type
+    save << LVLOBJ_THIS << " "; 
+    
+    //Write attributes
+    save << x << " ";
+    save << y << " ";
+    save << maxHealthPoints << " ";
+    save << weapon << " ";
+    save << etc << " ";   
+}
+</div>
+
+<div class="tutText">
+What you can do is have a save function that goes through the level objects, then give your objects a function that
+writes their attributes to a file.<br>
+<br>
+Here we have a function that takes in a reference to a save file.
+First we write the object type to the file, and after that we write the various attributes to the file.<br>
+<br>
+Writing the level objects was easy enough, but what about reading them?
+</div>
+
+<div class="tutCode">        //Go through file
+        while( file.eof()! )
+        {
+            //Determines what kind of object will be made
+            int objectType = -1;
+    
+            //Read level object type from level file
+            file >> objectType;
+        
+            //If there was a problem in reading the level file
+            if( map.fail() == true )
+            {
+                //Stop loading level
+                map.close();
+                return false;
+            }
+        
+            //Place object
+            switch( objectType )
+            {
+                case LVLOBJ_THIS:
+                level.push_back( new ThisThing( file ) );	
+                break;
+        
+                case LVLOBJ_THAT:
+                level.push_back( new ThatThing( file ) );	
+                break;   
+            }
+        }
+</div>
+
+<div class="tutText">
+When we wrote the level object to the file, we had each object write a set of attributes to a file. The first
+thing in each of the sets was the type of object.<br>
+<br>
+When reading in objects we would read the first character to determine what kind of object the attribute set
+belongs to. Then we add the proper object to the level and pass a reference of the file to the constructor of the
+new object.
+</div>
+
+<div class="tutCode">ThisThing::ThisThing( std::ifstream &load )
+{
+    //Get attributes
+    load >> x;
+    load >> y;
+    load >> maxHealthPoints;
+    load >> weapon;
+    load >> etc;   
+}
+</div>
+
+<div class="tutText">
+Now the constructor can continue reading the file and get its attributes. Once this object is constructed, the
+loading function will continue reading more objects.<br>
+<br>
+Now what if you want to edit objects while in the editor?
+</div>
+
+<div class="tutCode">        while( SDL_PollEvent( &event ) )
+        {
+            //When the user clicks
+            if( event.type == SDL_MOUSEBUTTONDOWN )
+            {
+                //On left mouse click
+                if( event.button.button == SDL_BUTTON_LEFT )
+                {
+                    //Select an object
+                    select_level_object( level, selectedObject );
+                }
+            }
+            
+            //Edit level object
+            if( selectedObject != NULL )
+            {
+                selectedObject->handle_edit();
+            }
+        }
+</div>
+
+<div class="tutCode">        //Show edit interface
+        if( selectedObject != NULL )
+        {
+            selectedObject->show_edit();
+        }
+</div>
+
+<div class="tutText">
+You could give your game objects functions that allow you to edit their attributes.<br>
+<br>
+You would need something to select the game objects, a function to handle events to edit the object's attributes,
+and a function that shows the attribute editor.<br>
+<br>
+The above two segments of psuedo code show what these might look like.
+</div>
+
+<div class="tutCode">void select_level_object( std::vector<GameObject*> &level, GameObject* &selected )
+{
+    //Mouse offsets
+    int x = 0, y = 0;
+    
+    //Get mouse offsets
+    SDL_GetMouseState( &x, &y );
+    
+    //Adjust to camera
+    x += camera.x;
+    y += camera.y;
+
+    //Don't want to point to old selected object.
+    selected = NULL;
+
+    //Go through level objects
+    for( int o = 0; o < level.size(); o++ )
+    {
+        //If the mouse touches a level object
+        if( mouse_touches( level[ o ] ) == true )
+        {
+            selected = level[ o ];
+        }
+    }
+}
+
+void ThisThing::handle_edit()
+{
+    //Handle GUI Objects
+    hpEditor.handle_events();
+    weaponEditor.handle_events();
+    etcEditor.handle_events();
+}
+
+void ThisThing::show_edit()
+{
+    //Show GUI Objects
+    hpEditor.show();
+    weaponEditor.show();
+    etcEditor.show();
+}
+</div>
+
+<div class="tutText">
+This is what the object selecting and attribute editing functions might look like. Now that we're getting to into
+GUIs, I would recommend using a GUI library if you're going to do any complex GUIs. You could roll your own GUIs
+like in this psuedo code, but some people think it's like pulling teeth. It's your level designer so it's up to
+you.<br>
+<br>
+There is other stuff we could cover, like using binary file IO as opposed to ASCII like we did here, file
+selectors, or adding all sort of other features, but you have the fundamentals. The hardest part is getting off the
+ground, so the rest you should be able to figure out with a little creative thinking and googling.
+</div>
+
+<div class="tutFooter">
+Download the media and source code for this article <a class="tutLink" href="../../downloads/index.php%3Ffile=Article09">here</a>.
+</div>
+
+</div>
+
+<div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../tutorials/SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../index.php.html">Articles</a>
+<a class="nav" href="../../tutorials/OpenGL/index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../index.php.html">News</a>
+<a class="nav" href="../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../contact.php.html">Contact</a>
+<a class="nav" href="../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+</body>
+</html>

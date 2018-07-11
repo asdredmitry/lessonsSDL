@@ -1,0 +1,635 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+    <head>
+
+        <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+
+        <title>Lazy Foo' Productions - Textured Vertex Buffers</title>
+		<META NAME=KEYWORDS CONTENT="freeGLUT glut C++ OpenGL Tutorial 2D Windows Linux Mac Vertex Buffer Objects VBO texture mapping">
+		<META NAME=DESCRIPTION CONTENT="Learn to render an OpenGL texture using modern VBO">
+
+        <link REL="stylesheet" TYPE="text/css" href="../../../layout/lazy.css">
+
+        <script src="main.js">
+        </script>
+
+    </head>
+
+    <body>
+
+        <div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>        
+        <div class="content">
+
+            <div class="tutPreface"><h1 class="tutHead">Textured Vertex Buffers</h1>
+            <div class="tutImg"><img src="preview.png"></div>
+            <h6>Last Updated 8/09/12</h6>
+            Using with glBegin()/glEnd() with glVertex() (known as immediate mode rendering) is deprecated in modern OpenGL implementations. If you want to render a textured
+            polygon in modern OpenGL implementations, you're going to have to do it with VBOs.
+            </div>
+
+<div class="tutCodeHeader">From LTexCoord.h</div>
+<div class="tutCode">#ifndef LTEX_COORD_H
+#define LTEX_COORD_H
+
+#include "LOpenGL.h"
+
+struct LTexCoord
+{
+    GLfloat s;
+    GLfloat t;
+};
+
+#endif
+</div>
+
+<div class="tutText">
+Here we have a new file with a new data type. An LTexCoord is a data type we're going to use to make handling texture coordinates easier.
+</div>
+
+<div class="tutCodeHeader">From LVertexData2D.h</div>
+<div class="tutCode">#ifndef LVERTEX_DATA_2D_H
+#define LVERTEX_DATA_2D_H
+
+#include "LVertexPos2D.h"
+#include "LTexCoord.h"
+
+struct LVertexData2D
+{
+    LVertexPos2D position;
+    LTexCoord texCoord;
+};
+
+#endif
+</div>
+
+<div class="tutText">
+Each one of the vertices for our textured quad has a vertex position and a texture coordinate, so we have another file with another data type to put them together. Each one of our
+textured quad corners will be represented by a LVertexData2D object.
+</div>
+
+<div class="tutCodeHeader">From LTexture.h</div>
+<div class="tutCode">        //Texture name
+        GLuint mTextureID;
+
+        //Current pixels
+        GLuint* mPixels;
+
+        //Texture dimensions
+        GLuint mTextureWidth;
+        GLuint mTextureHeight;
+
+        //Unpadded image dimensions
+        GLuint mImageWidth;
+        GLuint mImageHeight;
+
+        //VBO IDs
+        GLuint mVBOID;
+        GLuint mIBOID;
+};
+</div>
+
+<div class="tutText">
+We have new member variables for our VBO and IBO.
+</div>
+
+<div class="tutCodeHeader">From LTexture.h</div>
+<div class="tutCode">    private:
+        GLuint powerOfTwo( GLuint num );
+        /*
+        Pre Condition:
+         -None
+        Post Condition:
+         -Returns nearest power of two integer that is greater
+        Side Effects:
+         -None
+        */
+
+        void initVBO();
+        /*
+        Pre Condition:
+         -A valid OpenGL context
+         -A loaded member texture
+        Post Condition:
+         -Generates VBO and IBO to use for rendering
+        Side Effects:
+         -Binds NULL VBO and IBO
+        */
+
+        void freeVBO();
+        /*
+        Pre Condition:
+         -A generated VBO
+        Post Condition:
+         -Frees VBO and IBO
+        Side Effects:
+         -None
+        */
+</div>
+
+<div class="tutText">
+We also have the new functions initVBO() and freeVBO() handle our VBO variables.
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">LTexture::LTexture()
+{
+    //Initialize texture ID and pixels
+    mTextureID = 0;
+    mPixels = NULL;
+
+    //Initialize image dimensions
+    mImageWidth = 0;
+    mImageHeight = 0;
+
+    //Initialize texture dimensions
+    mTextureWidth = 0;
+    mTextureHeight = 0;
+
+    //Initialize VBO
+    mVBOID = 0;
+    mIBOID = 0;
+}
+</div>
+
+<div class="tutText">
+As always, don't forget to initialize your variables.
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">void LTexture::initVBO()
+{
+    //If texture is loaded and VBO does not already exist
+    if( mTextureID != 0 && mVBOID == 0 )
+    {
+        //Vertex data
+        LVertexData2D vData[ 4 ];
+        GLuint iData[ 4 ];
+
+        //Set rendering indices
+        iData[ 0 ] = 0;
+        iData[ 1 ] = 1;
+        iData[ 2 ] = 2;
+        iData[ 3 ] = 3;
+
+        //Create VBO
+        glGenBuffers( 1, &mVBOID );
+        glBindBuffer( GL_ARRAY_BUFFER, mVBOID );
+        glBufferData( GL_ARRAY_BUFFER, 4 * sizeof(LVertexData2D), vData, GL_DYNAMIC_DRAW );
+
+        //Create IBO
+        glGenBuffers( 1, &mIBOID );
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, mIBOID );
+        glBufferData( GL_ELEMENT_ARRAY_BUFFER, 4 * sizeof(GLuint), iData, GL_DYNAMIC_DRAW );
+
+        //Unbind buffers
+        glBindBuffer( GL_ARRAY_BUFFER, NULL );
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, NULL );
+    }
+}
+</div>
+
+<div class="tutText">
+Here's our VBO initializer. Notice how it will only run if a texture is already loaded. There's no point in a textured VBO with no texture.<br>
+<br>
+First we declare our vertex data and index data we're going to send to the GPU. Then we set our indices. The reason we aren't setting our vertex data is because it's going to be
+set in the rendering function. The reason we're using "GL_DYNAMIC_DRAW" is because we're going to be updating the vertex data, as opposed to the previous tutorial where we sent the
+data once and reused it.<br>
+<br>
+As with previous the tutorial, we generate the buffers and send the data to them. After our buffers are created, we unbind the buffers.
+</div>
+
+<div class="tutCodeHeader">From LTexture.h</div>
+<div class="tutCode">bool LTexture::loadTextureFromPixels32( GLuint* pixels, GLuint imgWidth, GLuint imgHeight, GLuint texWidth, GLuint texHeight )
+{
+    //Free texture if it exists
+    freeTexture();
+
+    //Get image dimensions
+    mImageWidth = imgWidth;
+    mImageHeight = imgHeight;
+    mTextureWidth = texWidth;
+    mTextureHeight = texHeight;
+
+    //Generate texture ID
+    glGenTextures( 1, &mTextureID );
+
+    //Bind texture ID
+    glBindTexture( GL_TEXTURE_2D, mTextureID );
+
+    //Generate texture
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, mTextureWidth, mTextureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels );
+
+    //Set texture parameters
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, DEFAULT_TEXTURE_WRAP );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, DEFAULT_TEXTURE_WRAP );
+
+    //Unbind texture
+    glBindTexture( GL_TEXTURE_2D, NULL );
+
+    //Check for error
+    GLenum error = glGetError();
+    if( error != GL_NO_ERROR )
+    {
+        printf( "Error loading texture from %p pixels! %s\n", pixels, gluErrorString( error ) );
+        return false;
+    }
+
+    //Generate VBO
+    initVBO();
+
+    return true;
+}
+</div>
+
+<div class="tutText">
+We call our VBO initializer whenever we load a texture so the VBO is ready to use for rendering our textured quad. As you can see, the rest of our texture loading is the same as
+before. The only part our VBO is going to affect is how the textured quad is rendered.
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">void LTexture::render( GLfloat x, GLfloat y, LFRect* clip )
+{
+    //If the texture exists
+    if( mTextureID != 0 )
+    {
+        //Texture coordinates
+        GLfloat texTop = 0.f;
+        GLfloat texBottom = (GLfloat)mImageHeight / (GLfloat)mTextureHeight;
+        GLfloat texLeft = 0.f;
+        GLfloat texRight = (GLfloat)mImageWidth / (GLfloat)mTextureWidth;
+
+        //Vertex coordinates
+        GLfloat quadWidth = mImageWidth;
+        GLfloat quadHeight = mImageHeight;
+
+        //Handle clipping
+        if( clip != NULL )
+        {
+            //Texture coordinates
+            texLeft = clip->x / mTextureWidth;
+            texRight = ( clip->x + clip->w ) / mTextureWidth;
+            texTop = clip->y / mTextureHeight;
+            texBottom = ( clip->y + clip->h ) / mTextureHeight;
+
+            //Vertex coordinates
+            quadWidth = clip->w;
+            quadHeight = clip->h;
+        }
+
+        //Move to rendering point
+        glTranslatef( x, y, 0.f );
+</div>
+
+<div class="tutText">
+At the top of the LTexture render() function, our vertex and texture coordinate calculation is pretty much the same as when we used immediate mode. The data itself isn't changing,
+it's how it's being sent to the GPU that's changing.
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">        //Set vertex data
+        LVertexData2D vData[ 4 ];
+
+        //Texture coordinates
+        vData[ 0 ].texCoord.s =  texLeft; vData[ 0 ].texCoord.t =    texTop;
+        vData[ 1 ].texCoord.s = texRight; vData[ 1 ].texCoord.t =    texTop;
+        vData[ 2 ].texCoord.s = texRight; vData[ 2 ].texCoord.t = texBottom;
+        vData[ 3 ].texCoord.s =  texLeft; vData[ 3 ].texCoord.t = texBottom;
+
+        //Vertex positions
+        vData[ 0 ].position.x =       0.f; vData[ 0 ].position.y =        0.f;
+        vData[ 1 ].position.x = quadWidth; vData[ 1 ].position.y =        0.f;
+        vData[ 2 ].position.x = quadWidth; vData[ 2 ].position.y = quadHeight;
+        vData[ 3 ].position.x =       0.f; vData[ 3 ].position.y = quadHeight;
+</div>
+
+<div class="tutText">
+After calculating our texture coordinates and vertex coordinates, we set the data in the vertex data array.<br>
+<br>
+If any of you are confused why the vertex data is set like this, this code should actually look familiar.
+</div>
+
+<div class="tutCodeHeader">From old LTexture render()</div>
+<div class="tutCode">        //Render textured quad
+        glBegin( GL_QUADS );
+            glTexCoord2f(  texLeft,    texTop ); glVertex2f(       0.f,        0.f );
+            glTexCoord2f( texRight,    texTop ); glVertex2f( quadWidth,        0.f );
+            glTexCoord2f( texRight, texBottom ); glVertex2f( quadWidth, quadHeight );
+            glTexCoord2f(  texLeft, texBottom ); glVertex2f(       0.f, quadHeight );
+        glEnd();
+</div>
+
+<div class="tutText">
+We're just specifying the same vertex/texture coordinates as we did before, only now the data is being put in an array.
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">        //Set texture ID
+        glBindTexture( GL_TEXTURE_2D, mTextureID );
+
+        //Enable vertex and texture coordinate arrays
+        glEnableClientState( GL_VERTEX_ARRAY );
+        glEnableClientState( GL_TEXTURE_COORD_ARRAY );
+</div>
+
+<div class="tutText">
+After setting our vertex/texture coordinates, it's time to render our textured quad. To do that we have to bind our texture, enable vertex coordinate arrays with "GL_VERTEX_ARRAY"
+and also enable texture coordinate arrays with "GL_TEXTURE_COORD_ARRAY".
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">            //Bind vertex buffer
+            glBindBuffer( GL_ARRAY_BUFFER, mVBOID );
+
+            //Update vertex buffer data
+            glBufferSubData( GL_ARRAY_BUFFER, 0, 4 * sizeof(LVertexData2D), vData );
+</div>
+
+<div class="tutText">
+Before we can render our textured quad, we need to update the vertex data in the VBO with the vertex data we calculated at the top of the render() function. First we bind the VBO
+so we can do operations on it. Then we call glBufferSubData() to update the vertex data on the current VBO much in the same way you would use glTexSubImage2D() to update a
+texture.<br>
+<br>
+The first argument specifies what type of data you're updating. The second argument is the byte offset you want to start updating the data, and because we're updating the whole
+VBO, we start from the beginning address 0. The third argument is the size of the data you're updating in bytes. We're sending 4 LVertexData2Ds, so it's 4 times the size of a
+LVertexData2D. The last argument is the pointer to the vertex data.<br>
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">            //Set texture coordinate data
+            glTexCoordPointer( 2, GL_FLOAT, sizeof(LVertexData2D), (GLvoid*)offsetof( LVertexData2D, texCoord ) );
+
+            //Set vertex data
+            glVertexPointer( 2, GL_FLOAT, sizeof(LVertexData2D), (GLvoid*)offsetof( LVertexData2D, position ) );
+</div>
+
+<div class="tutText">
+We have to set the vertex pointer like we did last time, and now we have to set the texture coordinate pointer since we're texturing. As with immediate mode, you want to send
+your texture coordinates before your vertex coordinates. Because we have our vertex coordinates and texture coordinates in the same VBO, setting the pointers is a bit more
+involved.<br>
+<br>
+The first argument for the glPointer functions is how many axes per coordinate. The second argument is the data type for the pointer data. The third argument is the stride.<br>
+<br>
+What is stride? Remember how I said in previous tutorials that since our structure is made up entirely of GLfloats, we can treat it like an array of floats? That still true:
+<div class="tutImg"><img src="parallel_arrays.png"></div>
+<br>
+Stride is the space between each set of data. When say the stride is sizeof(LVertexData2D) for the vertex pointer, you'll see that the starting address of each vertex is a
+LVertexData2D apart in bytes:
+<div class="tutImg"><img src="stride.png"></div>
+<br>
+So the way we're setting up the vertex pointer is to have OpenGL read in two GLfloats, shift over sizeof(LVertexData2D) bytes, read another two GLfloats, and so on until all the
+vertices are read:
+<div class="tutImg"><img src="pos_stride.png"></div>
+<br>
+You may have noticed that the stride for the texture coordinates is also sizeof(LVertexData2D), but the texture coordinates are placed differently:
+<div class="tutImg"><img src="tex_stride.png"></div>
+<br>
+Using the offsetof macro, we can give the vertex and texture coordinate pointers different starting address. When we define the last argument of the glPointer functions, the
+starting address of the data, we give it the byte offset of the member within the LVertexData2D struct.<br>
+<br>
+Remember: we have a VBO bound, so any address we give the function is going to be retrieved from VBO memory.
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">            //Draw quad using vertex data and index data
+            glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, mIBOID );
+            glDrawElements( GL_QUADS, 4, GL_UNSIGNED_INT, NULL );
+</div>
+
+<div class="tutText">
+With our vertex coordinate and texture coordinate data set, we bind our IBO and render our textured VBO quad.<br>
+<br>
+You may be wondering why didn't we update the IBO the same way we updated our VBO. Remember that our IBO is set so we render 4 vertices in order. While our vertex data may change,
+the fact that we will render 4 vertices in order will not change.
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">        //Disable vertex and texture coordinate arrays
+        glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+        glDisableClientState( GL_VERTEX_ARRAY );
+    }
+}
+</div>
+
+<div class="tutText">
+After we're done rendering our VBO textured quad, we disable the vertex and texture coordinate arrays.
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">void LTexture::freeVBO()
+{
+    //Free VBO and IBO
+    if( mVBOID != 0 )
+    {
+        glDeleteBuffers( 1, &mVBOID );
+        glDeleteBuffers( 1, &mIBOID );
+    }
+}
+</div>
+
+<div class="tutText">
+When we're done with our VBO and IBO, we free them using glDeleteBuffers().
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">void LTexture::freeTexture()
+{
+    //Delete texture
+    if( mTextureID != 0 )
+    {
+        glDeleteTextures( 1, &mTextureID );
+        mTextureID = 0;
+    }
+
+    //Delete pixels
+    if( mPixels != NULL )
+    {
+        delete[] mPixels;
+        mPixels = NULL;
+    }
+
+    mImageWidth = 0;
+    mImageHeight = 0;
+    mTextureWidth = 0;
+    mTextureHeight = 0;
+}
+</div>
+
+<div class="tutText">
+We don't free the VBO when we free the texture. It could happen where we load one texture and then another. In this case we can reuse the VBO from texture to texture.
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">LTexture::~LTexture()
+{
+    //Free texture data if needed
+    freeTexture();
+
+    //Free VBO and IBO if needed
+    freeVBO();
+}
+</div>
+
+<div class="tutText">
+We free the VBO after the LTexture object itself is deallocated. 
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">bool loadMedia()
+{
+    if( !gVBOTexture.loadTextureFromFile( "18_textured_vertex_buffers/opengl.png" ) )
+    {
+        printf( "Unable to load OpenGL texture!\n" );
+        return false;
+    }
+
+    return true;
+}
+
+void update()
+{
+
+}
+
+void render()
+{
+    //Clear color buffer
+    glClear( GL_COLOR_BUFFER_BIT );
+
+    //Initialize modelview matrix
+    glLoadIdentity();
+
+    //Render textured quad using VBOs
+    gVBOTexture.render( ( SCREEN_WIDTH - gVBOTexture.imageWidth() ) / 2.f, ( SCREEN_HEIGHT - gVBOTexture.imageHeight() ) / 2.f );
+
+    //Update screen
+    glutSwapBuffers();
+}
+</div>
+
+<div class="tutText">
+As you can see, all these VBO operations are invisible outside of the class.
+</div>
+
+            <div class="tutFooter">
+            Download the media and source code for this tutorial <a class="tutLink" href="18_textured_vertex_buffers.zip">here</a>.
+			<br>
+			<a class="leftNav" href="../index.php.html#Textured Vertex Buffers">Back to OpenGL Tutorials</a><br>
+            </div>
+
+        </div>
+
+        <div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+    </body>
+</html>

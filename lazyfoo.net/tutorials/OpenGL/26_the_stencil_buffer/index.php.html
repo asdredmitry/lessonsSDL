@@ -1,0 +1,471 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+    <head>
+
+        <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+
+        <title>Lazy Foo' Productions - The Stencil Buffer</title>
+		<META NAME=KEYWORDS CONTENT="freeGLUT glut C++ OpenGL Tutorial 2D Windows Linux Mac Stencil Buffer">
+		<META NAME=DESCRIPTION CONTENT="Learn to stencil your scene using the OpenGL stencil buffer.">
+
+        <link REL="stylesheet" TYPE="text/css" href="../../../layout/lazy.css">
+
+        <script src="main.js">
+        </script>
+
+    </head>
+
+    <body>
+
+        <div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>        
+        <div class="content">
+
+            <div class="tutPreface"><h1 class="tutHead">The Stencil Buffer</h1>
+            <div class="tutImg"><img src="preview.png"></div>
+            <h6>Last Updated 10/05/14</h6>
+            Up until now, we've always been rendering to the color buffer. You can also put values in the stencil buffer. We can then use those values to define the 
+            regions we want to draw or mask.
+            </div>
+
+<div class="tutText">
+Say we have this quad:
+<div class="tutImg"><img src="polygon.png"></div>
+<br>
+And let's say when the polygon rasterizes, it turns into this 3x3 set of pixels.
+<div class="tutImg"><img src="color_buffer.png"></div>
+<br>
+Pixels are nothing but GLuint RGB values that go into the color buffer. The color buffer isn't the only buffer we can rasterize into.  We can also put integer values in the stencil
+buffer:
+<div class="tutImg"><img src="stencil_buffer.png"></div>
+<br>
+We can then use stencil operations to say whether we do or not want to render where certain stencil values are at.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">//OpenGL texture
+LTexture gTexture;
+
+//Polygon attributes
+GLfloat gPolygonAngle = 0.f;
+GLfloat gPolygonX = SCREEN_WIDTH / 2.f, gPolygonY = SCREEN_HEIGHT / 2.f;
+
+//Stencil operation
+GLuint gStencilRenderOp = GL_NOTEQUAL;
+</div>
+
+<div class="tutText">
+At the top of LUtil.cpp, we declare the texture we're going to render. In this tutorial, we're also going to have a spinning triangle render to the stencil buffer.
+"gPolygonAngle", "gPolygonX", and "gPolygonY" are used to define the triangle.<br>
+<br>
+Lastly, we have "gStencilRenderOp" which defines the stencil operation we're going to use when rendering the texture to the color buffer. In this tutorial, we're going to either
+not render where the triangle is at, only render where the triangle is at, or ignore the triangle entirely and render everything.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">bool initGL()
+{
+    //Initialize GLEW
+    GLenum glewError = glewInit();
+    if( glewError != GLEW_OK )
+    {
+        printf( "Error initializing GLEW! %s\n", glewGetErrorString( glewError ) );
+        return false;
+    }
+
+    //Make sure OpenGL 2.1 is supported
+    if( !GLEW_VERSION_2_1 )
+    {
+        printf( "OpenGL 2.1 not supported!\n" );
+        return false;
+    }
+
+    //Set the viewport
+    glViewport( 0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT );
+
+    //Initialize Projection Matrix
+    glMatrixMode( GL_PROJECTION );
+    glLoadIdentity();
+    glOrtho( 0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, 1.0, -1.0 );
+
+    //Initialize Modelview Matrix
+    glMatrixMode( GL_MODELVIEW );
+    glLoadIdentity();
+
+    //Initialize clear color
+    glClearColor( 0.f, 0.f, 0.f, 1.f );
+
+    //Enable texturing
+    glEnable( GL_TEXTURE_2D );
+
+    //Set blending
+    glEnable( GL_BLEND );
+    glDisable( GL_DEPTH_TEST );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
+    //Initialize stencil clear value
+    glClearStencil( 0 );
+
+    //Check for error
+    GLenum error = glGetError();
+    if( error != GL_NO_ERROR )
+    {
+        printf( "Error initializing OpenGL! %s\n", gluErrorString( error ) );
+        return false;
+    }
+
+    //Initialize DevIL and DevILU
+    ilInit();
+    iluInit();
+    ilClearColour( 255, 255, 255, 000 );
+
+    //Check for error
+    ILenum ilError = ilGetError();
+    if( ilError != IL_NO_ERROR )
+    {
+        printf( "Error initializing DevIL! %s\n", iluErrorString( ilError ) );
+        return false;
+    }
+
+    return true;
+}
+</div>
+
+<div class="tutText">
+The function initGL() now has a call to glClearStencil() which ironically doesn't clear the stencil. This function works like glClearColor(), in that it defines what value the
+stencil value gets stencil buffer cleared with when you call glClear().
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">bool loadMedia()
+{
+    //Load texture
+    if( !gTexture.loadTextureFromFile32( "26_the_stencil_buffer/opengl.png" ) )
+    {
+        printf( "Unable to load texture!\n" );
+        return false;
+    }
+
+    return true;
+}
+
+void update()
+{
+    //Rotate triangle
+    gPolygonAngle += 6.f;
+}
+</div>
+
+<div class="tutText">
+In loadMedia() we load our texture and in update() we update the triangle's rotation angle.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">void render()
+{
+    //Clear color and stencil buffer
+    glClear( GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
+    glLoadIdentity();
+</div>
+
+<div class="tutText">
+At the top of render we clear both the color buffer and stencil buffer.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //Disable rendering to the color buffer
+    glColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE );
+
+    //Start using the stencil
+    glEnable( GL_STENCIL_TEST );
+</div>
+
+<div class="tutText">
+Now we need to render the triangle to the stencil buffer. Using glColorMask(), we'll disable rendering to the R, G, B, and A values in the color buffer. This way the triangle
+doesn't render to the color buffer and is invisible to the user. Then we enable stencil testing so we can start doing our stencil operations.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //Place a 1 where rendered
+    glStencilFunc( GL_ALWAYS, 1, 1 );
+
+    //Replace where rendered
+    glStencilOp( GL_REPLACE, GL_REPLACE, GL_REPLACE );
+
+    //Render stencil triangle
+    glTranslatef( gPolygonX, gPolygonY, 0.f );
+    glRotatef( gPolygonAngle, 0.f, 0.f, 1.f );
+    glBegin( GL_TRIANGLES );
+        glVertex2f(           -0.f / 4.f, -SCREEN_HEIGHT / 4.f );
+        glVertex2f(   SCREEN_WIDTH / 4.f,  SCREEN_HEIGHT / 4.f );
+        glVertex2f(  -SCREEN_WIDTH / 4.f,  SCREEN_HEIGHT / 4.f );
+    glEnd();
+</div>
+
+<div class="tutText">
+This call to glStencilFunc() will handle how we render to the stencil buffer. "GL_ALWAYS" makes sure that where ever our triangle renders, a "1" (the second argument) will be 
+rendered to the stencil buffer. The last argument is a mask that ANDs the second argument when we render. You'll want to use a different mask if you're using stencil values other
+than one.<br>
+<br>
+This call to glStencilOp() controls what happens with the stencil values we try to render. We want the values we render (which is the second argument in our call
+to glStencilFunc()) to the stencil buffer to replace what's in the stencil buffer so the first argument is "GL_REPLACE". The 2nd/3rd arguments have to do with the depth buffer,
+but since it's disabled it doesn't matter for this demo.<br>
+<br>
+Finally, we render our triangle to the stencil buffer.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //Reenable color
+    glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
+
+    //Where a 1 was not rendered
+    glStencilFunc( gStencilRenderOp, 1, 1 );
+
+    //Keep the pixel
+    glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
+</div>
+
+<div class="tutText">
+With our triangle rendered to the stencil buffer, we turn on rendering to the color buffer again with glColorMask().<br>
+<br>
+This next call controls how the textured quad is going to be rendered using the stencil buffer. The default value we gave to "gStencilRenderOp" was "GL_NOTEQUAL", so only the
+places where the triangle did not get rendered will the texture render. If "gStencilRenderOp" gets changed to "GL_EQUAL", only in the areas where the triangle was rendered
+will the texture show up. If it's set to "GL_ALWAYS", it will disregard the stencil test and render the whole texture.<br>
+<br>
+Lastly, we don't want to mess with the existing stencil values we have glStencilOp() keep them all.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //Render stenciled texture
+    glLoadIdentity();
+    gTexture.render( ( SCREEN_WIDTH - gTexture.imageWidth() ) / 2.f, ( SCREEN_HEIGHT - gTexture.imageHeight() ) / 2.f );
+
+    //Finished using stencil
+    glDisable( GL_STENCIL_TEST );
+
+    //Update screen
+    glutSwapBuffers();
+}
+</div>
+
+<div class="tutText">
+Here we render the stenciled texture. Then we disable the stencil test since we're done using it.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">void handleKeys( unsigned char key, int x, int y )
+{
+    //If the user presses q
+    if( key == 'q' )
+    {
+        //Cycle through stencil operations
+        if( gStencilRenderOp == GL_NOTEQUAL )
+        {
+            //Render where stencil polygon was rendered
+            gStencilRenderOp = GL_EQUAL;
+        }
+        else if( gStencilRenderOp == GL_EQUAL )
+        {
+            //Render everything
+            gStencilRenderOp = GL_ALWAYS;
+        }
+        else if( gStencilRenderOp == GL_ALWAYS )
+        {
+            //Render where stencil polygon was not rendered
+            gStencilRenderOp = GL_NOTEQUAL;
+        }
+    }
+}
+</div>
+
+<div class="tutText">
+When the user presses 'q', we cycle through the various ways to stencil the texture.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">void handleMouseMotion( int x, int y )
+{
+    //Set polygon position
+    gPolygonX = x;
+    gPolygonY = y;
+}
+</div>
+
+<div class="tutText">
+When the user moves the mouse, we change the position of the triangle. Note: when you click the mouse the triangle won't move, it's only when you move the mouse when the mouse
+button is down.
+</div>
+
+<div class="tutCodeHeader">From main.cpp</div>
+<div class="tutCode">#include "LUtil.h"
+
+int main( int argc, char* args[] )
+{
+    //Initialize FreeGLUT
+    glutInit( &argc, args );
+
+    //Create OpenGL 2.1 context
+    glutInitContextVersion( 2, 1 );
+
+    //Create Double Buffered Window
+    glutInitDisplayMode( GLUT_DOUBLE | GLUT_STENCIL );
+    glutInitWindowSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+    glutCreateWindow( "OpenGL" );
+
+    //Do post window/context creation initialization
+    if( !initGL() )
+    {
+        printf( "Unable to initialize graphics library!\n" );
+        return 1;
+    }
+
+    //Load media
+    if( !loadMedia() )
+    {
+        printf( "Unable to load media!\n" );
+        return 2;
+    }
+
+    //Set key handler
+    glutKeyboardFunc( handleKeys );
+
+    //Set mouse handler
+    glutMotionFunc( handleMouseMotion );
+
+    //Set rendering function
+    glutDisplayFunc( render );
+
+    //Set main loop
+    glutTimerFunc( 1000 / SCREEN_FPS, runMainLoop, 0 );
+
+    //Start GLUT main loop
+    glutMainLoop();
+
+    return 0;
+}
+</div>
+
+<div class="tutText">
+Lastly, in the main() function we have to set the mouse motion handler with glutMotionFunc() and pass in GLUT_STENCIL to glutInitDisplayMode().
+</div>
+
+            <div class="tutFooter">
+            Download the media and source code for this tutorial <a class="tutLink" href="26_the_stencil_buffer.zip">here</a>.
+			<br>
+			<a class="leftNav" href="../index.php.html#The Stencil Buffer">Back to OpenGL Tutorials</a><br>
+            </div>
+
+        </div>
+
+        <div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+    </body>
+</html>

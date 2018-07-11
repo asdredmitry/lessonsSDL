@@ -1,0 +1,340 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+	<head>
+
+		<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+
+		<title>Lazy Foo' Productions - Scrolling and the Matrix Stack</title>
+		<META NAME=KEYWORDS CONTENT="freeGLUT glut C++ OpenGL Tutorial 2D Windows Linux Mac scrolling matrices">
+		<META NAME=DESCRIPTION CONTENT="Learn to scroll your scene using matrices">
+		
+		<link REL="stylesheet" TYPE="text/css" href="../../../layout/lazy.css">
+
+		<script src="main.js">
+		</script>
+
+	</head>
+
+	<body>
+
+		<div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>		
+		<div class="content">
+
+			<div class="tutPreface"><h1 class="tutHead">Scrolling and the Matrix Stack</h1>
+			<div class="tutImg"><img src="preview.png"></div>
+            <h6>Last Updated 12/21/12</h6>
+			When dealing with large environments, you need some sort of camera to define the area you're rendering. Here we'll save transformations to the modelview matrix to
+			do that.
+			</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">#include "LUtil.h"
+
+//Camera position
+GLfloat gCameraX = 0.f, gCameraY = 0.f;
+
+bool initGL()
+{
+    //Set the viewport
+    glViewport( 0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT );
+
+    //Initialize Projection Matrix
+    glMatrixMode( GL_PROJECTION );
+    glLoadIdentity();
+    glOrtho( 0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, 1.0, -1.0 );
+
+    //Initialize Modelview Matrix
+    glMatrixMode( GL_MODELVIEW );
+    glLoadIdentity();
+
+    //Save the default modelview matrix
+    glPushMatrix();
+
+    //Initialize clear color
+    glClearColor( 0.f, 0.f, 0.f, 1.f );
+
+    //Check for error
+    GLenum error = glGetError();
+    if( error != GL_NO_ERROR )
+    {
+        printf( "Error initializing OpenGL! %s\n", gluErrorString( error ) );
+        return false;
+    }
+
+    return true;
+}
+</div>
+
+<div class="tutText">
+At the top of our LUtil.cpp file, we define x/y coordinates for our camera. The initGL() function is pretty much the same, only now there's a call to glPushMatrix().<br>
+<br>
+In OpenGL 2.1, there's the projection and modelview matrices (along with two others you can learn about in the documentation). Each of these matrix types have a stack associated
+with them. You can push a copy of the current matrix onto the stack to save it for later.<br>
+<br>
+In this tutorial, we are going to be applying translation tranformations to the modelview matrix to scroll the environment. This time however, instead of calling glLoadIdentity()
+and glOrtho() every time like we did in the Matrices and Coloring Polygons tutorial, we're going to push a copy of initial modelview matrix scrolled to the camera position onto
+the stack to save it for when we need to apply transformations to it. It's also considered to be a bad habit to apply camera transformations to the projection matrix as it interferes
+with fog and lighting calculations. We only did it in the last tutorial for the sake of simplicity.<br>
+<br>
+Note: the matrix stack isn't infinitely deep. Push too many matrices onto the stack and you'll get GL_STACK_OVERFLOW from glGetError().
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">void handleKeys( unsigned char key, int x, int y )
+{
+    //If the user pressed w/a/s/d, change camera position
+    if( key == 'w' )
+    {
+        gCameraY -= 16.f;
+    }
+    else if( key == 's' )
+    {
+        gCameraY += 16.f;
+    }
+    else if( key == 'a' )
+    {
+        gCameraX -= 16.f;
+    }
+    else if( key == 'd' )
+    {
+        gCameraX += 16.f;
+    }
+}
+</div>
+
+<div class="tutText">
+At the top of our handleKeys() function, we set the camera position for rendering when the user presses w/a/s/d.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //Take saved matrix off the stack and reset it
+    glMatrixMode( GL_MODELVIEW );
+    glPopMatrix();
+    glLoadIdentity();
+
+    //Move camera to position
+    glTranslatef( -gCameraX, -gCameraY, 0.f );
+
+    //Save default matrix again with camera translation
+    glPushMatrix();
+}
+</div>
+
+<div class="tutText">
+Since we changed the camera position when the user pressed a key, we need to change our default camera matrix.<br>
+<br>
+First we pop the old default matrix off the stack into the current matrix with glPopMatrix(). We then load the identity matrix into the current modelview matrix. After that we
+translate the modelview matrix by the camera's offsets so everything will render relative to the camera.<br>
+<br>
+Because we took the default matrix off the stack, we need to put our new one back on the top of the stack so we can save it for later.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">void render()
+{
+    //Clear color buffer
+    glClear( GL_COLOR_BUFFER_BIT );
+
+    //Pop default matrix onto current matrix
+    glMatrixMode( GL_MODELVIEW );
+    glPopMatrix();
+
+    //Save default matrix again
+    glPushMatrix();
+</div>
+
+<div class="tutText">
+Rather than using glLoadIdentity() to reset the modelview matrix, we'll use glPopMatrix() to load the matrix we saved with the camera translation. Because we need this default
+modelview matrix the next frame, we immediately push it back onto the stack to save it for later.<br>
+<br>
+Now that the modelview matrix renders everything relative to the camera, we can start rendering our geometry
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //Move to center of the screen
+    glTranslatef( SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f, 0.f );
+
+    //Red quad
+    glBegin( GL_QUADS );
+        glColor3f( 1.f, 0.f, 0.f );
+        glVertex2f( -SCREEN_WIDTH / 4.f, -SCREEN_HEIGHT / 4.f );
+        glVertex2f(  SCREEN_WIDTH / 4.f, -SCREEN_HEIGHT / 4.f );
+        glVertex2f(  SCREEN_WIDTH / 4.f,  SCREEN_HEIGHT / 4.f );
+        glVertex2f( -SCREEN_WIDTH / 4.f,  SCREEN_HEIGHT / 4.f );
+    glEnd();
+
+    //Move to the right of the screen
+    glTranslatef( SCREEN_WIDTH, 0.f, 0.f );
+
+    //Green quad
+    glBegin( GL_QUADS );
+        glColor3f( 0.f, 1.f, 0.f );
+        glVertex2f( -SCREEN_WIDTH / 4.f, -SCREEN_HEIGHT / 4.f );
+        glVertex2f(  SCREEN_WIDTH / 4.f, -SCREEN_HEIGHT / 4.f );
+        glVertex2f(  SCREEN_WIDTH / 4.f,  SCREEN_HEIGHT / 4.f );
+        glVertex2f( -SCREEN_WIDTH / 4.f,  SCREEN_HEIGHT / 4.f );
+    glEnd();
+
+    //Move to the lower right of the screen
+    glTranslatef( 0.f, SCREEN_HEIGHT, 0.f );
+
+    //Blue quad
+    glBegin( GL_QUADS );
+        glColor3f( 0.f, 0.f, 1.f );
+        glVertex2f( -SCREEN_WIDTH / 4.f, -SCREEN_HEIGHT / 4.f );
+        glVertex2f(  SCREEN_WIDTH / 4.f, -SCREEN_HEIGHT / 4.f );
+        glVertex2f(  SCREEN_WIDTH / 4.f,  SCREEN_HEIGHT / 4.f );
+        glVertex2f( -SCREEN_WIDTH / 4.f,  SCREEN_HEIGHT / 4.f );
+    glEnd();
+
+    //Move below the screen
+    glTranslatef( -SCREEN_WIDTH, 0.f, 0.f );
+
+    //Yellow quad
+    glBegin( GL_QUADS );
+        glColor3f( 1.f, 1.f, 0.f );
+        glVertex2f( -SCREEN_WIDTH / 4.f, -SCREEN_HEIGHT / 4.f );
+        glVertex2f(  SCREEN_WIDTH / 4.f, -SCREEN_HEIGHT / 4.f );
+        glVertex2f(  SCREEN_WIDTH / 4.f,  SCREEN_HEIGHT / 4.f );
+        glVertex2f( -SCREEN_WIDTH / 4.f,  SCREEN_HEIGHT / 4.f );
+    glEnd();
+
+    //Update screen
+    glutSwapBuffers();
+}
+</div>
+
+<div class="tutText">
+Here we render a scene twice the width/height of the screen. Our geometry never changes position, only the camera changes throughout our demo.
+</div>
+
+<div class="tutText">
+In this tutorial, the only tranformation we applied is translation with glTranslate(). If you want to zoom in/out, you can scale the matrix
+using glScale(). If you would like to rotate the camera, you can use glRotate(). If you want to see how these functions work, check out the OpenGL documentation.<br>
+<br>
+Another thing to point out is that it wastes GPU time to render something that isn't even on screen. Testing whether something is on screen is called an Occlusion Test. For 2D, you
+can check if an object is on screen if it collides with the bounding box of camera using collision detection. I have a tutorial written on collision detection using SDL 
+<a class="tutLink" href="../../../SDL_tutorials/lesson17/index.php.html">here</a>, and it shouldn't be difficult to implement this in OpenGL.
+</div>
+
+			<div class="tutFooter">
+			Download the media and source code for this tutorial <a class="tutLink" href="04_scrolling_and_the_matrix_stack.zip">here</a>.
+			<br>
+			<a class="leftNav" href="../index.php.html#Scrolling and the Matrix Stack">Back to OpenGL Tutorials</a><br>
+			</div>
+
+		</div>
+
+		<div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+	</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+<head>
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+
+<title>Lazy Foo' Productions</title>
+
+<link REL="stylesheet" TYPE="text/css" href="../../../layout/lazy.css">
+
+<script src="../../../layout/lazy.js">
+</script>
+
+</head>
+
+<body>
+
+<div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../../tutorials/SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../../../tutorials/OpenGL/index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>
+<div class="content">
+
+<div class="tutPreface"><h1 class="tutHead">Setting up SDL in Linux</h1>
+<h6>Last Updated 6/14/11</h6>
+Since there are so many flavors of Linux these tutorials might not work on your Linux set up.
+Try reading the <a class="tutLink" href="http://www.libsdl.org/faq.php?action=listentries&category=3">SDL Linux FAQ</a>.
+If you've tried everything and are still having problems, <a href="../../../contact.php.html" class="tutLink">contact me</a>
+and I'll try to add on a distro specific fix.<br/>
+<br/>
+A <a class="tutLink" href="../../../tutorials/SDL/01_hello_SDL/linux/index.php.html">Setting up SDL 2 on linux tutorial</a> is now available.
+</div>
+
+<div class="tutText">
+<a class="tutLink" name="1" href="index.php.html#1">1)</a>
+For Ubuntu users, it's recommended that you use the built in package manager. You can access the package manager
+going to system -> administration -> Synaptic Package Manager. Once you're in, search for "libsdl1.2-dev"
+(without quotes), which is the SDL development package. Once you find it, click and install it.<br>
+<br>
+<a class="tutLink" name="2" href="index.php.html#2">2)</a>
+For those of you who have Advanced Packaging Tool available you can enter the command:
+
+<h6>apt-get install libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev</h6>
+
+You need to have root priviledges, so use the "su" command or "sudo" command.<br>
+<br>
+<a class="tutLink" name="3" href="index.php.html#3">3)</a>
+For the Yellow dog Updater, Modified you can enter the command:
+
+<h6>yum install SDL-devel SDL_mixer-devel SDL_image-devel SDL_ttf-devel</h6>
+
+As with apt-get, you'll need root priviledges.<br>
+<br>
+<a class="tutLink" name="4" href="index.php.html#4">4)</a>
+For RPM based distros, you'll need the SDL development RPM.<br>
+You will find them on the SDL website, specifically on <a class="tutLink" href="http://www.libsdl.org/download-1.2.php">this page</a>.<br>
+<br>
+Scroll Down to the Development Libraries section and download the Linux development library:<br>
+<div class="tutImg"><img src="download.jpg"></div>
+<br>
+Now run the RPM and let it do it's thing.<br>
+<br>
+Now that you've installed the development libraries, it's time to start up your IDE/compiler.
+</div>
+
+<table class="tutToC">
+<col width="1%">
+	<tr>
+	<td class="ToCTitle" colspan="2">Select Your IDE/Compiler</td>
+	</tr>
+	
+	<tr>
+		<td class="tutLink"><a href="anjuta/index.php.html" class="tutLink"><img src="anjuta/logo.jpg"></a></td>
+		<td class="tutLink"><a href="anjuta/index.php.html" class="tutLink">Anjuta 1.2.2</a></td>
+	</tr>
+
+	<tr>
+		<td class="tutLink"><a href="kdevelop/index.php.html" class="tutLink"><img src="kdevelop/logo.jpg"></a></td>
+		<td class="tutLink"><a href="kdevelop/index.php.html" class="tutLink">KDevelop 3.2</a></td>
+	</tr>
+	
+	<tr>
+		<td class="tutLink"><a href="eclipse/index.php.html" class="tutLink"><img src="eclipse/logo.jpg"></a></td>
+		<td class="tutLink"><a href="eclipse/index.php.html" class="tutLink">Eclipse 3.0</a></td>
+	</tr>
+	
+	<tr>
+		<td class="tutLink"><a href="cli/index.php.html" class="tutLink"><img src="cli/logo.jpg"></a></td>
+		<td class="tutLink"><a href="cli/index.php.html" class="tutLink">Command Line</a></td>
+	</tr>
+
+	<tr>
+	<td colspan="2" class="tutLink"><a href="../index.php.html" class="tutLink">Back</a></td>
+	</tr>
+</table>
+
+<div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../../tutorials/SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../../../tutorials/OpenGL/index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+</body>
+</html>

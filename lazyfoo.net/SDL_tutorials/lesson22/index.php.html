@@ -1,0 +1,240 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+<head>
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+
+<title>Lazy Foo' Productions</title>
+
+<link REL="stylesheet" TYPE="text/css" href="../../layout/lazy.css">
+
+<script src="../../layout/lazy.js">
+</script>
+
+</head>
+
+<body>
+
+<div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../tutorials/SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../articles/index.php.html">Articles</a>
+<a class="nav" href="../../tutorials/OpenGL/index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../index.php.html">News</a>
+<a class="nav" href="../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../contact.php.html">Contact</a>
+<a class="nav" href="../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>
+<div class="content">
+
+<div class="tutPreface"><h1 class="tutHead">Scrolling Backgrounds</h1>
+<div class="tutImg"><img src="preview.jpg"></div>
+<h6>Last Updated 3/28/10</h6>
+In some cases making a one large background is either wasteful or impractical. This is where smooth scrolling
+backgrounds come in handy.<br>
+<br>
+Whether you have a level that will run for an indefinite length or you're just too lazy to make a background for
+an entire level, scrolling backgrounds can be quite useful. This tutorial will teach you to make an endless smooth
+scrolling background.<br/>
+<br/>
+A <a class="tutLink" href="../../tutorials/SDL/31_scrolling_backgrounds/index.php.html">Scrolling Backgrounds tutorial with SDL 2</a> is now available.
+</div>
+
+<div class="tutText">
+With a scrolling background, you see something like this:
+<div class="tutImg"><img src="scrolling.gif"></div>
+While what you want will probably be a bit smoother, it's a seemingly endless background.<br>
+<br>
+What is actually happening is this:<br>
+<div class="tutImg"><img src="looping.gif"></div>
+The background is blitted multiple times, and with every frame it moves over slightly.
+When the background goes too far, its offset is reset.<br>
+<br>
+The program loops through this process to give the illusion of an endless background.
+This is the basic premise of a scrolling background.
+</div>
+
+<div class="tutCode">    //The offsets of the background
+    int bgX = 0, bgY = 0;
+</div>
+
+<div class="tutText">
+Since the background is moving, we have to have variables to store its offset.<br>
+<br>
+It's typically better to have all scrolling done in a separate class but eh,
+doing it locally in main function is less typing for me.
+</div>
+
+<div class="tutCode">    //While the user hasn't quit
+    while( quit == false )
+    {
+        //Start the frame timer
+        fps.start();
+        
+        //While there's an event to handle
+        while( SDL_PollEvent( &event ) )
+        {   
+            //If the user has Xed out the window
+            if( event.type == SDL_QUIT )
+            {
+                //Quit the program
+                quit = true;
+            }
+        }
+        
+        //Scroll background
+        bgX -= 2;
+        
+        //If the background has gone too far
+        if( bgX <= -background->w )
+        {
+            //Reset the offset
+            bgX = 0;
+        }
+</div>
+
+<div class="tutText">
+After we do our event handling in the main loop, we scroll the background over to the left.
+Then we check if the background went too far to the left.
+If it did we restart our scrolling animation by moving the background back.
+</div>
+
+<div class="tutCode">        //Show the background
+        apply_surface( bgX, bgY, background, screen );
+        apply_surface( bgX + background->w, bgY, background, screen );
+        
+        //Show the dot
+        apply_surface( 310, 230, dot, screen );
+        
+        //Update the screen
+        if( SDL_Flip( screen ) == -1 )
+        {
+            return 1;    
+        }
+        
+        //Cap the frame rate
+        if( fps.get_ticks() < 1000 / FRAMES_PER_SECOND )
+        {
+            SDL_Delay( ( 1000 / FRAMES_PER_SECOND ) - fps.get_ticks() );
+        }
+    }
+</div>
+
+<div class="tutText">
+Then we show our background once at its offset,
+then once again right next to it and that should give us the illusion of an endless background.<br>
+<br>
+Then we show the dot, update the screen, cap the frame rate and all that good stuff.
+</div>
+
+<div class="tutFooter">
+Download the media and source code for this tutorial <a class="tutLink" href="../../downloads/index.php%3Ffile=SDLTut_lesson22">here</a>.<br>
+<br>
+<a class="leftNav" href="../lesson21/index.php.html">Previous Tutorial</a><a class="rightNav" href="../lesson23/index.php.html">Next Tutorial</a><br>
+</div>
+
+</div>
+
+<div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../tutorials/SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../articles/index.php.html">Articles</a>
+<a class="nav" href="../../tutorials/OpenGL/index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../index.php.html">News</a>
+<a class="nav" href="../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../contact.php.html">Contact</a>
+<a class="nav" href="../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+</body>
+</html>

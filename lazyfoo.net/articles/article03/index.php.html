@@ -1,0 +1,247 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+<head>
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+
+<title>Lazy Foo' Productions</title>
+
+<link REL="stylesheet" TYPE="text/css" href="../../layout/lazy.css">
+
+<script src="../../layout/lazy.js">
+</script>
+
+</head>
+
+<body>
+
+<div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../tutorials/SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../index.php.html">Articles</a>
+<a class="nav" href="../../tutorials/OpenGL/index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../index.php.html">News</a>
+<a class="nav" href="../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../contact.php.html">Contact</a>
+<a class="nav" href="../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>
+<div class="content">
+
+<div class="tutPreface"><h1 class="tutHead">What is a pixel?</h1>
+<h6>Last Updated 12/15/09</h6>
+As you probably know images are made out of pixels, but what are pixels made out of?
+</div>
+
+<div class="tutCode">            //Map the color key
+            Uint32 colorkey = SDL_MapRGB( optimizedImage->format, 0, 0xFF, 0xFF );
+</div>
+
+<div class="tutText">
+Here we have a line of code from the color keying tutorial. I say SDL_MapRGB() returns a pixel but how is a
+"Uint32" a pixel?<br>
+<br>
+Uint32 is a:<br>
+<br>
+<b>U</b>nsigned<br>
+<b>int</b>eger that is<br>
+<b>32</b> bits in size.<br>
+<br>
+Now how can a number be a pixel? Well odds are you know some HTML and you know you set your colors by combining
+3 numbers from 0 to 255.</div>
+
+<div class="tutCode">&#060span style="color: rgb(Red,Green,Blue)"&#062Text&#060/span&#062
+</div>
+
+<div class="tutText">
+Above you see the HTML/CSS code I use here to change the text's color.
+Combining Red, Green, and Blue values can get you any color your computer can show you.
+For example:<br>
+<br>
+<span style="color: rgb(255,255,255)">This</span> is made with Red 255, Green 255, and Blue 255.<br>
+<span style="color: rgb(255,0,0)">This</span> is made with Red 255, Green 0, and Blue 0.<br>
+<span style="color: rgb(0,0,255)">This</span> is made with Red 0, Green 0, and Blue 255.<br>
+<span style="color: rgb(0,0,0)">This</span> is made with Red 0, Green 0, and Blue 0.<br>
+<span style="color: rgb(192,192,0)">This</span> is made with Red 192, Green 192, and Blue 0.<br>
+<span style="color: rgb(0,255,255)">This</span> is made with Red 0, Green 255, and Blue 255.<br>
+<span style="color: rgb(192,128,64)">This</span> is made with Red 192, Green 128, and Blue 64.<br>
+<span style="color: rgb(186,3,207)">This</span> is made with Red 186, Green 3, and Blue 207.<br>
+<br>
+I'm sure you get the picture.<br>
+<br>
+Well a Uint32 is only one number. If pixels are made by a set of numbers shouldn't it be an array?<br>
+<br>
+Actually, it is.<br>
+<br>
+The red, green, and blue values that make up a pixel can be a number from 0 to 255. Remember 0 is a number too and
+in programming we always start counting from 0. That means there's up to 256 values you can have. 256 is 2 to the
+8th power so that means each of the values that make up the color can be represented by 8 bit numbers.<br>
+<br>
+A Uint32 is just all those bits stuck together one after the other into one number. In memory your pixel
+essentially looks like this:<br>
+<span style="color: rgb(255,0,0)">10101011</span><span style="color: rgb(0,255,0)">00101011</span><span style="color: rgb(0,0,255)">01011011</span><br>
+<br>
+Since it's just an array of 8 bit numbers, all you have to do to get the individual colors is type cast from one
+big 32 bit number to an array of 8 bit numbers.
+</div>
+
+<div class="tutCode">//Get the address of the pixel
+Uint8 *colors = (Uint8*)&pixel;
+
+//Get the individual colors
+red = colors[ 0 ];
+green = colors[ 1 ];
+blue = colors[ 2 ];
+</div>
+
+<div class="tutText">
+But you should generally never do this. To get the individual colors of a pixel you should use SDL_GetRGB(). I'll
+tell you why in a little bit.<br>
+<br>
+There's probably something bugging you right now. 8 bits per color * 3 colors = 24 bits. What are the last 8 bits?
+Those last 8 bits make up the alpha of the pixel.<br>
+<br>
+Alpha controls the transparency of the pixel. 255 means the pixel is completely opaque and 0 means it's completely
+transparent. Here are some examples of an image blitted on a white background. Each time the image has a different
+alpha value.<br>
+<br>
+<div class="tutImg">Here the alpha is 255 so the image just displays normally.<br><img src="255.jpg"></div><br>
+<div class="tutImg">Here the alpha is 192. You can see that the white background is starting to show through.<br><img src="192.jpg"></div><br>
+<div class="tutImg">Here the alpha is 128. This is about 50% transparency.<br><img src="128.jpg"></div><br>
+<div class="tutImg">Here the alpha is 0 and the image is completely invisible.<br><img src="0.jpg"></div><br>
+<br>
+So that's what a 32 bit RGBA pixel is made out of, but not all pixels are built the same.<br>
+<br>
+There are different pixel formats. The colors can be in different order, like BGRA has it's colors in blue, green,
+red, alpha. ABGR is pretty much the same thing only the alpha is the first byte. Pixels can also have different
+sizes, like a 24 bit BGR bitmap. There's also 16 bit color which can have 5 bits red, 5 bits green, 5 bits blue,
+and 1 bit alpha.<br>
+<br>
+There's many more formats out there and I won't go into detail, but having all these pixel formats is why you have to
+pass a SDL_PixelFormat to SDL_MapRGB() and SDL_GetRGB() so the functions know how work with pixels. It's also why
+it's not a good idea to mess with the bytes directly unless you know for sure which pixel format you're going to get.<br>
+<br>
+The different formats is also why you can't blit two surfaces of a different format together. If you copy ABGR
+pixels into a RGBA surface the colors are going to be all wrong. SDL can convert the pixels on the fly, but pixel
+conversion eats up CPU. This is why all surfaces are converted to the screen's format when we load them in our
+load_image() function.<br>
+<br>
+There's much more to pixels like how pixel conversion works, but that's something you don't bother with unless
+you're working at a really low level. For now, you know all the basics about the building blocks of images.<br>
+<br>
+Just as some food for thought, because all RGB pixels are a combination of 3 numbers, isn't it possible to count
+through all of them to show every possible color? And if images are combinations of pixels, isn't it possible to
+count through every possible combination of pixels and show you every image that could possibly exist?<br>
+<br>
+Trippy, aint it? =)
+</div>
+
+<div class="tutFooter">
+If you have any suggestions to improve this article,
+It would be great if you <a class="tutLink" href="../../contact.php.html">contacted me</a> so I can improve this article.
+</div>
+
+</div>
+
+<div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../tutorials/SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../index.php.html">Articles</a>
+<a class="nav" href="../../tutorials/OpenGL/index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../index.php.html">News</a>
+<a class="nav" href="../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../contact.php.html">Contact</a>
+<a class="nav" href="../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+</body>
+</html>

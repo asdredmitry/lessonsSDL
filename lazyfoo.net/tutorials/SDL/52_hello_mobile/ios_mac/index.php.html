@@ -1,0 +1,206 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+	<head>
+
+		<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+		<META NAME=KEYWORDS CONTENT="SDL 2 C++ Tutorial 2D Mac OS X XCode Install SDL 2 iOS iPhone iPad iPod Touch">
+		<META NAME=DESCRIPTION CONTENT="Install SDL 2 on iOS.">
+
+		<title>Lazy Foo' Productions - Setting up SDL 2 on iOS with XCode 9.2</title>
+
+		<link REL="stylesheet" TYPE="text/css" href="../../../../layout/lazy.css">
+
+	</head>
+
+	<body>
+
+		<div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../../../OpenGL/index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../../index.php.html">News</a>
+<a class="nav" href="../../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>
+		<div class="content">
+
+			<div class="tutPreface"><h1 class="tutHead">Setting up SDL 2 on iOS with XCode 9.2</h1>
+            <h6>Last Updated 1/21/18</h6>
+			</div>
+
+			<div class="tutText">
+			<br>
+			<a class="tutLink" name="1" href="index.php.html#1">1)</a> Download the SDL2 source. Not just the development libraries you use for desktop development, the full source.
+			You can find the full source on <a class="tutLink" href="https://www.libsdl.org/download-2.0.php">this page</a>.
+			<div class="tutImg"><img src="download_sdl_source.png"></div>
+			<br/>
+			<a class="tutLink" name="2" href="index.php.html#2">2)</a> Extract the folder inside of the archive we downloaded to an easily accessible directory that is ideally
+			dedicated to iOS development. For this tutorial we will be putting everything in "~/ioslib".<br/>
+			<br/>
+			After extracting the SDL source you should have it at "~/ioslib/SDL2-2.0.7/" (path will vary depending on your SDL version). Copy the SDL iOS project template located at
+			"~/ioslib/SDL2-2.0.7/Xcode-iOS/Template/SDL iOS Application" to "~/ioslib/SDL2-2.0.7/SDL iOS Application"<br/>
+			<br/>
+			<a class="tutLink" name="3" href="index.php.html#3">3)</a> Open the template project inside of "~/ioslib/SDL2-2.0.7/Xcode-iOS/Template/SDL iOS Application".
+			Inside you'll see a broken reference to the SDL source project. Delete it:<br/>
+			<div class="tutImg"><img src="delete_old_reference.png"></div>
+			<br/>
+			And then add the SDL source project located at "~/ioslib/SDL2-2.0.7/Xcode-iOS/SDL/SDL.xcodeproj"
+			<div class="tutImg"><img src="add_new_reference.png"></div>
+			<div class="tutImg"><img src="add_sdl_project.png"></div>
+			<br/>
+			Build the application (command+B) and you should get an error:
+			<h5>entry point (_main) undefined</h5>
+			<a class="tutLink" name="4" href="index.php.html#4">4)</a> To fix the undefined main we need to link the project against SDL. Set the build target to libsdl
+			and build
+			<div class="tutImg"><img src="compile_libsdl.png"></div>
+			<br/>
+			Then set the target back to the original project, select the original project, go to Build Phases, and go to Link With Libraries
+			<div class="tutImg"><img src="link_with_libraries.png"></div>
+			<br/>
+			And select the libSDL library we compiled
+			<div class="tutImg"><img src="link_libsdl.png"></div>
+			<br/>
+			Build again and you'll get some new errors.<br/>
+			<br/>
+			<a class="tutLink" name="5" href="index.php.html#5">5)</a> We just got a bunch of undefined symbol errors regarding AVAudioSession. To fix that, link with
+			the AVFoundation framework
+			<div class="tutImg"><img src="link_avfoundation.png"></div>
+			<br/>
+			<a class="tutLink" name="6" href="index.php.html#6">6)</a> The project should now build and run with the default source. We want to use our own source code so download
+			the <a class="tutLink" href="../52_hello_mobile.zip">source for lesson 52</a>. Extract the folder inside to your development folder and then delete the
+			default source from the project and add the tutorial source to the project.
+			<div class="tutImg"><img src="add_tutorial_source.png"></div>
+			<br/>
+			<a class="tutLink" name="7" href="index.php.html#7">7)</a> If you try to build the compiler will complain that it can't find SDL.h. To fix this add the
+			include folder from the SDL source ("~/ioslib/SDL2-2.0.7/include") to the sources as a group.
+			<div class="tutImg"><img src="add_include.png"></div>
+			<div class="tutImg"><img src="include_folder.png"></div>
+			And don't forget to change
+			<h5>#include &lt;SDL.h&gt;</h5>
+			to
+			<h5>#include "SDL.h"</h5>
+			Now the project should compile and run, but it will crash.<br/>
+			<br/>
+			<a class="tutLink" name="8" href="index.php.html#8">8)</a> The reason this app will crash is because it can't find the resource files. To add them, add new files to the
+			resources group and select the folder with our demo files. <b>Make sure to add the folder as a folder reference and not a group!</b>
+			<div class="tutImg"><img src="folder_references.png"></div>
+			<br/>
+			If your app is trying to load "52_hello_mobile/hello.bmp", it needs to be in the resources folder in a "52_hello_mobile" folder reference:
+			<div class="tutImg"><img src="added_resource.png"></div>
+			<br>
+			Now build and run your application. The simulator can take up to a minute to boot and run so give it time. With the application building and running,
+			it's time to go over the source code.
+			</div>
+
+			<div class="tutFooter">
+			<a class="tutLink" href="../index2.php.html">Hello Mobile Part 2: Your First Mobile SDL 2 App</a><br>
+			</div>
+
+		</div>
+
+		<div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../../../OpenGL/index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../../index.php.html">News</a>
+<a class="nav" href="../../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+	</body>
+</html>

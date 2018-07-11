@@ -1,0 +1,762 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+    <head>
+
+        <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+
+        <title>Lazy Foo' Productions - Hello GLSL</title>
+		<META NAME=KEYWORDS CONTENT="C++ OpenGL 3.0 Tutorial 2D Windows Linux Mac GLSL shader">
+		<META NAME=DESCRIPTION CONTENT="Learn to create GLSL shader programs.">
+
+        <link REL="stylesheet" TYPE="text/css" href="../../../layout/lazy.css">
+
+        <script src="main.js">
+        </script>
+
+    </head>
+
+    <body>
+
+        <div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>        
+        <div class="content">
+
+            <div class="tutPreface"><h1 class="tutHead">Hello GLSL</h1>
+            <div class="tutImg"><img src="preview.png"></div>
+            <h6>Last Updated 8/09/12</h6>
+            Up until now we've been using the old Fixed Function Pipeline which did all our vertex operations (glTranslate(), glVertex(), glTexCoord(), etc) and fragment operations
+            (I'll show you those in a little bit) for us. This was nice when you're a beginner and you're not doing anything complicated, but when you need power and flexibility
+            the fixed function pipeline is constraining.<br>
+            <br>
+            Enter GLSL (Open<b>GL</b> <b>S</b>hading <b>L</b>anguage) and the Programmable Pipeline. With GLSL, you can give your OpenGL program executable shader programs which
+            control how your GPU handles the data you send it. The GLSL Programmable Pipeline can do everything the Fixed Function Pipeline can do and more which made the FFP obsolete.
+            With the release of OpenGL 3.0+, the fixed function pipeline is deprecated and if you want to do any rendering you need to tell the GPU how to handle your data with
+            GLSL.<br>
+            <br>
+            Why didn't the tutorial set start off with the Programmable Pipeline? Because as you're about to see it takes significantly more work to get a GLSL shader program going.
+            This tutorial will get you off the ground by creating your first GLSL shader program.
+            </div>
+
+<div class="tutCodeHeader">From main.cpp</div>
+<div class="tutCode">    //Do post window/context creation initialization
+    if( !initGL() )
+    {
+        printf( "Unable to initialize graphics library!\n" );
+        return 1;
+    }
+
+    //Load graphics programs
+    if( !loadGP() )
+    {
+        printf( "Unable to load shader programs!\n" );
+        return 1;
+    }
+
+    //Load media
+    if( !loadMedia() )
+    {
+        printf( "Unable to load media!\n" );
+        return 2;
+    }
+</div>
+
+<div class="tutText">
+In this tutorial and future ones we'll loading shader programs. Shader programs control how our OpenGL program operates, so they could be loaded in the initGL() function. In
+future tutorials we'll be loading text shader files so they could be loaded in the loadMedia() function.<br>
+<br>
+Because graphics programs are so unique, they'll get their own loading function loadGP().
+</div>
+
+<div class="tutCodeHeader">From LShaderProgram.h</div>
+<div class="tutCode">class LShaderProgram
+{
+    public:
+        LShaderProgram();
+        /*
+        Pre Condition:
+         -None
+        Post Condition:
+         -Initializes variables
+        Side Effects:
+         -None
+        */
+
+        virtual ~LShaderProgram();
+        /*
+        Pre Condition:
+         -None
+        Post Condition:
+         -Frees shader program
+        Side Effects:
+         -None
+        */
+
+        virtual bool loadProgram() = 0;
+        /*
+        Pre Condition:
+         -A valid OpenGL context
+        Post Condition:
+         -Loads shader program
+        Side Effects:
+         -None
+        */
+
+        virtual void freeProgram();
+        /*
+        Pre Condition:
+         -None
+        Post Condition:
+         -Frees shader program if it exists
+        Side Effects:
+         -None
+        */
+
+        bool bind();
+        /*
+        Pre Condition:
+         -A loaded shader program
+        Post Condition:
+         -Sets this program as the current shader program
+         -Reports to console if there was an error
+        Side Effects:
+         -None
+        */
+
+        void unbind();
+        /*
+        Pre Condition:
+         -None
+        Post Condition:
+         -Sets default shader program as current program
+        Side Effects:
+         -None
+        */
+
+        GLuint getProgramID();
+        /*
+        Pre Condition:
+         -None
+        Post Condition:
+         -Returns program ID
+        Side Effects:
+         -None
+        */
+
+    protected:
+        void printProgramLog( GLuint program );
+        /*
+        Pre Condition:
+         -None
+        Post Condition:
+         -Prints program log
+         -Reports error is GLuint ID is not a shader program
+        Side Effects:
+         -None
+        */
+
+        void printShaderLog( GLuint shader );
+        /*
+        Pre Condition:
+         -None
+        Post Condition:
+         -Prints shader log
+         -Reports error is GLuint ID is not a shader
+        Side Effects:
+         -None
+        */
+
+        //Program ID
+        GLuint mProgramID;
+};
+</div>
+
+<div class="tutText">
+Here's the overview of the LShaderProgram class which will serve as the base class for all of our shader programs.<br>
+<br>
+Don't obsess with the details of the class too much for now, but take notice of the "mProgramID" member variable. Just like we bind texture IDs and VBO IDs to use them, we'll be
+binding shader program IDs to use them.
+</div>
+
+<div class="tutCodeHeader">From LShaderProgram.cpp</div>
+<div class="tutCode">LShaderProgram::LShaderProgram()
+{
+    mProgramID = NULL;
+}
+
+LShaderProgram::~LShaderProgram()
+{
+    //Free program if it exists
+    freeProgram();
+}
+
+void LShaderProgram::freeProgram()
+{
+    //Delete program
+    glDeleteProgram( mProgramID );
+}
+</div>
+
+<div class="tutText">
+The constructor for LShaderProgram just initializes the ID to 0. The destructor just calls freeProgram() which just calls glDeleteProgram() to delete the program much in the same
+way we would call glDeleteTextures() to delete a texture.
+</div>
+
+<div class="tutCodeHeader">From LShaderProgram.cpp</div>
+<div class="tutCode">bool LShaderProgram::bind()
+{
+    //Use shader
+    glUseProgram( mProgramID );
+
+    //Check for error
+    GLenum error = glGetError();
+    if( error != GL_NO_ERROR )
+    {
+        printf( "Error binding shader! %s\n", gluErrorString( error ) );
+        printProgramLog( mProgramID );
+        return false;
+    }
+
+    return true;
+}
+
+void LShaderProgram::unbind()
+{
+    //Use default program
+    glUseProgram( NULL );
+}
+
+GLuint LShaderProgram::getProgramID()
+{
+    return mProgramID;
+}
+</div>
+
+<div class="tutText">
+To bind a shader program for use, we call glUseProgram() on the program ID. To make sure the shader program bound successfully, we check if there were any errors using
+glGetError(). If there were errors, we report them to the console. If there were no errors we return true.<br>
+<br>
+To unbind the current shader program, we just bind a null ID. On OpenGL 2.1, this will cause the old fixed function pipeline to be used. In the post OpenGL 3.0 world, binding a
+NULL shader will cause nothing to be rendered because there's no fixed function pipeline.<br>
+<br>
+Lastly, we have a function to get the program ID.
+</div>
+
+<div class="tutCodeHeader">From LShaderProgram.cpp</div>
+<div class="tutCode">void LShaderProgram::printProgramLog( GLuint program )
+{
+    //Make sure name is shader
+    if( glIsProgram( program ) )
+    {
+        //Program log length
+        int infoLogLength = 0;
+        int maxLength = infoLogLength;
+
+        //Get info string length
+        glGetProgramiv( program, GL_INFO_LOG_LENGTH, &maxLength );
+
+        //Allocate string
+        char* infoLog = new char[ maxLength ];
+
+        //Get info log
+        glGetProgramInfoLog( program, maxLength, &infoLogLength, infoLog );
+        if( infoLogLength > 0 )
+        {
+            //Print Log
+            printf( "%s\n", infoLog );
+        }
+
+        //Deallocate string
+        delete[] infoLog;
+    }
+    else
+    {
+        printf( "Name %d is not a program\n", program );
+    }
+}
+</div>
+
+<div class="tutText">
+Now getting a GLSL shader program working requires quite a bit of communication with the GPU and we need to be able to print the GLSL shader program logs to know if something goes
+wrong. This information is vital when trying to debug your GLSL shader program.<br>
+<br>
+First we want to check if the ID we gave it was even a shader program using glIsProgram(). If it is, we check to find out how long the info log is in characters using glGetProgramiv().
+Then we allocate the needed character string and get the actual program info log using glGetProgramInfoLog(). If the info log is longer than 0 characters (which means one actually
+exists) we print it out to the console. After we'll done with the program log, we deallocate the string.<br>
+<br>
+Now if the ID was not even a program, we print an error to the console.
+</div>
+
+<div class="tutCodeHeader">From LShaderProgram.cpp</div>
+<div class="tutCode">void LShaderProgram::printShaderLog( GLuint shader )
+{
+    //Make sure name is shader
+    if( glIsShader( shader ) )
+    {
+        //Shader log length
+        int infoLogLength = 0;
+        int maxLength = infoLogLength;
+
+        //Get info string length
+        glGetShaderiv( shader, GL_INFO_LOG_LENGTH, &maxLength );
+
+        //Allocate string
+        char* infoLog = new char[ maxLength ];
+
+        //Get info log
+        glGetShaderInfoLog( shader, maxLength, &infoLogLength, infoLog );
+        if( infoLogLength > 0 )
+        {
+            //Print Log
+            printf( "%s\n", infoLog );
+        }
+
+        //Deallocate string
+        delete[] infoLog;
+    }
+    else
+    {
+        printf( "Name %d is not a shader\n", shader );
+    }
+}
+</div>
+
+<div class="tutText">
+Here we have printShaderLog() which prints out the log for a shader pretty much in the same way printProgramLog() prints out the info for a program.<br>
+<br>
+You're probably wondering what's the difference between a shader and a program. A shader controls part of your graphics pipeline. A vertex shader controls how to process vertex
+data and a fragment shader controls fragment operations. The program has a vertex shader and a fragment shader attached to it (and maybe other shaders like a geometry shader).
+With the shaders attached to it, the shader program controls how data is rendered.
+</div>
+
+<div class="tutCodeHeader">From LPlainPolygonProgram2D.h</div>
+<div class="tutCode">#include "LShaderProgram.h"
+
+class LPlainPolygonProgram2D : public LShaderProgram
+{
+    public:
+        bool loadProgram();
+        /*
+        Pre Condition:
+         -A valid OpenGL context
+        Post Condition:
+         -Loads plain polygon program
+        Side Effects:
+         -None
+        */
+
+    private:
+
+};
+</div>
+
+<div class="tutText">
+Here we have the LPlainPolygonProgram2D shader program class. The only current difference between the base class is that it has a function defined to load a shader program.<br>
+<br>
+Now that you seen the overall structure of these shader program classes, it's time to build your first shader.
+</div>
+
+<div class="tutCodeHeader">From LPlainPolygonProgram2D.cpp</div>
+<div class="tutCode">bool LPlainPolygonProgram2D::loadProgram()
+{
+    //Success flag
+    GLint programSuccess = GL_TRUE;
+
+    //Generate program
+    mProgramID = glCreateProgram();
+</div>
+
+<div class="tutText">
+At the top of the loadProgram() function we allocate a shader program ID using glCreateProgram(). A shader program isn't very useful without some vertex or fragment operation
+attached to it. So let's start attaching some shaders.
+</div>
+
+<div class="tutCodeHeader">From LPlainPolygonProgram2D.cpp</div>
+<div class="tutCode">    //Create vertex shader
+    GLuint vertexShader = glCreateShader( GL_VERTEX_SHADER );
+
+    //Get vertex source
+    const GLchar* vertexShaderSource[] =
+    {
+        "void main() { gl_Position = gl_Vertex; }"
+    };
+
+    //Set vertex source
+    glShaderSource( vertexShader, 1, vertexShaderSource, NULL );
+</div>
+
+<div class="tutText">
+Ok here we allocate a vertex shader ID using glCreateShader() with the GL_VERTEX_SHADER argument. Then we have some GLSL source code put directly into an array of strings named
+"vertexShaderSource". We then set the source code for the vertex shader using glShaderSource().<br>
+<br>
+The first argument is the vertex shader ID. The second argument is how many source strings you're using. Caution: the GLSL compiler expects one long string per source file. Much
+like in C++, you can have more than one source file per shader. However, it will treat each string in the array as a source file.<br>
+<br>
+The third argument is the pointer to the array of shader source strings. The last argument is the array of string lengths for each of the shader source strings. If this is null,
+the GLSL source compiler assumes each string is null terminated.
+</div>
+
+<div class="tutCodeHeader">From LPlainPolygonProgram2D.cpp</div>
+<div class="tutCode">    //Compile vertex source
+    glCompileShader( vertexShader );
+
+    //Check vertex shader for errors
+    GLint vShaderCompiled = GL_FALSE;
+    glGetShaderiv( vertexShader, GL_COMPILE_STATUS, &vShaderCompiled );
+    if( vShaderCompiled != GL_TRUE )
+    {
+        printf( "Unable to compile vertex shader %d!\n", vertexShader );
+        printShaderLog( vertexShader );
+        return false;
+    }
+
+    //Attach vertex shader to program
+    glAttachShader( mProgramID, vertexShader );
+</div>
+
+<div class="tutText">
+With the vertex shader source code set for the vertex shader, we compile the shader using glCompileShader().<br>
+<br>
+After compiling, we need to check if there were any errors in compilation. Using glGetShaderiv(), we get the GL_COMPILE_STATUS. If the shader failed to compile, we output the log
+to use for debugging.<br>
+<br>
+If the vertex shader compiled successfully, we attach the vertex shader to our program.
+</div>
+
+<div class="tutCodeHeader">From LPlainPolygonProgram2D.cpp</div>
+<div class="tutCode">    //Create fragment shader
+    GLuint fragmentShader = glCreateShader( GL_FRAGMENT_SHADER );
+
+    //Get fragment source
+    const GLchar* fragmentShaderSource[] =
+    {
+        "void main() { gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 ); }"
+    };
+
+    //Set fragment source
+    glShaderSource( fragmentShader, 1, fragmentShaderSource, NULL );
+
+    //Compile fragment source
+    glCompileShader( fragmentShader );
+
+    //Check fragment shader for errors
+    GLint fShaderCompiled = GL_FALSE;
+    glGetShaderiv( fragmentShader, GL_COMPILE_STATUS, &fShaderCompiled );
+    if( fShaderCompiled != GL_TRUE )
+    {
+        printf( "Unable to compile fragment shader %d!\n", fragmentShader );
+        printShaderLog( fragmentShader );
+        return false;
+    }
+
+    //Attach fragment shader to program
+    glAttachShader( mProgramID, fragmentShader );
+</div>
+
+<div class="tutText">
+Here we compile and attach the fragment shader much in the same way we did with the vertex shader. Do make a note of the fact that the GLSL shader code is different for the
+fragment shader. This is obviously because vertices and fragments are two different things that require different operations.
+</div>
+
+<div class="tutCodeHeader">From LPlainPolygonProgram2D.cpp</div>
+<div class="tutCode">    //Link program
+    glLinkProgram( mProgramID );
+
+    //Check for errors
+    glGetProgramiv( mProgramID, GL_LINK_STATUS, &programSuccess );
+    if( programSuccess != GL_TRUE )
+    {
+        printf( "Error linking program %d!\n", mProgramID );
+        printProgramLog( mProgramID );
+        return false;
+    }
+
+    return true;
+}
+</div>
+
+<div class="tutText">
+With both the vertex and fragment shaders attached to the shader program, we link the program. Vertex and fragment shaders typically have to have data sent between them so the
+linking process makes sure the shaders play nice with each other.<br>
+<br>
+Like with compilation, we use glGetProgramiv() to make sure the program linked properly. If it did, it means our program is ready to be used.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">//Basic shader
+LPlainPolygonProgram2D gPlainPolygonProgram2D;
+
+bool initGL()
+{
+    //Initialize GLEW
+    GLenum glewError = glewInit();
+    if( glewError != GLEW_OK )
+    {
+        printf( "Error initializing GLEW! %s\n", glewGetErrorString( glewError ) );
+        return false;
+    }
+
+    //Make sure OpenGL 2.1 is supported
+    if( !GLEW_VERSION_2_1 )
+    {
+        printf( "OpenGL 2.1 not supported!\n" );
+        return false;
+    }
+
+    //Set the viewport
+    glViewport( 0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT );
+
+    //Initialize Projection Matrix
+    glMatrixMode( GL_PROJECTION );
+    glLoadIdentity();
+    glOrtho( 0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, 1.0, -1.0 );
+
+    //Initialize Modelview Matrix
+    glMatrixMode( GL_MODELVIEW );
+    glLoadIdentity();
+
+    //Initialize clear color
+    glClearColor( 0.f, 0.f, 0.f, 1.f );
+
+    //Enable texturing
+    glEnable( GL_TEXTURE_2D );
+
+    //Set blending
+    glEnable( GL_BLEND );
+    glDisable( GL_DEPTH_TEST );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
+    //Check for error
+    GLenum error = glGetError();
+    if( error != GL_NO_ERROR )
+    {
+        printf( "Error initializing OpenGL! %s\n", gluErrorString( error ) );
+        return false;
+    }
+
+    //Initialize DevIL and DevILU
+    ilInit();
+    iluInit();
+    ilClearColour( 255, 255, 255, 000 );
+
+    //Check for error
+    ILenum ilError = ilGetError();
+    if( ilError != IL_NO_ERROR )
+    {
+        printf( "Error initializing DevIL! %s\n", iluErrorString( ilError ) );
+        return false;
+    }
+
+    return true;
+}
+</div>
+
+<div class="tutText">
+At the top of LUtil.cpp we declare a shader object for us to use.<br>
+<br>
+Make sure to notice how initGL() is the same as it used to be. It'll be an important thing to know when we get to rendering.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">bool loadGP()
+{
+    //Load basic shader program
+    if( !gPlainPolygonProgram2D.loadProgram() )
+    {
+        printf( "Unable to load basic shader!\n" );
+        return false;
+    }
+
+    //Bind basic shader program
+    gPlainPolygonProgram2D.bind();
+
+    return true;
+}
+</div>
+
+<div class="tutText">
+In the loadGP() function, we load the LPlainPolygonProgram2D and bind it for use.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">void render()
+{
+    //Clear color buffer
+    glClear( GL_COLOR_BUFFER_BIT );
+
+    //Reset transformations
+    glLoadIdentity();
+
+    //Solid cyan quad in the center
+    glTranslatef( SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f, 0.f );
+    glBegin( GL_QUADS );
+        glColor3f( 0.f, 1.f, 1.f );
+        glVertex2f( -50.f, -50.f );
+        glVertex2f(  50.f, -50.f );
+        glVertex2f(  50.f,  50.f );
+        glVertex2f( -50.f,  50.f );
+    glEnd();
+
+    //Update screen
+    glutSwapBuffers();
+}
+</div>
+
+<div class="tutText">
+In our render function, we have the code to render a cyan quad in the center of the screen. Yet for some reason, when this demo program compiles and runs we get this:
+<div class="tutImg"><img src="preview.png"></div>
+<br>
+Why? Let's look at the shader source code we gave the shaders.
+</div>
+
+<div class="tutCodeHeader">From Vertex Shader Source</div>
+<div class="tutCode">void main()
+{
+    gl_Position = gl_Vertex;
+}
+</div>
+
+<div class="tutText">
+Here is the GLSL code for the vertex shader. Even if you've never seen the GLSL documentation, its C like syntax should be easy to pick up on the fly.<br>
+<br>
+Notice how the final position of the vertex is the same as the vertex we took in. We never multiplied against the projection or modelview matrices so glOrtho(), glTranslate(),
+and our other OpenGL matrix calls have no effect and the quad we rendered uses untransformed matrix coordinates. This is what we mean by programmable pipeline because you program
+how the GPU pipeline processes the data.<br>
+<br>
+So because the vertices are untransformed, the quad will consume the entire screen as opposed to being 100 pixels wide in the center.
+</div>
+
+<div class="tutCodeHeader">From Fragment Shader Source</div>
+<div class="tutCode">void main()
+{
+   gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );
+}
+</div>
+
+<div class="tutText">
+Here's the fragment shader and the reason the quad is red as opposed to cyan. In the fragment shader we don't take into account the color attribute and just set the output fragment
+to be red 1, green 0, blue 0, and alpha 1. While it appears strange how the OpenGL program behaved, it was only doing what we told it to do.<br>
+<br>
+This is the power of shaders. By giving control to the programmer how the graphics data is processed you can achieve the powerful effects you see in modern games, or something
+completely pointless like untransformed red geometry =).
+</div>
+
+            <div class="tutFooter">
+            Download the media and source code for this tutorial <a class="tutLink" href="29_hello_glsl.zip">here</a>.
+			<br>
+			<a class="leftNav" href="../index.php.html#Hello GLSL">Back to OpenGL Tutorials</a><br>
+            </div>
+
+        </div>
+
+        <div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+    </body>
+</html>

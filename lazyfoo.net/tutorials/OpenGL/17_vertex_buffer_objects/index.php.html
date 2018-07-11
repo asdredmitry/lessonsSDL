@@ -1,0 +1,291 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+    <head>
+
+        <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+        <META NAME=KEYWORDS CONTENT="freeGLUT glut C++ OpenGL Tutorial 2D Windows Linux Mac Vertex Buffer Objects VBO Index Buffer Objects IBO">
+        <META NAME=DESCRIPTION CONTENT="Learn to render a polygon using modern OpenGL vertex buffer objects.">
+
+        <title>Lazy Foo' Productions - Vertex Buffer Objects</title>
+
+        <link REL="stylesheet" TYPE="text/css" href="../../../layout/lazy.css">
+
+        <script src="main.js">
+        </script>
+
+    </head>
+
+    <body>
+
+        <div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>        
+        <div class="content">
+
+            <div class="tutPreface"><h1 class="tutHead">Vertex Buffer Objects</h1>
+            <div class="tutImg"><img src="preview.png"></div>
+            <h6>Last Updated 8/09/12</h6>
+            Vertex arrays are more efficient than sending vertices one by one. What's even more efficient is sending your vertex data into a vertex buffer object, which is what is
+            used by modern OpenGL implementations. With vertex buffer objects you can send your vertex data once (as opposed to every time you have a new set of data to draw) and
+            just have it stored on the GPU when you need to use it.
+            </div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">//Quad vertices
+LVertexPos2D gQuadVertices[ 4 ];
+
+//Vertex Indices
+GLuint gIndices[ 4 ];
+
+//Vertex buffer
+GLuint gVertexBuffer = 0;
+
+//Index buffer
+GLuint gIndexBuffer = 0;
+</div>
+
+<div class="tutText">
+At the top of LUtil.cpp, we define our quad vertices like before. This time we also have index data to define.<br>
+<br>
+In the Vertex Arrays tutorial, we called glDrawArrays() to draw our vertex data. glDrawArrays() just took our vertex data and drew each vertex in order. In this tutorial we're
+going to use a drawing function that can draw vertex data in any order. It can even render the same vertex twice. In order to use this function, we need a set of indices to
+specify how to draw the vertex data. This is what the array "gIndices" is for.<br>
+<br>
+Now that we have our vertex data and our index data, we need to store them onto the GPU. Once we have them on the GPU, we need to be able to indentify them. Much like how textures
+have GLuint IDs, vertex buffer objects have GLuint IDs. As you can see, "gVertexBuffer" is our vertex buffer ID and "gIndexBuffer" index buffer ID.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">bool loadMedia()
+{
+    //Set quad verticies
+    gQuadVertices[ 0 ].x = SCREEN_WIDTH * 1.f / 4.f;
+    gQuadVertices[ 0 ].y = SCREEN_HEIGHT * 1.f / 4.f;
+
+    gQuadVertices[ 1 ].x = SCREEN_WIDTH * 3.f / 4.f;
+    gQuadVertices[ 1 ].y = SCREEN_HEIGHT * 1.f / 4.f;
+
+    gQuadVertices[ 2 ].x = SCREEN_WIDTH * 3.f / 4.f;
+    gQuadVertices[ 2 ].y = SCREEN_HEIGHT * 3.f / 4.f;
+
+    gQuadVertices[ 3 ].x = SCREEN_WIDTH * 1.f / 4.f;
+    gQuadVertices[ 3 ].y = SCREEN_HEIGHT * 3.f / 4.f;
+
+    //Set rendering indices
+    gIndices[ 0 ] = 0;
+    gIndices[ 1 ] = 1;
+    gIndices[ 2 ] = 2;
+    gIndices[ 3 ] = 3;
+</div>
+
+<div class="tutText">
+In loadMedia(), we define our vertex data much like we did with vertex array. After that we set our rendering indices. What our rendering function glDrawElements() will do is take
+in the array of indices, look at the first element in the index array (which is gIndices[ 0 ]) look at it's value (which is 0) and draw the vertex at index 0. Then it will second
+element in the index array (which is gIndices[ 1 ]) look at it's value (which is 1) and draw the vertex at index 1. I'm sure you can see the way we set up our indices, we're telling
+glDrawElements() vertices 0 - 3 in order.<br>
+<br>
+Why are we doing this? Imagine we were drawing a cube. It has 6 faces with 4 vertices each which results in 24 vertices. But a cube only has 8 corners. To optimize it, we only give
+the vertex positions for the corners, and use indices to draw the corners as we need them.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //Create VBO
+    glGenBuffers( 1, &gVertexBuffer );
+    glBindBuffer( GL_ARRAY_BUFFER, gVertexBuffer );
+    glBufferData( GL_ARRAY_BUFFER, 4 * sizeof(LVertexPos2D), gQuadVertices, GL_STATIC_DRAW );
+</div>
+
+<div class="tutText">
+Now that we have the vertex and index data defined, we need to send them to the GPU inside of a buffer. First we generate a buffer name using glGenBuffers(), then we bind the
+buffer using glBindBuffer(). We want to specify that we're binding an array of vertex data with "GL_ARRAY_BUFFER".<br>
+<br>
+After binding our vertex buffer object (or VBO) we want to send our vertex data for our VBO. We do this with glBufferData(). This first argument is what type of buffer data we're sending.
+The second argument is the size of our buffer data in bytes. Since we're sending 4 LVertexPos2Ds, the size is 4 times the size of a LVertexPos2D. The third argument is the address
+of our vertex data. The last argument is how the data is expected to be handled so the driver can act accordingly. Since we're sending the data once and draw with it multiple times,
+we set it to "GL_STATIC_DRAW".<br>
+<br>
+Now that our vertex data is in a buffer on the GPU, let's do the same with the index data.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //Create IBO
+    glGenBuffers( 1, &gIndexBuffer );
+    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, gIndexBuffer );
+    glBufferData( GL_ELEMENT_ARRAY_BUFFER, 4 * sizeof(GLuint), gIndices, GL_STATIC_DRAW );
+
+    return true;
+}
+</div>
+
+<div class="tutText">
+As you can see, creating an index buffer object (or IBO) works pretty much the same as creating a VBO. However, since we're dealing with index data instead of vertex data, we
+want to specify this using "GL_ELEMENT_ARRAY_BUFFER".
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">void render()
+{
+    //Clear color buffer
+    glClear( GL_COLOR_BUFFER_BIT );
+
+    //Enable vertex arrays
+    glEnableClientState( GL_VERTEX_ARRAY );
+
+        //Set vertex data
+        glBindBuffer( GL_ARRAY_BUFFER, gVertexBuffer );
+        glVertexPointer( 2, GL_FLOAT, 0, NULL );
+</div>
+
+<div class="tutText">
+At the top of our rendering function, we clear the screen and enable vertex arrays like before. This time we're going to use the vertex data from our VBO, so we bind the VBO using
+glBindBuffer(). Now when we call glVertexPointer() to set our vertex data, it will get it from the memory of our VBO. Since we want it to get the vertex data from the start of the
+VBO, we give it an address of NULL (which is equal to 0).
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">        //Draw quad using vertex data and index data
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, gIndexBuffer );
+        glDrawElements( GL_QUADS, 4, GL_UNSIGNED_INT, NULL );
+
+    //Disable vertex arrays
+    glDisableClientState( GL_VERTEX_ARRAY );
+
+    //Update screen
+    glutSwapBuffers();
+}
+</div>
+
+<div class="tutText">
+After setting our current vertex data, we want to set our current index data with glBindBuffer(). Again, since in index data and not vertex data, we specify "GL_ELEMENT_ARRAY_BUFFER"
+for our buffer.<br>
+<br>
+After our VBO and IBO are bound, we draw with them using glDrawElements(). The first argument is what kind of geometry you want to draw. The second is how many elements you want to
+draw, and because we have it 4 indices in our IBO we want to draw 4. The third argument is the data type for our indices, and the last the address of our index data. Remember that
+because we have an IBO currently bound, the address we give glDrawElements() will be from IBO memory. Like with our VBO, we want glDrawElements() to read it from the beginning so we
+give it an address of NULL.<br>
+<br>
+Alternatively, you could not bind an IBO and just give glDrawElements() the pointer to our index data. This has the same pitfalls as using straight vertex arrays where you have
+to send the index data to the GPU every time you have a new set of indices. That and straight vertex arrays are deprecated in OpenGL 3.0+.<br>
+<br>
+After we're done drawing our VBO, we disable vertex arrays and update the screen.
+</div>
+
+            <div class="tutFooter">
+            Download the media and source code for this tutorial <a class="tutLink" href="17_vertex_buffer_objects.zip">here</a>.
+            <br>
+            <a class="leftNav" href="../index.php.html#Vertex Buffer Objects">Back to OpenGL Tutorials</a><br>
+            </div>
+
+        </div>
+
+        <div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+    </body>
+</html>

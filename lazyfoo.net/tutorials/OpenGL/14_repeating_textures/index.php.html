@@ -1,0 +1,363 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+	<head>
+
+		<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+
+		<title>Lazy Foo' Productions - Repeating Textures</title>
+		<META NAME=KEYWORDS CONTENT="freeGLUT glut C++ OpenGL Tutorial 2D Windows Linux Mac Repeating Tiling Texture Mapping">
+		<META NAME=DESCRIPTION CONTENT="Learn to tile textures in OpenGL.">
+
+		<link REL="stylesheet" TYPE="text/css" href="../../../layout/lazy.css">
+
+		<script src="main.js">
+		</script>
+
+	</head>
+
+	<body>
+
+		<div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>		
+		<div class="content">
+
+			<div class="tutPreface"><h1 class="tutHead">Repeating Textures</h1>
+			<div class="tutImg"><img src="preview.png"></div>
+            <h6>Last Updated 10/04/14</h6>
+			In this tutorial we're going to create a scrolling tiling effect by doing some tricks with texture coordinates.
+			</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">#include "LTexture.h"
+#include &#060IL/il.h&#062
+#include &#060IL/ilu.h&#062
+
+GLenum DEFAULT_TEXTURE_WRAP = GL_REPEAT;
+</div>
+
+<div class="tutText">
+In addition to texture filtering, another parameter you can set for your texture is how the textures wraps.<br>
+<br>
+I know I've said in the past that texture coordinates go from 0.0 to 1.0, but this isn't necessarily true. You can give a texture coordinate of 2.0 which will cause the 200% of
+texture to get mapped. This means the texture will get mapped twice along that axis.<br>
+<br>
+This assumes you have your texture wrap set to GL_REPEAT. This is the default texture wrap when creating an OpenGL texture, and now we're going to be setting it explicitly. At the
+top of LTexture.cpp, we declare our default texture wrap. 
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">bool LTexture::loadTextureFromPixels32( GLuint* pixels, GLuint imgWidth, GLuint imgHeight, GLuint texWidth, GLuint texHeight )
+{
+    //Free texture if it exists
+    freeTexture();
+
+    //Get image dimensions
+    mImageWidth = imgWidth;
+    mImageHeight = imgHeight;
+    mTextureWidth = texWidth;
+    mTextureHeight = texHeight;
+
+    //Generate texture ID
+    glGenTextures( 1, &mTextureID );
+
+    //Bind texture ID
+    glBindTexture( GL_TEXTURE_2D, mTextureID );
+
+    //Generate texture
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, mTextureWidth, mTextureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels );
+
+    //Set texture parameters
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, DEFAULT_TEXTURE_WRAP );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, DEFAULT_TEXTURE_WRAP );
+
+    //Unbind texture
+    glBindTexture( GL_TEXTURE_2D, NULL );
+
+    //Check for error
+    GLenum error = glGetError();
+    if( error != GL_NO_ERROR )
+    {
+        printf( "Error loading texture from %p pixels! %s\n", pixels, gluErrorString( error ) );
+        return false;
+    }
+
+    return true;
+}
+</div>
+
+<div class="tutText">
+In all our texture loading functions, we set texture wrap using glTexParameter(). We set texture wrap for both the s texture axis and t texture axis.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">//Repeating image
+LTexture gRepeatingTexture;
+
+//Texture offset
+GLfloat gTexX = 0.f, gTexY = 0.f;
+
+//Texture wrap type
+int gTextureWrapType = 0;
+</div>
+
+<div class="tutText">
+At the top of LUtil.cpp we declare a few global variables, the first of which is the texture we're going to tile.<br>
+<br>
+Secondly there's the texture offsets we're going to use to scroll the texture. Lastly, the "gTextureWrapType" which controls how we wrap our texture.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">bool loadMedia()
+{
+    //Load texture
+    if( !gRepeatingTexture.loadTextureFromFile( "14_repeating_textures/texture.png" ) )
+    {
+        printf( "Unable to load repeating texture!\n" );
+        return false;
+    }
+
+    return true;
+}
+
+void update()
+{
+    //Scroll texture
+    gTexX++;
+    gTexY++;
+
+    //Cap scrolling
+    if( gTexX >= gRepeatingTexture.textureWidth() )
+    {
+        gTexX = 0.f;
+    }
+    if( gTexY >= gRepeatingTexture.textureHeight() )
+    {
+        gTexY = 0.f;
+    }
+}
+</div>
+
+<div class="tutText">
+As usual, loadMedia() loads our texture. This time the function update() updates our texture offset so our texture scrolls. We also cap the scrolling so every time the texture
+goes too far, the respective coordinate resets allowing our scrolling to loop.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">void render()
+{
+    //Clear color buffer
+    glClear( GL_COLOR_BUFFER_BIT );
+
+    //Calculate texture maxima
+    GLfloat textureRight = (GLfloat)SCREEN_WIDTH / (GLfloat)gRepeatingTexture.textureWidth();
+    GLfloat textureBottom = (GLfloat)SCREEN_HEIGHT / (GLfloat)gRepeatingTexture.textureHeight();
+</div>
+
+<div class="tutText">
+In render() after we clear the color buffer, we calculate the texture coordinates for the bottom right corner of the quad.<br>
+<br>
+Let's say the texture is 128 pixels wide and the screen is 256 pixels wide. What this would do is calculate the right coordinate as 256 / 128, or 2.0. So the texture would be
+mapped 2 times along the x/s axis. Then we do the same for the y/t axis.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //Use repeating texture
+    glBindTexture( GL_TEXTURE_2D, gRepeatingTexture.getTextureID() );
+
+    //Switch to texture matrix
+    glMatrixMode( GL_TEXTURE );
+
+    //Reset transformation
+    glLoadIdentity();
+</div>
+
+<div class="tutText">
+Now we want to use the texture we loaded so we bind it using glBindTexture(). Then we set the current matrix to be the texture matrix with glMatrixMode(). The texture matrix can
+be used to transform texture coordinates much in the same way the modelview matrix can be used to transform vertex coordinates. Here we initialize the texture matrix to the
+identity matrix.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //Scroll texture
+    glTranslatef( gTexX / gRepeatingTexture.textureWidth(), gTexY / gRepeatingTexture.textureHeight(), 0.f );
+
+    //Render
+    glBegin( GL_QUADS );
+        glTexCoord2f(          0.f,           0.f ); glVertex2f(          0.f,           0.f );
+        glTexCoord2f( textureRight,           0.f ); glVertex2f( SCREEN_WIDTH,           0.f );
+        glTexCoord2f( textureRight, textureBottom ); glVertex2f( SCREEN_WIDTH, SCREEN_HEIGHT );
+        glTexCoord2f(          0.f, textureBottom ); glVertex2f(          0.f, SCREEN_HEIGHT );
+    glEnd();
+
+    //Update screen
+    glutSwapBuffers();
+}
+</div>
+
+<div class="tutText">
+After initializing the texture matrix, we translate to the texture offset. Remembering that 1 equals one texture length and not one pixel, we divide each texture offset by the
+length of the texture.<br>
+<br>
+Then finally we render a quad with the transformed texture coordinates.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">void handleKeys( unsigned char key, int x, int y )
+{
+    //If q is pressed
+    if( key == 'q' )
+    {
+        //Cycle through texture reptetitions
+        gTextureWrapType++;
+        if( gTextureWrapType >= 2 )
+        {
+            gTextureWrapType = 0;
+        }
+
+        //Set texture repetition
+        glBindTexture( GL_TEXTURE_2D, gRepeatingTexture.getTextureID() );
+        switch( gTextureWrapType )
+        {
+            case 0:
+                glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+                glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+                printf( "%d: GL_REPEAT\n", gTextureWrapType );
+            break;
+
+            case 1:
+                glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+                glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+                printf( "%d: GL_CLAMP\n", gTextureWrapType );
+            break;
+        }
+    }
+}
+</div>
+
+<div class="tutText">
+Finally when the user presses q, the texture's wrap toggles between GL_REPEAT and GL_CLAMP. If the texture's wrap is GL_REPEAT, when it encounters a texture coordinate beyond
+0.0 and 1.0 it will just continue mapping the texture and repeat. If the texture's wrap is GL_CLAMP, the texture mapping will stop beyond 0.0 and 1.0. 
+</div>
+
+			<div class="tutFooter">
+			Download the media and source code for this tutorial <a class="tutLink" href="14_repeating_textures.zip">here</a>.
+			<br>
+			<a class="leftNav" href="../index.php.html#Repeating Textures">Back to OpenGL Tutorials</a><br>
+			</div>
+
+		</div>
+
+		<div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+	</body>
+</html>

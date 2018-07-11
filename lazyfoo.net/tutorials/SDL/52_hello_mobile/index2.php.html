@@ -1,0 +1,240 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+    <head>
+
+        <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+        <META NAME=KEYWORDS CONTENT="C++ SDL 2 Tutorial 2D Windows Linux Mac Android iOS iPhone iPad ipod Touch">
+        <META NAME=DESCRIPTION CONTENT="Create an SDL2 Mobile Application.">
+
+        <title>Lazy Foo' Productions - Hello Mobile: Your First Mobile SDL 2 App</title>
+
+        <link REL="stylesheet" TYPE="text/css" href="../../../layout/lazy.css">
+
+    </head>
+
+    <body>
+
+        <div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../../OpenGL/index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>        
+        <div class="content">
+
+            <div class="tutPreface"><h1 class="tutHead">Hello Mobile: Your First Mobile SDL 2 App</h1>
+            <div class="tutImg"><img src="preview.png"></div>
+            <h6>Last Updated 5/11/15</h6>
+            Now that you covered the hard part of getting the application to compile and run, let's go over the application code.
+            </div>
+
+<div class="tutCode">//Screen dimensions
+SDL_Rect gScreenRect = { 0, 0, 320, 240 };
+</div>
+
+<div class="tutText">
+Since mobile devices vary a lot in resolution, we're going to use variable screen dimensions instead of constant ones.
+</div>
+
+
+<div class="tutCode">        //Get device display mode
+        SDL_DisplayMode displayMode;
+        if( SDL_GetCurrentDisplayMode( 0, &displayMode ) == 0 )
+        {
+            gScreenRect.w = displayMode.w;
+            gScreenRect.h = displayMode.h;
+        }
+
+        //Create window
+        gWindow = SDL_CreateWindow( "SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, gScreenRect.w, gScreenRect.h, SDL_WINDOW_SHOWN );
+        if( gWindow == NULL )
+        {
+            SDL_Log( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
+            success = false;
+        }
+</div>
+
+<div class="tutText">
+Here we call <a class="tutLink" href="http://wiki.libsdl.org/SDL_GetCurrentDisplayMode">SDL_GetCurrentDisplayMode</a> to get the resolution of the mobile device. We then create a window using the device dimensions.<br/>
+<br/>
+Notice how we're using <a class="tutLink" href="http://wiki.libsdl.org/SDL_Log">SDL_Log</a> instead of printf. This is because Android/iOS have their own platform specific ways to print to the console and SDL gives us a nice
+wrapper to make our code cross platform.
+</div>
+
+
+<div class="tutCode">int main( int argc, char* args[] )
+{
+    //Start up SDL and create window
+    if( !init() )
+    {
+        SDL_Log( "Failed to initialize!\n" );
+    }
+    else
+    {
+        //Load media
+        if( !loadMedia() )
+        {
+            SDL_Log( "Failed to load media!\n" );
+        }
+        else
+        {
+            //Main loop flag
+            bool quit = false;
+
+            //Event handler
+            SDL_Event e;
+
+            //While application is running
+            while( !quit )
+            {
+                //Handle events on queue
+                while( SDL_PollEvent( &e ) != 0 )
+                {
+                    //User requests quit
+                    if( e.type == SDL_QUIT )
+                    {
+                        quit = true;
+                    }
+                }
+
+                //Clear screen
+                SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
+                SDL_RenderClear( gRenderer );
+
+                //Render splash
+                gSplashTexture.render( ( gScreenRect.w - gSplashTexture.getWidth() ) / 2, ( gScreenRect.h - gSplashTexture.getHeight() ) / 2 );
+
+                //Update screen
+                SDL_RenderPresent( gRenderer );
+            }
+        }
+    }
+
+    //Free resources and close SDL
+    close();
+
+    return 0;
+}
+</div>
+
+<div class="tutText">
+Other than the fact that we're using SDL_Log, the code is pretty much the same as before.
+</div>
+
+
+            <div class="tutFooter">
+            Download the media and source code for this tutorial <a class="tutLink" href="52_hello_mobile.zip">here</a>.<br>
+            <br>
+            <a class="leftNav" href="../index.php.html#Hello Mobile">Back to SDL Tutorials</a><br>
+            </div>
+
+        </div>
+
+        <div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../../OpenGL/index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+    </body>
+</html>

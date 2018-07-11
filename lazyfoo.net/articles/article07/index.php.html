@@ -1,0 +1,530 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+<head>
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+
+<title>Lazy Foo' Productions</title>
+
+<link REL="stylesheet" TYPE="text/css" href="../../layout/lazy.css">
+
+<script src="../../layout/lazy.js">
+</script>
+
+</head>
+
+<body>
+
+<div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../tutorials/SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../index.php.html">Articles</a>
+<a class="nav" href="../../tutorials/OpenGL/index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../index.php.html">News</a>
+<a class="nav" href="../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../contact.php.html">Contact</a>
+<a class="nav" href="../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>
+<div class="content">
+
+<div class="tutPreface"><h1 class="tutHead">Using Multiple Source Files</h1>
+<h6>Last Updated 7/16/12</h6>
+As you saw with the last article, program source codes can get pretty big.
+Here you'll learn how to break your program's source into smaller, easier to manage pieces.
+</div>
+
+<div class="tutText">
+The state machine demo had over 1000 lines of code. Any of you that have tried know it's a pain having to
+search through one big source file. By having your program's source split into multiple source files, you no
+longer have to sift through one big chunk of code.<br>
+<br>
+When dealing with multiple source files there's basically two types of files you're going to be dealing with:
+source files and header files. Standard *.cpp source files you already know as you've been using them since you
+started programming. Headers, however, are a bit tricky.<br>
+<br>
+To try to understand what headers do, look in the SDL_image.h file. Inside, you'll see a bunch of declarations of
+the functions in the SDL_image API like IMG_Load(), IMG_GetError(), IMG_isPNG(), etc, but you don't actually see
+the definitions of the functions that load the images, get the errors, and such. Is all that headers do is declare
+constants/classes/functions/variables?<br>
+<br>
+The answer is yes. All SDL_image.h does is tell the compiler about the functions in SDL_image so it can compile
+your source file. Is that all it needs? Well, when you try to build your executable, the compiler will compile
+your source file, then the linker will try to link everything together into one binary. After it compiles your .cpp
+file, it will try to look up the actual definitions for the SDL_image functions. When the linker doesn't find the
+function definitions in one of the *.cpp files in your project, it will complain that it can't find the
+definitions and abort.<br>
+<br>
+Well where is the actual code for SDL_image functions? The functions are compiled inside of the SDL_image binary
+(*.dll on windows and *.so on *nix). To get the linker to stop complaining, we give it a lib file which tells the
+linker where function definitions are in the SDL_image binary so it can link dynamically at the program's run time.<br>
+<br>
+This might not make much sense now, but it will after we get our hands dirty by splitting up the motion tutorial
+source code into mulitple files.
+</div>
+
+<div class="tutCode">#ifndef CONSTANTS_H
+#define CONSTANTS_H
+
+//The screen attributes
+const int SCREEN_WIDTH = 640;
+const int SCREEN_HEIGHT = 480;
+const int SCREEN_BPP = 32;
+
+//The frame rate
+const int FRAMES_PER_SECOND = 20;
+
+//The dimensions of the dot
+const int DOT_WIDTH = 20;
+const int DOT_HEIGHT = 20;
+
+#endif
+</div>
+
+<div class="tutText">
+Here's the code inside of the constants.h file. This header file declares the constants we're going to use in the
+program.<br>
+<br>
+The preprocessors at the top and the bottom might be new to you. For those of you who don't know what a
+preprocessor is, it's basically a way to talk to the compiler. For example the #include preprocessor tells the
+compiler to include a file into the code.<br>
+<br>
+What "#ifndef CONSTANTS_H" does is asks <b>if</b> CONSTANTS_H is <b>n</b>ot <b>def</b>ined. If CONSTANTS_H is not
+defined, the next line defines CONSTANTS_H. Then we continue on with the code that defines the constants. Then
+#endif serves as the end of the "#ifndef CONSTANTS_H" condition block.<br>
+<br>
+Now why did we do that?
+</div>
+
+<div class="tutCode">#include "constants.h"
+#include "constants.h"
+</div>
+
+<div class="tutText">
+Let's say we had a situation where we included the same file twice.<br>
+<br>
+In the first line where we include constants.h, the compiler will check if CONSTANTS_H is defined. Since it's not,
+it will define CONSTANTS_H and use the constants code inside the constants.h normally.<br>
+<br>
+In the second line when we try to include constants.h, the compiler will try check if CONSTANTS_H is defined.
+Because CONSTANTS_H was defined already, it will skip past the code that defines the constants. This prevents the
+constants from being defined twice and causing a conflict.<br>
+<br>
+So now you see how this simple but effective safeguard works.
+</div>
+
+<div class="tutCode">#ifndef BACON
+#define BACON
+
+//The screen attributes
+const int SCREEN_WIDTH = 640;
+const int SCREEN_HEIGHT = 480;
+const int SCREEN_BPP = 32;
+
+//The frame rate
+const int FRAMES_PER_SECOND = 20;
+
+//The dimensions of the dot
+const int DOT_WIDTH = 20;
+const int DOT_HEIGHT = 20;
+
+#endif
+</div>
+
+<div class="tutText">
+Just for the sake of information, what definition you check for doesn't matter. The above code will work perfectly.
+The thing is, using FILENAME_H is the common naming standard and as I have mentioned before it's important to use
+a naming standard.
+</div>
+
+<div class="tutCode">#ifndef CLASSES_H
+#define CLASSES_H
+
+//The dot that will move around on the screen
+class Dot
+{
+    private:
+    //The X and Y offsets of the dot
+    int x, y;
+    
+    //The velocity of the dot
+    int xVel, yVel;
+    
+    public:
+    //Initializes the variables
+    Dot();
+    
+    //Takes key presses and adjusts the dot's velocity
+    void handle_input();
+    
+    //Moves the dot
+    void move();
+    
+    //Shows the dot on the screen
+    void show();
+};
+
+//The timer
+class Timer
+{
+    private:
+    //The clock time when the timer started
+    int startTicks;
+    
+    //The ticks stored when the timer was paused
+    int pausedTicks;
+    
+    //The timer status
+    bool paused;
+    bool started;
+    
+    public:
+    //Initializes variables
+    Timer();
+    
+    //The various clock actions
+    void start();
+    void stop();
+    void pause();
+    void unpause();
+    
+    //Gets the timer's time
+    int get_ticks();
+    
+    //Checks the status of the timer
+    bool is_started();
+    bool is_paused();    
+};
+
+#endif
+</div>
+
+<div class="tutText">
+Here's the classes.h file which declares the Dot and Timer classes.<br>
+<br>
+It would be better if I had separate header files for the Dot and Timer classes. The general rule is you should
+have a header file associated with each source file, but for the sake of not having to fumble with more files than
+we need to, I lumped them together here.
+</div>
+
+<div class="tutCode">#ifndef FUNCTIONS_H
+#define FUNCTIONS_H
+
+//The headers
+#include "SDL/SDL.h"
+#include "SDL/SDL_image.h"
+#include &#060string&#062
+
+//File Loader
+SDL_Surface *load_image( std::string filename );
+
+//Surface blitter
+void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination, SDL_Rect* clip = NULL );
+
+//Initialization
+bool init();
+
+//File loading
+bool load_files();
+
+//Clean up
+void clean_up();
+
+#endif
+</div>
+
+<div class="tutText">
+Here you see functions.h which has the declarations for the various utility functions. At the top we include the
+SDL and string headers because the functions need to know what a string and SDL_Surface are.
+</div>
+
+<div class="tutCode">#ifndef GLOBALS_H
+#define GLOBALS_H
+
+//The header
+#include "SDL/SDL.h"
+
+//The surfaces
+extern SDL_Surface *dot;
+extern SDL_Surface *screen;
+
+//The event structure
+extern SDL_Event event;
+
+#endif
+</div>
+
+<div class="tutText">
+Here's the globals.h which contains the declarations for the global variables in the program. At the top you see
+we included SDL.h because the header needs to know what an SDL_Surface is.<br>
+<br>
+Now the extern keyword you see infront of the global variables might be new to you. Well remember that header
+files are just supposed to inform the compiler that something exists. If we didn't have extern infront of the
+globals, when the header is included in a source file the compiler will create a copy of the variable for that
+source file. Then when the linker tries to link everything together, it will find multiple copies of the same
+variable and it will complain and abort.<br>
+<br>
+The extern keyword just tells the compiler the variable exists somewhere. Now you won't have multiple definitions
+of the same variable, but where are the actual globals located? 
+</div>
+
+<div class="tutCode">//The headers
+#include "SDL/SDL.h"
+#include "globals.h"
+
+//The surfaces
+SDL_Surface *dot = NULL;
+SDL_Surface *screen = NULL;
+
+//The event structure
+SDL_Event event;
+</div>
+
+<div class="tutText">
+When the linker looks for the definitions for the of the globals, it'll find them in the global.cpp source file.
+Also notice this is where we initialize the globals which makes sense since these are the actual variables and not
+just a declaration.<br>
+<br>
+Just a tip: in case you mess up with the globals and get a multiple definiton error and then you fix the source
+code but the linker still complains, try rebuilding the whole project. To save time, the compiler will only
+recompile the source codes that have been changed, and since the source files haven't been changed, the linker
+stll has them compiled with multiple definitons. Rebuilding them will get rid of the old compiled code.
+</div>
+
+<div class="tutCode">//The headers
+#include "SDL/SDL.h"
+#include "SDL/SDL_image.h"
+#include &#060string&#062
+#include "constants.h"
+#include "classes.h"
+#include "functions.h"
+#include "globals.h"
+
+Dot::Dot()
+{
+    //Initialize the offsets
+    x = 0;
+    y = 0;
+    
+    //Initialize the velocity
+    xVel = 0;
+    yVel = 0;
+}
+</div>
+
+<div class="tutText">
+Here's the top of the dot.cpp file which defines the Dot class.<br>
+<br>
+We include the SDL headers because we use SDL_Event and SDL_Surface types. We use the constants header for the dot
+dimensions. The classes header has the dot declaration so that's a given. We need the functions header for
+applying surfaces. Lastly we need the globals header to apply stuff to the screen.
+</div>
+
+<div class="tutCode">#include "SDL/SDL.h"
+#include "classes.h"
+
+Timer::Timer()
+{
+    //Initialize the variables
+    startTicks = 0;
+    pausedTicks = 0;
+    paused = false;
+    started = false;    
+}
+</div>
+
+<div class="tutText">
+Here's the top of the timer.cpp source file. All we include is the SDL header for the SDL timing functions and
+the classes header for the timer declaration.
+</div>
+
+<div class="tutCode">#include "SDL/SDL.h"
+#include "SDL/SDL_image.h"
+#include &#060string&#062
+#include "constants.h"
+#include "functions.h"
+#include "globals.h"
+
+SDL_Surface *load_image( std::string filename ) 
+{
+    //The image that's loaded
+    SDL_Surface* loadedImage = NULL;
+    
+    //The optimized surface that will be used
+    SDL_Surface* optimizedImage = NULL;
+    
+    //Load the image
+    loadedImage = IMG_Load( filename.c_str() );
+    
+    //If the image loaded
+    if( loadedImage != NULL )
+    {
+        //Create an optimized surface
+        optimizedImage = SDL_DisplayFormat( loadedImage );
+        
+        //Free the old surface
+        SDL_FreeSurface( loadedImage );
+        
+        //If the surface was optimized
+        if( optimizedImage != NULL )
+        {
+            //Color key surface
+            SDL_SetColorKey( optimizedImage, SDL_RLEACCEL | SDL_SRCCOLORKEY, SDL_MapRGB( optimizedImage->format, 0, 0xFF, 0xFF ) );
+        }
+    }
+    
+    //Return the optimized surface
+    return optimizedImage;
+}
+</div>
+
+<div class="tutText">
+Here's the top of functions.cpp file. We use the SDL headers, the constants header, functions header and globals
+header.
+</div>
+
+<div class="tutCode">#include "SDL/SDL.h"
+#include "SDL/SDL_image.h"
+#include &#060string&#062
+#include "constants.h"
+#include "classes.h"
+#include "functions.h"
+#include "globals.h"
+
+int main( int argc, char* args[] )
+{
+    //Quit flag
+    bool quit = false;
+    
+    //The dot that will be used
+    Dot myDot;
+    
+    //The frame rate regulator
+    Timer fps;
+    
+    //Initialize
+    if( init() == false )
+    {
+        return 1;
+    }
+    
+    //Load the files
+    if( load_files() == false )
+    {
+        return 1;
+    }
+</div>
+
+<div class="tutText">
+Here's the top of main.cpp which hosts the main() function. At the top we include all the headers we need and then
+some. The main function itself is exactly the same as its single source file counterpart.<br>
+</div>
+
+<div class="tutFooter">
+Download the media and source code for this article <a class="tutLink" href="../../downloads/index.php%3Ffile=Article07">here</a>.
+</div>
+
+</div>
+
+<div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../tutorials/SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../index.php.html">Articles</a>
+<a class="nav" href="../../tutorials/OpenGL/index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../index.php.html">News</a>
+<a class="nav" href="../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../contact.php.html">Contact</a>
+<a class="nav" href="../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+</body>
+</html>

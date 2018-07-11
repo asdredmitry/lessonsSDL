@@ -1,0 +1,486 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+	<head>
+
+		<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">		
+		<META NAME=KEYWORDS CONTENT="freeGLUT glut C++ OpenGL Tutorial 2D Windows Linux Mac Update Taxture Mapping">
+		<META NAME=DESCRIPTION CONTENT="Learn to update texture pixels.">
+
+		<title>Lazy Foo' Productions - Updating Textures</title>
+
+		<link REL="stylesheet" TYPE="text/css" href="../../../layout/lazy.css">
+
+		<script src="main.js">
+		</script>
+
+	</head>
+
+	<body>
+
+		<div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>		
+		<div class="content">
+
+			<div class="tutPreface"><h1 class="tutHead">Updating Textures</h1>
+			<div class="tutImg"><img src="preview.png"></div>
+            <h6>Last Updated 12/31/12</h6>
+			After creating a texture, it's possible to retrieve and send data from your existing texture. Here we'll get a circle image, black out its background and make a
+			diagonal stripe pattern on it.
+			</div>
+
+<div class="tutCodeHeader">From LTexture.h</div>
+<div class="tutCode">    private:
+        GLuint powerOfTwo( GLuint num );
+        /*
+        Pre Condition:
+         -None
+        Post Condition:
+         -Returns nearest power of two integer that is greater
+        Side Effects:
+         -None
+        */
+
+        //Texture name
+        GLuint mTextureID;
+
+        //Current pixels
+        GLuint* mPixels;
+
+        //Texture dimensions
+        GLuint mTextureWidth;
+        GLuint mTextureHeight;
+
+        //Unpadded image dimensions
+        GLuint mImageWidth;
+        GLuint mImageHeight;
+};
+</div>
+
+<div class="tutText">
+The LTexture class has a new member variable "mPixels" to hold the pixel data from the texture that we're going to manipulate.
+</div>
+
+<div class="tutCodeHeader">From LTexture.h</div>
+<div class="tutCode">        bool lock();
+        /*
+        Pre Condition:
+         -An existing unlocked texture
+        Post Condition:
+         -Gets member pixels from texture data
+         -Returns true if texture pixels were retrieved
+        Side Effects:
+         -Binds a NULL texture
+        */
+
+        bool unlock();
+        /*
+        Pre Condition:
+         -A locked texture
+        Post Condition:
+         -Updates texture with member pixels
+         -Returns true if texture pixels were updated
+        Side Effects:
+         -Binds a NULL texture
+        */
+
+        GLuint* getPixelData32();
+        /*
+        Pre Condition:
+         -Available member pixels
+        Post Condition:
+         -Returns member pixels
+        Side Effects:
+         -None
+        */
+
+        GLuint getPixel32( GLuint x, GLuint y );
+        /*
+        Pre Condition:
+         -Available member pixels
+        Post Condition:
+         -Returns pixel at given position
+         -Function will segfault if the texture is not locked.
+        Side Effects:
+         -None
+        */
+
+        void setPixel32( GLuint x, GLuint y, GLuint pixel );
+        /*
+        Pre Condition:
+         -Available member pixels
+        Post Condition:
+         -Sets pixel at given position
+         -Function will segfault if the texture is not locked.
+        Side Effects:
+         -None
+        */
+</div>
+
+<div class="tutText">
+And here's the new set of functions that we'll use to manipulate the pixels. The function lock() gets the pixels from the texture so we can do stuff with them, and unlock() sends
+the pixel data back to the texture. getPixelData32() gets a pointer to the entire pixel array and getPixel32()/setPixel32() get/set individual pixels.
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">LTexture::LTexture()
+{
+    //Initialize texture ID and pixels
+    mTextureID = 0;
+    mPixels = NULL;
+
+    //Initialize image dimensions
+    mImageWidth = 0;
+    mImageHeight = 0;
+
+    //Initialize texture dimensions
+    mTextureWidth = 0;
+    mTextureHeight = 0;
+}
+</div>
+
+<div class="tutText">
+As always, you should be initializing your variables but you should especially make sure to initialize pointers.
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">void LTexture::freeTexture()
+{
+    //Delete texture
+    if( mTextureID != 0 )
+    {
+        glDeleteTextures( 1, &mTextureID );
+        mTextureID = 0;
+    }
+
+    //Delete pixels
+    if( mPixels != NULL )
+    {
+        delete[] mPixels;
+        mPixels = NULL;
+    }
+
+    mImageWidth = 0;
+    mImageHeight = 0;
+    mTextureWidth = 0;
+    mTextureHeight = 0;
+}
+</div>
+
+<div class="tutText">
+In freeTexture(), we now also have to check if we have any pixel data that needs to be freed.
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">bool LTexture::lock()
+{
+    //If texture is not locked and a texture exists
+    if( mPixels == NULL && mTextureID != 0 )
+    {
+        //Allocate memory for texture data
+        GLuint size = mTextureWidth * mTextureHeight;
+        mPixels = new GLuint[ size ];
+
+        //Set current texture
+        glBindTexture( GL_TEXTURE_2D, mTextureID );
+
+        //Get pixels
+        glGetTexImage( GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, mPixels );
+
+        //Unbind texture
+        glBindTexture( GL_TEXTURE_2D, NULL );
+
+        return true;
+    }
+
+    return false;
+}
+</div>
+
+<div class="tutText">
+To lock the texture for pixel manipulation, we have to check if there are no member pixels (because having member pixels here would mean the texture is already locked) and that a
+texture to get pixels from exists. After that, we allocate memory for the pixel data to copy into.<br>
+<br>
+Finally, we bind the texture we want to get the pixel data from, get the data with glGetTexImage(), and unbind the texture.
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">bool LTexture::unlock()
+{
+    //If texture is locked and a texture exists
+    if( mPixels != NULL && mTextureID != 0 )
+    {
+        //Set current texture
+        glBindTexture( GL_TEXTURE_2D, mTextureID );
+
+        //Update texture
+        glTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, mTextureWidth, mTextureHeight, GL_RGBA, GL_UNSIGNED_BYTE, mPixels );
+
+        //Delete pixels
+        delete[] mPixels;
+        mPixels = NULL;
+
+        //Unbind texture
+        glBindTexture( GL_TEXTURE_2D, NULL );
+
+        return true;
+    }
+
+    return false;
+}
+</div>
+
+<div class="tutText">
+After we're done with our pixel operations, we want to send the pixel data back to the texture. We do this using glTexSubImage2D(). It's more efficent to do this as opposed to just
+destroying the texture and making another call to glTexImage2D().<br>
+<br>
+In this piece of code we check if there are member pixels and that there's a texture to update (which means the the texture is locked). After that we bind the texture we want to
+update and update the texture pixels with glTexSubImage2D().<br>
+<br>
+You may have noticed that glTexSubImage2D() has more arguments than glGetTexImage() or glTexImage2D(). The 3rd/4th/5th/6th arguments represent the portion of the texture you
+want to update by defining the x offset/y offset/width/height of the area you want to update. Here we're updating the entire texture.
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">GLuint* LTexture::getPixelData32()
+{
+    return mPixels;
+}
+
+GLuint LTexture::getPixel32( GLuint x, GLuint y )
+{
+    return mPixels[ y * mTextureWidth + x ];
+}
+
+void LTexture::setPixel32( GLuint x, GLuint y, GLuint pixel )
+{
+    mPixels[ y * mTextureWidth + x ] = pixel;
+}
+</div>
+
+<div class="tutText">
+Now here are our functions to perform operations on our pixel data.<br>
+<br>
+You may be wondering what the equation "y * mTextureWidth + x" in getPixel32() and setPixel32() does. The thing to know here is that the image pixels aren't stored like this in
+2D:
+<div class="tutImg"><img src="pixels_2D.png"></div>
+<br>
+They're stored in a 1 dimensional array like this:
+<div class="tutImg"><img src="pixels_1D.png"></div>
+<br>
+So you when you want to get a specific pixel you have to turn the 2D coordinate into a 1D array index. Say we wanted to get pixel number 06 ( which is at x = 2, y = 1) from the 2D
+image above. With a texture width of 4, y * mTextureWidth + x get us 1 * 4 + 2 which is equal to array index 6.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">bool loadMedia()
+{
+    //Load texture
+    if( !gCircleTexture.loadTextureFromFile( "09_updating_textures/circle.png" ) )
+    {
+        printf( "Unable to load circle texture!\n" );
+        return false;
+    }
+
+    //Lock texture for modification
+    gCircleTexture.lock();
+</div>
+
+<div class="tutText">
+Now in loadMedia() we load our texture as usual. Then we lock it so we can mess with the pixels.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //Calculate target color
+    GLuint targetColor;
+    GLubyte* colors = (GLubyte*)&targetColor;
+    colors[ 0 ] = 000;
+    colors[ 1 ] = 255;
+    colors[ 2 ] = 255;
+    colors[ 3 ] = 255;
+</div>
+
+<div class="tutText">
+Our circle has a cyan background (r000g255b255a255), that we want to make black. Here we're calculating the pixel value of that color.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //Replace target color with transparent black
+    GLuint* pixels = gCircleTexture.getPixelData32();
+    GLuint pixelCount = gCircleTexture.textureWidth() * gCircleTexture.textureHeight();
+    for( int i = 0; i < pixelCount; ++i )
+    {
+        if( pixels[ i ] == targetColor )
+        {
+            pixels[ i ] = 0;
+        }
+    }
+</div>
+
+<div class="tutText">
+Here we're going through all the pixels. If any of them are equal to our target color, we set it be transparent black.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //Diagonal Lines
+    for( int y = 0; y < gCircleTexture.imageHeight(); ++y )
+    {
+        for( int x = 0; x < gCircleTexture.imageWidth(); ++x )
+        {
+            if( y % 10 != x % 10 )
+            {
+                gCircleTexture.setPixel32( x, y, 0 );
+            }
+        }
+    }
+
+    //Update texture
+    gCircleTexture.unlock();
+
+    return true;
+}
+</div>
+
+<div class="tutText">
+After blacking out the cyan background, we go through the pixels row by row and column by column to black out certain pixels to make a diagonal line pattern.<br>
+<br>
+After doing that, we unlock the texture so it has our updated pixel data.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">void render()
+{
+    //Clear color buffer
+    glClear( GL_COLOR_BUFFER_BIT );
+
+    //Render circle
+    gCircleTexture.render( ( SCREEN_WIDTH - gCircleTexture.imageWidth() ) / 2.f, ( SCREEN_HEIGHT - gCircleTexture.imageHeight() ) / 2.f );
+
+    //Update screen
+    glutSwapBuffers();
+}
+</div>
+
+<div class="tutText">
+Finally, we render our pixel processed circle
+</div>
+
+			<div class="tutFooter">
+			Download the media and source code for this tutorial <a class="tutLink" href="09_updating_textures.zip">here</a>.
+			<br>
+			<a class="leftNav" href="../index.php.html#Updating Textures">Back to OpenGL Tutorials</a><br>
+			</div>
+
+		</div>
+
+		<div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+	</body>
+</html>

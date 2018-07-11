@@ -1,0 +1,625 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+    <head>
+
+        <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+        <META NAME=KEYWORDS CONTENT="freeGLUT glut C++ OpenGL Tutorial 2D Windows Linux Mac Vertex Buffer Objects VBO">
+        <META NAME=DESCRIPTION CONTENT="Learn to use Vertex Array Objects in this VBO Tutorial.">
+
+        <title>Lazy Foo' Productions - Vertex Array Objects</title>
+
+        <link REL="stylesheet" TYPE="text/css" href="../../../layout/lazy.css">
+
+        <script src="main.js">
+        </script>
+
+    </head>
+
+    <body>
+
+        <div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>        
+        <div class="content">
+
+            <div class="tutPreface"><h1 class="tutHead">Vertex Array Objects</h1>
+            <div class="tutImg"><img src="preview.png"></div>
+            <h6>Last Updated 10/19/14</h6>
+            So far we've only been setting vertex position pointers, texture coordinate pointers, and color pointers. In a full 3D OpenGL application, you could be setting vertex,
+            normal, color, texture, ambient material, diffuse material, multitexture, etc pointers. Having to set the individual data pointers every single time we draw can be
+            tedious and wasteful. Using vertex array objects, you set your vertex array attributes once and bind your VAO when you need it.
+            </div>
+
+<div class="tutCodeHeader">From main.cpp</div>
+<div class="tutCode">    //Create OpenGL 3.0 context
+    glutInitContextVersion( 3, 0 );
+</div>
+
+<div class="tutText">
+VAOs were promoted to the OpenGL core in version 3.0. If your GPU supports the ARB_vertex_array_object extension, you can still use it as an extension.
+</div>
+
+<div class="tutCodeHeader">From LDoubleMultiColorPolygonProgram2D.glvs</div>
+<div class="tutCode">#version 130
+
+//Transformation Matrices
+uniform mat4 LProjectionMatrix;
+uniform mat4 LModelViewMatrix;
+
+//Vertex position attribute
+in vec2 LVertexPos2D;
+
+//Multicolor attribute
+in vec4 LMultiColor1;
+in vec4 LMultiColor2;
+out vec4 multiColor;
+
+void main()
+{
+    //Process color
+    multiColor = LMultiColor1 * LMultiColor2;
+    
+    //Process vertex
+    gl_Position = LProjectionMatrix * LModelViewMatrix * vec4( LVertexPos2D.x, LVertexPos2D.y, 0.0, 1.0 );
+}
+</div>
+
+<div class="tutText">
+We're creating a new shader program to test out VAOs. The double multicolor polygon program takes in a vertex position attribute and two color attributes per vertex. It takes the
+two color attributes and component multiplies them to get the final color attribute to pass onto the fragment shader.<br>
+<br>
+We're also not bothering with GLSL 1.2 code. At the top of the shader source we use the version macro to specfy that we're using GLSL 1.3 for this source code.
+</div>
+
+<div class="tutCodeHeader">From LDoubleMultiColorPolygonProgram2D.glfs</div>
+<div class="tutCode">#version 130
+
+//Multicolor attribute
+in vec4 multiColor;
+
+//Final color
+out vec4 LFragment;
+
+void main()
+{
+    //Set fragment
+    LFragment = multiColor;
+}
+</div>
+
+<div class="tutText">
+The fragment shader largely the same as before only now instead of using an old reserved word we declare "LFragment" to specify the color that goes out to the color buffer.
+</div>
+
+<div class="tutCodeHeader">From LDoubleMultiColorPolygonProgram2D.h</div>
+<div class="tutCode">        void setVertexPointer( GLsizei stride, const GLvoid* data );
+        /*
+        Pre Condition:
+         -Bound LMultiColorPolygonProgram2D
+        Post Condition:
+         -Sets vertex position attribute pointer
+        Side Effects:
+         -None
+        */
+
+        void setColor1Pointer( GLsizei stride, const GLvoid* data );
+        /*
+        Pre Condition:
+         -Bound LMultiColorPolygonProgram2D
+        Post Condition:
+         -Sets vertex color 1 attribute pointer
+        Side Effects:
+         -None
+        */
+
+        void setColor2Pointer( GLsizei stride, const GLvoid* data );
+        /*
+        Pre Condition:
+         -Bound LMultiColorPolygonProgram2D
+        Post Condition:
+         -Sets vertex color 2 attribute pointer
+        Side Effects:
+         -None
+        */
+
+        void enableDataPointers();
+        /*
+        Pre Condition:
+         -Bound LDoubleMultiColorPolygonProgram2D
+        Post Condition:
+         -Enables all attributes
+        Side Effects:
+         -None
+        */
+
+        void disableDataPointers();
+        /*
+        Pre Condition:
+         -Bound LDoubleMultiColorPolygonProgram2D
+        Post Condition:
+         -Disables all attributes
+        Side Effects:
+         -None
+        */
+</div>
+
+<div class="tutText">
+The shader program for our new shader is largely the same as before only now it has functions for two color attribute pointers. Also, instead of having a function to enable/disable
+each individual attribute, we have one pair of functions to enable/disable them with one function call.
+</div>
+
+<div class="tutCodeHeader">From LDoubleMultiColorPolygonProgram2D.cpp</div>
+<div class="tutCode">    //Get variable locations
+    mVertexPos2DLocation = glGetAttribLocation( mProgramID, "LVertexPos2D" );
+    if( mVertexPos2DLocation == -1 )
+    {
+        printf( "%s is not a valid glsl program variable!\n", "LVertexPos2D" );
+    }
+
+    mMultiColor1Location = glGetAttribLocation( mProgramID, "LMultiColor1" );
+    if( mMultiColor1Location == -1 )
+    {
+        printf( "%s is not a valid glsl program variable!\n", "LMultiColor1" );
+    }
+
+    mMultiColor2Location = glGetAttribLocation( mProgramID, "LMultiColor2" );
+    if( mMultiColor2Location == -1 )
+    {
+        printf( "%s is not a valid glsl program variable!\n", "LMultiColor2" );
+    }
+
+    mProjectionMatrixLocation = glGetUniformLocation( mProgramID, "LProjectionMatrix" );
+    if( mProjectionMatrixLocation == -1 )
+    {
+        printf( "%s is not a valid glsl program variable!\n", "LProjectionMatrix" );
+    }
+
+    mModelViewMatrixLocation = glGetUniformLocation( mProgramID, "LModelViewMatrix" );
+    if( mModelViewMatrixLocation == -1 )
+    {
+        printf( "%s is not a valid glsl program variable!\n", "LModelViewMatrix" );
+    }
+
+    return true;
+}
+</div>
+
+<div class="tutText">
+Loading this shader program is pretty much the same. We just got to remember to get the locations for all of our variables.
+</div>
+
+<div class="tutCodeHeader">From LDoubleMultiColorPolygonProgram2D.cpp</div>
+<div class="tutCode">void LDoubleMultiColorPolygonProgram2D::setVertexPointer( GLsizei stride, const GLvoid* data )
+{
+    glVertexAttribPointer( mVertexPos2DLocation, 2, GL_FLOAT, GL_FALSE, stride, data );
+}
+
+void LDoubleMultiColorPolygonProgram2D::setColor1Pointer( GLsizei stride, const GLvoid* data )
+{
+    glVertexAttribPointer( mMultiColor1Location, 4, GL_FLOAT, GL_FALSE, stride, data );
+}
+
+void LDoubleMultiColorPolygonProgram2D::setColor2Pointer( GLsizei stride, const GLvoid* data )
+{
+    glVertexAttribPointer( mMultiColor2Location, 4, GL_FLOAT, GL_FALSE, stride, data );
+}
+
+void LDoubleMultiColorPolygonProgram2D::enableDataPointers()
+{
+    glEnableVertexAttribArray( mVertexPos2DLocation );
+    glEnableVertexAttribArray( mMultiColor1Location );
+    glEnableVertexAttribArray( mMultiColor2Location );
+}
+
+void LDoubleMultiColorPolygonProgram2D::disableDataPointers()
+{
+    glDisableVertexAttribArray( mMultiColor2Location );
+    glDisableVertexAttribArray( mMultiColor1Location );
+    glDisableVertexAttribArray( mVertexPos2DLocation );
+}
+</div>
+
+<div class="tutText">
+All this should look familiar. This big difference here is that we have the all in one enable/disable attribute functions.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">//Double Multicolor shader
+LDoubleMultiColorPolygonProgram2D gDoubleMultiColorPolygonProgram2D;
+
+//VBO names
+GLuint gVertexVBO = NULL;
+GLuint gRGBYVBO = NULL;
+GLuint gCYMWVBO = NULL;
+GLuint gGrayVBO = NULL;
+GLuint gIBO = NULL;
+
+//VAO Names
+GLuint gLeftVAO = NULL;
+GLuint gRightVAO = NULL;
+</div>
+
+<div class="tutText">
+At the top of LUtil.cpp we have our shader program object like we usually do. This time around we have 4 vertex buffers.<br>
+<br>
+We have a vertex buffer of 4 vertex positions, a VBO for a red, green, blue and yellow colors, a VBO for cyan, yellow, magenta, and white colors, and a VBO for 4 shades of grey.
+We also have our IBO like we did before.<br>
+<br>
+Next we have the VAO for the left quad and the VAO for the right quad. They have integer names just like textures, VBO, shaders, shader programs, and just about everything else
+we've worked with.<br>
+<br>
+The quad on the left is going to have the vertex positions, RGBY colors, and the grey colors attribute pointers. The quad on the right is going to have the vertex positions, CYMW
+colors, and the grey colors attribute pointers.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">bool loadGP()
+{
+    //Load double multicolor shader program
+    if( !gDoubleMultiColorPolygonProgram2D.loadProgram() )
+    {
+        printf( "Unable to load double multicolor shader!\n" );
+        return false;
+    }
+
+    //Bind double multicolor shader program
+    gDoubleMultiColorPolygonProgram2D.bind();
+
+    //Initialize projection
+    gDoubleMultiColorPolygonProgram2D.setProjection( glm::ortho&#060GLfloat&#062( 0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, 1.0, -1.0 ) );
+    gDoubleMultiColorPolygonProgram2D.updateProjection();
+
+    //Initialize modelview
+    gDoubleMultiColorPolygonProgram2D.setModelView( glm::mat4() );
+    gDoubleMultiColorPolygonProgram2D.updateModelView();
+
+    return true;
+}
+</div>
+
+<div class="tutText">
+Here we load our shader program like we usually do.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">bool loadMedia()
+{
+    //VBO data
+    LVertexPos2D quadPos[ 4 ];
+    LColorRGBA quadColorRGBY[ 4 ];
+    LColorRGBA quadColorCYMW[ 4 ];
+    LColorRGBA quadColorGray[ 4 ];
+    GLuint indices[ 4 ];
+
+    //Set quad verticies
+    quadPos[ 0 ].x = -50.f;
+    quadPos[ 0 ].y = -50.f;
+
+    quadPos[ 1 ].x =  50.f;
+    quadPos[ 1 ].y = -50.f;
+
+    quadPos[ 2 ].x =  50.f;
+    quadPos[ 2 ].y =  50.f;
+
+    quadPos[ 3 ].x = -50.f;
+    quadPos[ 3 ].y =  50.f;
+
+    quadColorRGBY[ 0 ].r = 1.f;
+    quadColorRGBY[ 0 ].g = 0.f;
+    quadColorRGBY[ 0 ].b = 0.f;
+    quadColorRGBY[ 0 ].a = 1.f;
+
+    quadColorRGBY[ 1 ].r = 1.f;
+    quadColorRGBY[ 1 ].g = 1.f;
+    quadColorRGBY[ 1 ].b = 0.f;
+    quadColorRGBY[ 1 ].a = 1.f;
+
+    quadColorRGBY[ 2 ].r = 0.f;
+    quadColorRGBY[ 2 ].g = 1.f;
+    quadColorRGBY[ 2 ].b = 0.f;
+    quadColorRGBY[ 2 ].a = 1.f;
+
+    quadColorRGBY[ 3 ].r = 0.f;
+    quadColorRGBY[ 3 ].g = 0.f;
+    quadColorRGBY[ 3 ].b = 1.f;
+    quadColorRGBY[ 3 ].a = 1.f;
+
+    quadColorCYMW[ 0 ].r = 0.f;
+    quadColorCYMW[ 0 ].g = 1.f;
+    quadColorCYMW[ 0 ].b = 1.f;
+    quadColorCYMW[ 0 ].a = 1.f;
+
+    quadColorCYMW[ 1 ].r = 1.f;
+    quadColorCYMW[ 1 ].g = 1.f;
+    quadColorCYMW[ 1 ].b = 0.f;
+    quadColorCYMW[ 1 ].a = 1.f;
+
+    quadColorCYMW[ 2 ].r = 1.f;
+    quadColorCYMW[ 2 ].g = 0.f;
+    quadColorCYMW[ 2 ].b = 1.f;
+    quadColorCYMW[ 2 ].a = 1.f;
+
+    quadColorCYMW[ 3 ].r = 1.f;
+    quadColorCYMW[ 3 ].g = 1.f;
+    quadColorCYMW[ 3 ].b = 1.f;
+    quadColorCYMW[ 3 ].a = 1.f;
+
+    quadColorGray[ 0 ].r = 0.75f;
+    quadColorGray[ 0 ].g = 0.75f;
+    quadColorGray[ 0 ].b = 0.75f;
+    quadColorGray[ 0 ].a = 1.f;
+
+    quadColorGray[ 1 ].r = 0.50f;
+    quadColorGray[ 1 ].g = 0.50f;
+    quadColorGray[ 1 ].b = 0.50f;
+    quadColorGray[ 1 ].a = 0.50f;
+
+    quadColorGray[ 2 ].r = 0.75f;
+    quadColorGray[ 2 ].g = 0.75f;
+    quadColorGray[ 2 ].b = 0.75f;
+    quadColorGray[ 2 ].a = 1.f;
+
+    quadColorGray[ 3 ].r = 0.50f;
+    quadColorGray[ 3 ].g = 0.50f;
+    quadColorGray[ 3 ].b = 0.50f;
+    quadColorGray[ 3 ].a = 1.f;
+
+    //Set rendering indices
+    indices[ 0 ] = 0;
+    indices[ 1 ] = 1;
+    indices[ 2 ] = 2;
+    indices[ 3 ] = 3;
+</div>
+
+<div class="tutText">
+Here we set the VBO data and IBO data.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //Create VBOs
+    glGenBuffers( 1, &gVertexVBO );
+    glBindBuffer( GL_ARRAY_BUFFER, gVertexVBO );
+    glBufferData( GL_ARRAY_BUFFER, 4 * sizeof(LVertexPos2D), quadPos, GL_STATIC_DRAW );
+
+    glGenBuffers( 1, &gRGBYVBO );
+    glBindBuffer( GL_ARRAY_BUFFER, gRGBYVBO );
+    glBufferData( GL_ARRAY_BUFFER, 4 * sizeof(LColorRGBA), quadColorRGBY, GL_STATIC_DRAW );
+    
+    glGenBuffers( 1, &gCYMWVBO );
+    glBindBuffer( GL_ARRAY_BUFFER, gCYMWVBO );
+    glBufferData( GL_ARRAY_BUFFER, 4 * sizeof(LColorRGBA), quadColorCYMW, GL_STATIC_DRAW );
+    
+    glGenBuffers( 1, &gGrayVBO );
+    glBindBuffer( GL_ARRAY_BUFFER, gGrayVBO );
+    glBufferData( GL_ARRAY_BUFFER, 4 * sizeof(LColorRGBA), quadColorGray, GL_STATIC_DRAW );
+
+    //Create IBO
+    glGenBuffers( 1, &gIBO );
+    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, gIBO );
+    glBufferData( GL_ELEMENT_ARRAY_BUFFER, 4 * sizeof(GLuint), indices, GL_STATIC_DRAW );
+</div>
+
+<div class="tutText">
+Here we create the VBOs for the vertex position, RGBY color, CYMW color, and gray color attributes. We also create the IBO.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //Generate left quad VAO
+    glGenVertexArrays( 1, &gLeftVAO );
+
+    //Bind vertex array
+    glBindVertexArray( gLeftVAO );
+
+    //Enable vertex attributes
+    gDoubleMultiColorPolygonProgram2D.enableDataPointers();
+
+    //Set vertex data
+    glBindBuffer( GL_ARRAY_BUFFER, gVertexVBO );
+    gDoubleMultiColorPolygonProgram2D.setVertexPointer( 0, NULL );
+
+    glBindBuffer( GL_ARRAY_BUFFER, gRGBYVBO );
+    gDoubleMultiColorPolygonProgram2D.setColor1Pointer( 0, NULL );
+
+    glBindBuffer( GL_ARRAY_BUFFER, gGrayVBO );
+    gDoubleMultiColorPolygonProgram2D.setColor2Pointer( 0, NULL );
+
+    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, gIBO );
+
+    //Unbind VAO
+    glBindVertexArray( NULL );
+</div>
+
+<div class="tutText">
+Now it's time to generate the VAO for the left quad using glGenVertexArrays(). After generating it we bind it using glBindVertexArray().<br>
+<br>
+When we have our VAO bound, any changes made to the vertex attribute state are made to the currently bound VAO. Here we're enabling all the data pointers for our shader program,
+setting the vertex position data pointer, setting the two color pointers, and setting the IBO. Then we unbind the VAO by binding null.<br>
+<br>
+If we were to bind this VAO again, it would enable all the attributes that we enabled on here, set all the pointers we set here, and set the IBO we set here.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //Generate right quad VAO
+    glGenVertexArrays( 1, &gRightVAO );
+
+    //Bind vertex array
+    glBindVertexArray( gRightVAO );
+
+    //Enable vertex attributes
+    gDoubleMultiColorPolygonProgram2D.enableDataPointers();
+
+    //Set vertex data
+    glBindBuffer( GL_ARRAY_BUFFER, gVertexVBO );
+    gDoubleMultiColorPolygonProgram2D.setVertexPointer( 0, NULL );
+
+    glBindBuffer( GL_ARRAY_BUFFER, gCYMWVBO );
+    gDoubleMultiColorPolygonProgram2D.setColor1Pointer( 0, NULL );
+
+    glBindBuffer( GL_ARRAY_BUFFER, gGrayVBO );
+    gDoubleMultiColorPolygonProgram2D.setColor2Pointer( 0, NULL );
+
+    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, gIBO );
+
+    //Unbind VAO
+    glBindVertexArray( NULL );
+</div>
+
+<div class="tutText">
+Here we create and set the VAO for the right quad much like we did left quad, only here we're using the CYMW color instead of the RGBY color that the left quad is using.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">void render()
+{
+    //Clear color buffer
+    glClear( GL_COLOR_BUFFER_BIT );
+
+    //Multicolor quad on the left
+    gDoubleMultiColorPolygonProgram2D.setModelView( glm::translate&#060GLfloat&#062( glm::vec3(SCREEN_WIDTH * 1.f / 4.f, SCREEN_HEIGHT / 2.f, 0.f ) ) );
+    gDoubleMultiColorPolygonProgram2D.updateModelView();
+
+    //Set left vertex array object
+    glBindVertexArray( gLeftVAO );
+    glDrawElements( GL_TRIANGLE_FAN, 4, GL_UNSIGNED_INT, NULL );
+
+    //Multicolor quad on the right
+    gDoubleMultiColorPolygonProgram2D.setModelView( glm::translate&#060GLfloat&#062( glm::vec3( SCREEN_WIDTH * 3.f / 4.f, SCREEN_HEIGHT / 2.f, 0.f ) ) );
+    gDoubleMultiColorPolygonProgram2D.updateModelView();
+
+    //Set right vertex array object
+    glBindVertexArray( gRightVAO );
+    glDrawElements( GL_TRIANGLE_FAN, 4, GL_UNSIGNED_INT, NULL );
+
+    //Update screen
+    glutSwapBuffers();
+}
+
+</div>
+
+<div class="tutText">
+Now when drawing the left quad with glDrawElements() instead of making 1 function call to enable the attribute pointers, 3 more calls to set the attribute pointers, and one more to
+set the IBO, we make one call to bind the VAO with all the attributes states set and draw.<br>
+<br>
+It's the same story with here when we render the right quad were we make one call to set the vertex states we need as opposed to 5. When used properly, VAOs can save you quite a
+bit of hassle.
+</div>
+
+            <div class="tutFooter">
+            Download the media and source code for this tutorial <a class="tutLink" href="36_vertex_array_objects.zip">here</a>.
+            <br>
+            <a class="leftNav" href="../index.php.html#Vertex Array Objects">Back to OpenGL Tutorials</a><br>
+            </div>
+
+        </div>
+
+        <div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+    </body>
+</html>

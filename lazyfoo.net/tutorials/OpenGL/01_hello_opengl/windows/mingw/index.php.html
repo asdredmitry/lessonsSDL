@@ -1,0 +1,275 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+	<head>
+
+		<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+		<META NAME=KEYWORDS CONTENT="freeGLUT glut C++ OpenGL Tutorial 2D Windows freeGLUT mingw">
+		<META NAME=DESCRIPTION CONTENT="Install OpenGL freeglut on mingw.">
+
+		<title>Lazy Foo' Productions - Setting up freeGLUT on MinGW</title>
+
+		<link REL="stylesheet" TYPE="text/css" href="../../../../../layout/lazy.css">
+
+		<script src="main.js">
+		</script>
+
+	</head>
+
+	<body>
+
+		<div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../../../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../../../index.php.html">News</a>
+<a class="nav" href="../../../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>
+		<div class="content">
+
+			<div class="tutPreface"><h1 class="tutHead">Setting up freeGLUT on MinGW</h1>
+            <h6>Last Updated 8/09/12</h6>
+			</div>
+
+			<div class="tutText">
+			<a class="tutLink" name="1" href="index.php.html#1">1)</a>First thing you need to do is download freeGLUT headers and binaries. You will find them on the freeGLUT website, specifically
+			on <a class="tutLink" href="http://freeglut.sourceforge.net/index.php#download">this page</a>.<br>
+			<br>
+			Scroll down to the Prepackaged Releases section and click on the prepackaged windows binaries page.<br>
+			<div class="tutImg"><img src="../download.png"></div>
+			<br>
+			Then download the MinGW binaries archive.<br>
+			<div class="tutImg"><img src="mingw_package.png"></div>
+			<br>
+			Open the zip archive and there should be a folder called "freeglut". Copy that entire folder and put it anywhere you'd like. For these tutorials I'm putting it in a 
+			directory I created called C:\mingw_dev_lib<br>
+			<br>
+			<a class="tutLink" name="2" href="index.php.html#2">2)</a>Next you're going to want to get up the path for mingw so you can run mingw commands in any directory. Open up the system
+			menu either by A) right clicking My Computer and selecting Properties or B) going to the Control Panel and selecting the system menu. Once your in the system menu,
+			click advanced system settings.
+			<div class="tutImg"><img src="system.png"></div>
+			<br>
+			and then click environment variables
+			<div class="tutImg"><img src="environment_variables.png"></div>
+			<br>
+			Under system variables, select the "Path" variable and click edit.
+			<div class="tutImg"><img src="edit_path.png"></div>
+			<br>
+			What the path variable does is tell the OS where to look when running an executable. What we want to do is whenever we run the g++ command, the OS should look in the
+			MinGW bin directory where g++.exe is located. If you installed MinGW by itself, the MinGW bin directory should be
+			<h6>C:\MinGW\bin</h6>
+			Append it to the long list of paths with a semi-colon after it and click ok.
+			<div class="tutImg"><img src="add_path.png"></div>
+			If you're using an IDE like Code::Blocks which uses MinGW, you can also set its MinGW bin directory which should be at
+			<h6>C:\Program Files (x86)\CodeBlocks\MinGW\bin</h6>
+			Now when ever you run a command that uses a MinGW executable, the OS will know to look in the MinGW bin directory.<br>
+			<br>			
+			<a class="tutLink" name="3" href="index.php.html#3">3)</a>Now go download the <a class="tutLink" href="../../01_hello_freeglut.zip">source for lesson 01</a>. Extract the source
+			somewhere. Open up a command window in the directory by holding shift and right clicking.
+			<div class="tutImg"><img src="command.png"></div>
+			<br>
+			Now compile by entering this big old command (This command assumed you have freeGLUT extracted at C:\mingw_dev_lib\freeglut):
+			
+			<h6>g++ LUtil.cpp main.cpp -IC:\mingw_dev_lib\freeglut\include -LC:\mingw_dev_lib\freeglut\lib -w -Wl,-subsystem,windows -lOpenGL32 -lglu32 -lfreeGLUT  -o 01_hello_freeglut</h6>
+			
+			As the programs get bigger and bigger, having to manually punch in this compilation command gets very tedious very quickly. This is why I recommend using Make.<br>
+			<br>
+			<a class="tutLink" name="4" href="index.php.html#4">4)</a> MingGW Make allows you to make build scripts that'll automate the compilation process.
+			</div>
+			
+			<div class="tutCodeHeader">From Basic Makefile</div>
+<div class="tutCode">#OBJS specifies which files to compile as part of the project
+OBJS = LUtil.cpp main.cpp
+
+#OBJ_NAME specifies the name of our exectuable
+OBJ_NAME = 01_hello_freeglut
+
+#This is the target that compiles our executable
+all : $(OBJS)
+	g++ $(OBJS) -IC:\mingw_dev_lib\freeglut\include -LC:\mingw_dev_lib\freeglut\lib -w -Wl,-subsystem,windows -lOpenGL32 -lglu32 -lfreeGLUT  -o $(OBJ_NAME)
+</div>
+
+			<div class="tutText">
+			Here we have a basic Makefile. At the top we declare and set the "OBJS" macro which specifies which files we're compiling. Then we set the "OBJ_NAME" macro that specifies
+			the name of our executable.<br>
+			<br>
+			After setting these two macros, we have the "all" target which compiles the program. It's followed by the dependencies which as you can see is the OBJS macro, because
+			obviously you need the source files to compile the program.<br>
+			<br>
+			After specifying the name of the target and its dependencies, the command to create the target is on the next line. The command to create the target must begin with a
+			tab or Make will reject it.<br>
+			<br>
+			As you would expect, the command to compile the program is largely the same as the command we would compile it off the command line. A key difference is that we have
+			macros that we insert into the command which makes things like adding new files to the project must easier since you only have to change the macro as opposed to changing
+			the whole command.<br>
+			<br>
+			In future tutorials, we will be using more libraries and more source files. We should probably use more macros to make the process of adding them easier.
+			</div>
+			
+			<div class="tutCodeHeader">From Makefile</div>
+<div class="tutCode">#OBJS specifies which files to compile as part of the project
+OBJS = LUtil.cpp main.cpp
+
+#CC specifies which compiler we're using
+CC = g++
+
+#INCLUDE_PATHS specifies the additional include paths we'll need
+INCLUDE_PATHS = -IC:\mingw_dev_lib\freeglut\include
+
+#LIBRARY_PATHS specifies the additional library paths we'll need
+LIBRARY_PATHS = -LC:\mingw_dev_lib\freeglut\lib
+
+#COMPILER_FLAGS specifies the additional compilation options we're using
+# -w suppresses all warnings
+# -Wl,-subsystem,windows gets rid of the console window
+COMPILER_FLAGS = -w -Wl,-subsystem,windows
+
+#LINKER_FLAGS specifies the libraries we're linking against
+LINKER_FLAGS = -lOpenGL32 -lglu32 -lfreeGLUT 
+
+#OBJ_NAME specifies the name of our exectuable
+OBJ_NAME = 01_hello_freeglut
+
+#This is the target that compiles our executable
+all : $(OBJS)
+	$(CC) $(OBJS) $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(OBJ_NAME)
+</div>
+			<div class="tutText">
+			Now our compilation command is much more flexible.<br>
+			<br>
+			Near the top we have the macros that define the files we're compiling and the compiler we're using.<br>
+			<br>
+			Next we have the "INCLUDE_PATHS" macro which specifies the additional directories we're getting header files from. As you can see, we're using the include directory
+			from the freeGLUT folder we extacted earlier. The "LIBRARY_PATHS" sets the additional library file paths. Notice how there's a <b>-I</b> before every include directory
+			and a <b>-L</b> before every library directory.<br>
+			<br>
+			The "COMPILER_FLAGS" macro are the additional options we use when compiling. In this case we're disabling all warnings and disabling the console window. The
+			"LINKER_FLAGS" macro specifies which libraries we're linking against. Here we're compiling against OpenGL, GL Utilities, and freeGLUT. Notice how there's a <b>-l</b>
+			flag before every library.<br>
+			<br>
+			Finally at the bottom we have our target compiling using all of our macros. Thanks to macros we can very easily change the macros to add more files and libraries as we
+			need them.<br>
+			<br>
+			Save this Makefile code to a file named "Makefile" (case sensitive with no file extension) or you can use the one I premade <a class="tutLink" href="Makefile">here</a>.
+			Open a command line in the directory with the source files and run the command <b>mingw32-make.exe</b>. Make will search for a file named "Makefile" in the directory
+			Make was called in and run the Makefile that will compile your code.<br>
+			<br>
+			Now that you have OpenGL and freeGLUT compiling, it time to go onto part 2 of the tutorial.
+			</div>
+
+			<div class="tutFooter">
+			The documentation for OpenGL can be found <a class="tutLink" href="http://www.opengl.org/documentation/">here</a>.<br>
+			The documentation for GLUT (the API freeGLUT is based on) can be found <a class="tutLink" href="http://www.opengl.org/documentation/specs/glut/spec3/spec3.html">here</a>.<br>
+			The documentation for freeGLUT can be found <a class="tutLink" href="http://freeglut.sourceforge.net/docs/api.php">here</a>.<br>
+			<br>
+			<a class="tutLink" href="../../index2.php.html">Hello OpenGL Part 2: Your First Polygon</a><br>
+			</div>
+
+		</div>
+
+		<div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../../../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../../../index.php.html">News</a>
+<a class="nav" href="../../../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+	</body>
+</html>

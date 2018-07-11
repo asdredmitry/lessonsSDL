@@ -1,0 +1,280 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+<head>
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+
+<title>Lazy Foo' Productions</title>
+
+<link REL="stylesheet" TYPE="text/css" href="../../layout/lazy.css">
+
+<script src="../../layout/lazy.js">
+</script>
+
+</head>
+
+<body>
+
+<div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../tutorials/SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../articles/index.php.html">Articles</a>
+<a class="nav" href="../../tutorials/OpenGL/index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../index.php.html">News</a>
+<a class="nav" href="../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../contact.php.html">Contact</a>
+<a class="nav" href="../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>
+<div class="content">
+
+<div class="tutPreface"><h1 class="tutHead">Clip Blitting and Sprite Sheets</h1>
+<div class="tutImg"><img src="preview.jpg"></div>
+<h6>Last Updated 1/04/2014</h6>
+Sprite sheets are collections of images held in a single image file. They're useful for when you have large
+amounts of images but don't want to have to deal with many image files.<br>
+<br>
+In order to get the individual images you have to be able to clip the part you want when blitting. Now in this
+lesson we have a sprite sheet with 4 different dot sprites on it. This tutorial covers how to clip a sprite from a
+sprite sheet.<br/>
+<br/>
+A <a class="tutLink" href="../../tutorials/SDL/11_clip_rendering_and_sprite_sheets/index.php.html">Clip Rendering and Sprite Sheets tutorial with SDL 2</a> is now available.
+</div>
+
+<div class="tutCode">//The surfaces
+SDL_Surface *dots = NULL;
+SDL_Surface *screen = NULL;
+
+//The event structure
+SDL_Event event;
+
+//The portions of the sprite map to be blitted
+SDL_Rect clip[ 4 ];
+</div>
+
+<div class="tutText">
+Here we have some global variables.
+There's the screen surface, and the event structure from before.
+We also have the "dots" surface which is the sprite sheet that contains all the dot sprites.<br>
+<br>
+There's also an array of four SDL_Rects. These hold the offsets and dimensions of the 4 dot sprites.
+</div>
+
+<div class="tutCode">void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination, SDL_Rect* clip = NULL )
+{
+    //Holds offsets
+    SDL_Rect offset;
+    
+    //Get offsets
+    offset.x = x;
+    offset.y = y;
+    
+    //Blit
+    SDL_BlitSurface( source, clip, destination, &offset );
+}
+</div>
+
+<div class="tutText">
+Here's the surface blitting function from before but with some adjustments.<br>
+<br>
+The new argument is the SDL_Rect called "clip" that defines the rectangular piece of the surface we want to blit.<br>
+<br>
+We set NULL to be the default argument, which means<br>
+apply_surface( 0, 0, image, screen, NULL );<br>
+<br>
+and<br>
+<br>
+apply_surface( 0, 0, image, screen );<br>
+do the exact same thing.<br>
+<br>
+We also changed the way we call SDL_BlitSurface().
+We no longer just set the second argument to NULL, we now put the "clip" argument in it.<br>
+<br>
+Now SDL_BlitSurface() will blit the region of the source surface defined by "clip". If "clip" is NULL, then it
+will blit the entire source surface.
+</div>
+
+<div class="tutCode">    //Clip range for the top left
+    clip[ 0 ].x = 0;
+    clip[ 0 ].y = 0;
+    clip[ 0 ].w = 100;
+    clip[ 0 ].h = 100;
+    
+    //Clip range for the top right
+    clip[ 1 ].x = 100;
+    clip[ 1 ].y = 0;
+    clip[ 1 ].w = 100;
+    clip[ 1 ].h = 100;
+    
+    //Clip range for the bottom left
+    clip[ 2 ].x = 0;
+    clip[ 2 ].y = 100;
+    clip[ 2 ].w = 100;
+    clip[ 2 ].h = 100;
+    
+    //Clip range for the bottom right
+    clip[ 3 ].x = 100;
+    clip[ 3 ].y = 100;
+    clip[ 3 ].w = 100;
+    clip[ 3 ].h = 100;
+</div>
+
+<div class="tutText">
+In the main function after everything is initialized and the files are loaded, we set the clip rectangles.<br>
+<br>
+We're going to take this sprite sheet:<br>
+<div class="tutImg"><img src="sheet.jpg"></div>
+<br>
+and set the clip rectangles to their designated regions:<br>
+<div class="tutImg"><img src="sprites.jpg"></div>
+like so.<br>
+<br>
+Now we're ready to blit the individual sprites from the sprite sheet.
+</div>
+
+<div class="tutCode">    //Fill the screen white
+    SDL_FillRect( screen, &screen->clip_rect, SDL_MapRGB( screen->format, 0xFF, 0xFF, 0xFF ) );
+</div>
+
+<div class="tutText">
+Now we fill the screen white using SDL_FillRect().
+What SDL_FillRect() does is take the surface in the first argument, and fill the region in the second argument with color in the third argument.<br>
+<br>
+The region in the second argument is the surface's clip_rect or the entire region of the surface.
+</div>
+
+<div class="tutCode">    //Apply the images to the screen
+    apply_surface( 0, 0, dots, screen, &clip[ 0 ] );
+    apply_surface( 540, 0, dots, screen, &clip[ 1 ] );
+    apply_surface( 0, 380, dots, screen, &clip[ 2 ] );
+    apply_surface( 540, 380, dots, screen, &clip[ 3 ] );
+    
+    //Update the screen
+    if( SDL_Flip( screen ) == -1 )
+    {
+        return 1;    
+    }
+</div>
+
+<div class="tutText">
+Now we actually blit the sprites.
+Notice that every time we're blitting the same surface.
+The only difference is that we're blitting a different piece of the surface.<br>
+<br>
+The final result should look like this:<br>
+<div class="tutImg"><img src="result.jpg"></div>
+<br>
+Now when you have many images you want to use, you don't have to keep thousands of image files.
+You can put collections of sprites in a single image and just blit the portion you want to use.
+</div>
+
+<div class="tutFooter">
+Download the media and source code for this tutorial <a class="tutLink" href="../../downloads/index.php%3Ffile=SDLTut_lesson06">here</a>.<br>
+<br>
+<a class="leftNav" href="../lesson05/index.php.html">Previous Tutorial</a><a class="rightNav" href="../lesson07/index.php.html">Next Tutorial</a><br>
+</div>
+
+</div>
+
+<div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../tutorials/SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../articles/index.php.html">Articles</a>
+<a class="nav" href="../../tutorials/OpenGL/index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../index.php.html">News</a>
+<a class="nav" href="../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../contact.php.html">Contact</a>
+<a class="nav" href="../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+</body>
+</html>

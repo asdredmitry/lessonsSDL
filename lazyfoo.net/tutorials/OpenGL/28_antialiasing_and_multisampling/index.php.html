@@ -1,0 +1,353 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+    <head>
+
+        <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+
+        <title>Lazy Foo' Productions - Antialiasing and Multisampling</title>
+		<META NAME=KEYWORDS CONTENT="freeGLUT glut C++ OpenGL Tutorial 2D Windows Linux Mac Anti Aliasing Multisampling Jaggies Smooth Polygons">
+		<META NAME=DESCRIPTION CONTENT="Learn to render smooth polygons in OpenGL.">
+
+        <link REL="stylesheet" TYPE="text/css" href="../../../layout/lazy.css">
+
+        <script src="main.js">
+        </script>
+
+    </head>
+
+    <body>
+
+        <div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>        
+        <div class="content">
+
+            <div class="tutPreface"><h1 class="tutHead">Antialiasing and Multisampling</h1>
+            <div class="tutImg"><img src="preview.png"></div>
+            <h6>Last Updated 8/09/12</h6>
+            Using OpenGL's built antialiasing and multisampling functionality, you can smooth out the edges of your polygon when they rasterize.
+            </div>
+
+<div class="tutCodeHeader">From main.cpp</div>
+<div class="tutCode">    //Create Double Buffered Window with multisampled buffer
+    glutInitDisplayMode( GLUT_DOUBLE | GLUT_MULTISAMPLE );
+    glutInitWindowSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+    glutCreateWindow( "OpenGL" );
+</div>
+
+<div class="tutText">
+In order to use multisampling, you have to request a multisampled buffer from your windowing API. For freeGLUT, that means passing in GLUT_MULTISAMPLE to glutInitDisplayMode().
+For other windowing APIs, look in your documentation on how to request a multisampled buffer.
+</div>
+
+<div class="tutCodeHeader">From LUtil.h</div>
+<div class="tutCode">//Aliasing methods
+enum AliasMode
+{
+    ALIAS_MODE_ALIASED,
+    ALIAS_MODE_ANTIALIASED,
+    ALIAS_MODE_MULTISAMPLE
+};
+</div>
+
+<div class="tutText">
+In this tutorial there's 3 ways we're going to render the triangle on the screen. Aliased means we're going to render the triangle with plain rasterization which leads to aliasing
+(the technical term for jaggies). Antialiased means OpenGL will smooth out the edges of the triangle. Multisampling is another type of antialiasing where we render with multiple
+samples per pixel. 
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">//Aliasing
+AliasMode gMode = ALIAS_MODE_ALIASED;
+</div>
+
+<div class="tutText">
+At the top of LUtil.cpp, we have a global variable that controls how we're rendering the triangle.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //Set blending
+    glEnable( GL_BLEND );
+    glDisable( GL_DEPTH_TEST );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
+    //Set antialiasing/multisampling
+    glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
+    glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
+    glDisable( GL_LINE_SMOOTH );
+    glDisable( GL_POLYGON_SMOOTH );
+    glDisable( GL_MULTISAMPLE );
+</div>
+
+<div class="tutText">
+In order to use antialiasing and multisampling, you have to enable blending. This isn't much of an issue because we've been using blending for a while now.<br>
+<br>
+Using glHint() we can tell the OpenGL driver how to do polygon smoothing antialiasing. Here we're telling the OpenGL driver to use the nicest line and polygon smoothing. Whether
+the driver will listen to our request is all up to the card vendor's (AMD, nVidia, Intel, etc) driver implementation.<br>
+<br>
+Finally, we disable line/polygon smoothing and multisampling in our initGL() function. For this demo we want aliased polygons to be our default behavior.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">bool loadMedia()
+{
+    return true;
+}
+
+void update()
+{
+
+}
+</div>
+
+<div class="tutText">
+Since we're rendering a plain polygon, the loadMedia() and update() functions don't do much.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">void render()
+{
+    //Clear color
+    glClear( GL_COLOR_BUFFER_BIT );
+
+    //Start alias mode
+    switch( gMode )
+    {
+        case ALIAS_MODE_ALIASED:
+            glDisable( GL_LINE_SMOOTH );
+            glDisable( GL_POLYGON_SMOOTH );
+            glDisable( GL_MULTISAMPLE );
+            break;
+
+        case ALIAS_MODE_ANTIALIASED:
+            glEnable( GL_LINE_SMOOTH );
+            glEnable( GL_POLYGON_SMOOTH );
+            glDisable( GL_MULTISAMPLE );
+            break;
+
+        case ALIAS_MODE_MULTISAMPLE:
+            glDisable( GL_LINE_SMOOTH );
+            glDisable( GL_POLYGON_SMOOTH );
+            glEnable( GL_MULTISAMPLE );
+            break;
+    }
+</div>
+
+<div class="tutText">
+At the top of the render() function, we clear the screen as usual and then set the aliasing mode.<br>
+<br>
+If we want the polygon to be aliased, smoothing and multisampling are disabled. If we want the polygon to be smoothed, we enable smoothing and disable multisampling. If we want to
+render things multisampled, we disable smoothing and enable multisampling.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //Render Triangle
+    glColor3f( 1.f, 1.f, 1.f );
+    glBegin( GL_TRIANGLES );
+     glVertex2f( SCREEN_WIDTH, 0.f );
+     glVertex2f( SCREEN_WIDTH, SCREEN_HEIGHT );
+     glVertex2f( 0.f, SCREEN_HEIGHT );
+    glEnd();
+</div>
+
+<div class="tutText">
+For the sake of simplicity, we're using the slow immediate mode to render the triangle.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //End alias mode
+    switch( gMode )
+    {
+        case ALIAS_MODE_ANTIALIASED:
+            glDisable( GL_LINE_SMOOTH );
+            glDisable( GL_POLYGON_SMOOTH );
+            break;
+            
+        case ALIAS_MODE_MULTISAMPLE:
+            glDisable( GL_MULTISAMPLE );
+            break;
+    }
+
+    //Update screen
+    glutSwapBuffers();
+}
+</div>
+
+<div class="tutText">
+After we're done rendering the triangle, we disable whatever smoothing/multisampling was used.<br>
+<br>
+Finally, we swap the buffers to update the screen.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">void handleKeys( unsigned char key, int x, int y )
+{
+    //If the user presses q
+    if( key == 'q' )
+    {
+        //Cycle alias mode
+        switch( gMode )
+        {
+            case ALIAS_MODE_ALIASED:
+                printf( "Antialiased\n" );
+                gMode = ALIAS_MODE_ANTIALIASED;
+                break;
+
+            case ALIAS_MODE_ANTIALIASED:
+                printf( "Multisampled\n" );
+                gMode = ALIAS_MODE_MULTISAMPLE;
+                break;
+
+            case ALIAS_MODE_MULTISAMPLE:
+                printf( "Aliased\n" );
+                gMode = ALIAS_MODE_ALIASED;
+                break;
+        }
+    }
+}
+</div>
+
+<div class="tutText">
+And in our handleKeys() function we cycle through the different aliasing modes.<br>
+<br>
+When you run the program, you can zoom in to see how your OpenGL driver handles the polygon rendering.<br>
+<br>
+<div class="tutImg">
+<img src="aliased.png"><br>
+This is rendering with aliased edges.
+</div>
+<br>
+<div class="tutImg">
+<img src="multisampled.png"><br>
+This is rendering with multisampled buffer.
+</div><br>
+<br>
+If you're wondering how using polygon smoothing looks, that's.... something I would like to know too. See, antialiasing via polygon smoothing was one of the earlier methods of 
+antialiasing in OpenGL. Then multisampling came along. While it's part of the OpenGL spec, polygon smoothing isn't always there and my home rig doesn't support it. When we make a
+call with glHint, it's handled as a request, not an order.<br>
+<br>
+These days, it's generally not a good idea to rely on polygon smoothing for antialiasing. If you want antialiasing done for you, you can use multisampling. Many
+developers today don't rely on API level multisampling and use their own methods via shaders. One method I've seen is using a gaussian blur on edges.<br>
+<br>
+Start looking up image processing is you want to use your own method for antialiasing.
+</div>
+
+            <div class="tutFooter">
+            Download the media and source code for this tutorial <a class="tutLink" href="28_antialiasing_and_multisampling.zip">here</a>.
+			<br>
+			<a class="leftNav" href="../index.php.html#Antialiasing and Multisampling">Back to OpenGL Tutorials</a><br>
+            </div>
+
+        </div>
+
+        <div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+    </body>
+</html>

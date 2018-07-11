@@ -1,0 +1,425 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+<head>
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+
+<title>Lazy Foo' Productions</title>
+
+<link REL="stylesheet" TYPE="text/css" href="../../layout/lazy.css">
+
+<script src="../../layout/lazy.js">
+</script>
+
+</head>
+
+<body>
+
+<div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../tutorials/SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../index.php.html">Articles</a>
+<a class="nav" href="../../tutorials/OpenGL/index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../index.php.html">News</a>
+<a class="nav" href="../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../contact.php.html">Contact</a>
+<a class="nav" href="../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>
+<div class="content">
+
+<div class="tutPreface"><h1 class="tutHead">Pinpointing a Crash</h1>
+<h6>Last Updated 6/09/12</h6>
+So your application seems to be crashing at random. Here you'll learn a way to find the location of the crash.
+</div>
+
+<div class="tutText">
+Before I start, let me say this isn't the best method to isolate segfaults. The best way is by using your
+debugger. The thing is this site is all about being cross platform, and having to make an article for each of
+the debuggers would take more time than I have. After you read this article (or now if you want to), I recommend
+looking up how to use your IDEs/compilers debugger and learn to use it. This article is just to give you a method
+I've used that helped me successfully find and fix segfaults.<br>
+<br>
+So one day I get an e-mail about someone who can't get one of my tutorial applications to work because it keeps
+opening and immediately closing. All the code is correct, he has all the files in the right place, but it still
+crashes. The thing is he's on OS X and I don't have a Mac to test the code on. It's in my interest to make sure my
+code is bug free so I had to find a way to debug over e-mail.<br>
+<br>
+I decided to use a game log. Game logs record how the application is running. We use it to find the line that
+causes the crash by checking the game log to find the last thing the application did before crashing. So I tell
+the Mac user to paste some logging code into the program to find the problem.
+</div>
+
+<div class="tutCode">//File stream for the game log.
+std::ofstream logger( "log.txt" );
+</div>
+
+<div class="tutText">
+Here's the file stream we would use to create a game log. It's global because we're going to need it available at
+all points in the program.<br>
+<br>
+If you don't know file IO, I cover it in <a class="tutLink" href="../../SDL_tutorials/lesson24/index.php.html">tutorial 24<a>.
+We're going to be doing simple stuff with file IO so it shouldn't be too hard to learn as we go along.
+</div>
+
+<div class="tutCode">void log( std::string message )
+{
+    //Write message to file
+    logger << message << std::endl;
+
+    //Flush the buffer
+    logger.flush();
+}
+</div>
+
+<div class="tutText">
+This is our function that writes to the game log. It writes the message in the argument and goes to the next line.
+You don't have to start a new line every time you write, but most of the time in our game log we write one line at
+a time and it's easier not having to add a "\n" or "endl" to the message every single time we write to the game
+log.<br>
+<br>
+The after we write to the game log we flush the buffer. The reason we do this is because whenever we write to a
+file we are actually requesting to write. It can happen where you request to write to the file and program crashes
+before the write goes through. The flush() function makes sure that it gets written.<br>
+<br>
+Actually, here it is redundant since std:endl also flushes the buffer. If you used "\n" instead of endl you'd have
+to call flush() manually. I just wanted to demonstrate the flush() function.
+</div>
+
+<div class="tutCode">    //Quit flag
+    bool quit = false;
+    
+    //Initialize
+    if( init() == false )
+    {
+        return 1;    
+    }
+    
+    //Load the files
+    if( load_files() == false )
+    {
+        return 1;    
+    }
+    
+    //Apply the surfaces to the screen
+    apply_surface( 0, 0, background, screen );
+    apply_surface( 240, 190, foo, screen );
+    
+    //Update the screen
+    if( SDL_Flip( screen ) == -1 )
+    {
+        return 1;    
+    }
+</div>
+
+<div class="tutText">
+This code is from the color keying tutorial. Say if this code was crashing, how would we use game logging to find
+the problem?
+</div>
+
+<div class="tutCode">    //Quit flag
+    bool quit = false;
+    
+    log( "Initializing..." );
+    //Initialize
+    if( init() == false )
+    {
+        return 1;    
+    }
+    
+    log( "Loading files..." );
+    //Load the files
+    if( load_files() == false )
+    {
+        return 1;    
+    }
+    
+    log( "Blitting..." );
+    //Apply the surfaces to the screen
+    apply_surface( 0, 0, background, screen );
+    apply_surface( 240, 190, foo, screen );
+    
+    log( "Updating screen..." );
+    //Update the screen
+    if( SDL_Flip( screen ) == -1 )
+    {
+        return 1;    
+    }
+</div>
+
+<div class="tutText">
+Here you see the logger is writing to the log what's happening in the program as its happening. So if we open
+log.txt and we see this:<br>
+<h6>
+Initializing...<br>
+Loading files...<br>
+</h6>
+It means the program managed to get to the file loading function but it never got to the blitting. Now we know the
+crash happened somewhere in the load_files() function. Now it's time to dig deeper.
+</div>
+
+<div class="tutCode">bool load_files()
+{
+    log( "Loading background..." );
+    //Load the background image
+    background = load_image( "background.png" );
+    
+    //If the background didn't load
+    if( background == NULL )
+    {
+        log( SDL_GetError() );
+        log( IMG_GetError() );
+        return false;    
+    }
+    
+    log( "Loading foo..." );
+    //Load the stick figure
+    foo = load_image( "foo.png" );
+    
+    //If the stick figure didn't load
+    if( foo == NULL )
+    {
+        log( SDL_GetError() );
+        log( IMG_GetError() );
+        return false;    
+    }
+    
+    return true;    
+}
+</div>
+
+<div class="tutText">
+Now we log the file loading function.<br>
+<br>
+Now we not only log to isolate the problem, we also use SDL's error reporting functions. SDL_GetError() returns
+errors as a string from SDL so we can write it to the game log and IMG_GetError() is used for SDL_image errors.
+Other error reporting functions you'll want to know about are TTF_GetError() for SDL_ttf and Mix_GetError() for
+SDL_mixer.<br>
+<br>
+When our Mac user opened up the log again, he found out load_image() returned NULL and IMG_GetError() reported
+that the problem was he didn't have proper png support installed.
+</div>
+
+<div class="tutText">
+So back when I was developing lazy blocks, I was testing it and it started crashing at random. Using a game log,
+I would have done something like this in the next chunk of code.<br>
+<br>
+Note: I won't be actually using the real lazy blocks code because it makes me want to vomit.
+</div>
+
+<div class="tutCode">//File stream
+std::ofstream logger;
+
+//Logging function
+void log( std::string message );
+
+int main( int argc, char* args[] )
+{
+    //Start up
+    init();
+    load_files();
+        
+    while( quit == false )
+    {
+        //Open log file
+        logger.open( "log.txt" )
+        
+        log( "handling events..." );
+        handle_events();
+        
+        log( "doing logic..." );
+        logic();
+		
+        log( "rendering..." );
+        render();
+        
+        //Update screen
+        update_screen():
+        cap_fps();
+        
+        //Close log file
+        logger.close();
+    }
+</div>
+
+<div class="tutText">
+Here is what the code would look like if I was making a game log for a game loop. Notice at the top we open the
+game log and at the bottom we close it. This is so we start the game log over every time we go through the game
+loop. If we just keep appending to game log, we could eventually create one giant file that wastes space on our
+hard drive.<br>
+<br>
+So I had the program run a few times and the last line said "Deleting Piece..." whenever it crashed. This means
+the program crashed when the function that deleted the piece objects was called. It also only crashed when the
+square piece hit the bottom of the stage.<br>
+<br>
+So then I logged the delete_piece() function and I found out the the program would crash at the next chuck of
+code inside of the set_blocks() function of the piece class.
+</div>
+
+<div class="tutCode">    log( "Setting blocks..." );
+    //Set blocks
+    for( int s = 0; s < numBlocks; s ++ )
+    {
+        blocks[ s ]->set_status( BLOCK_STATIONARY );
+    }
+</div>
+
+<div class="tutText">
+Remember, segfaults are caused by the program trying to access a piece of memory it shouldn't. This is usually
+caused by:
+<ol>
+<li>Uninitialized pointers.</li>
+<li>Trying to use objects from NULL pointers.</li>
+<li>Arrays going out of bounds.</li>
+</ol>
+So something was causing us to go out of bounds. This loop keeps going for however long numBlock says to, so
+the problem is probably that numBlocks was set wrong. Sure enough, I looked in the constructor for the square
+piece class and I forgot to initialize numBlocks so this was looping for an indefinite amount of time.<br>
+<br>
+Another tool you can use are the __FILE__ and __LINE__ macros. Every modern C/C++ compiler has these macros that
+store the value of what file and line the program is at. It's easier to see with an example.
+</div>
+
+<div class="tutCode">#include "SDL/SDL.h"
+#include &#060fstream&#062
+
+//File stream for the game log.
+std::ofstream logger( "log.txt" );
+
+void log( std::string file, int line, std::string message = "" )
+{
+    //Write message to file
+    logger << file << ", " << line << ":" << message << std::endl;
+}
+
+int main( int argc, char* args[] )
+{
+    //Start SDL
+    SDL_Init( SDL_INIT_EVERYTHING );
+    
+    log( __FILE__, __LINE__ );
+    
+    //Quit SDL
+    SDL_Quit();
+    
+    return 0;    
+}
+</div>
+
+<div class="tutText">
+This would output <h6>mysource.cpp 21</h6> into your log. This method is useful when you don't want to make unique
+messages for each log.<br>
+<br>
+Now you have a method to find your segfault which is half the battle when trying to fix them. You can use this
+method when you don't have access to a debugger, but don't use it as an excuse not to learn to use your debugger.
+</div>
+
+<div class="tutFooter">
+If you have any suggestions to improve this article,
+It would be great if you <a class="tutLink" href="../../contact.php.html">contacted me</a> so I can improve this article.
+</div>
+
+</div>
+
+<div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../tutorials/SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../index.php.html">Articles</a>
+<a class="nav" href="../../tutorials/OpenGL/index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../index.php.html">News</a>
+<a class="nav" href="../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../contact.php.html">Contact</a>
+<a class="nav" href="../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+</body>
+</html>

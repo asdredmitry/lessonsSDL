@@ -1,0 +1,755 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+    <head>
+
+        <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+
+        <title>Lazy Foo' Productions - Multi-Color Polygons and Attributes</title>
+        <META NAME=KEYWORDS CONTENT="C++ OpenGL 3.0 Tutorial 2D Windows Linux Mac GLSL vertex attributes">
+        <META NAME=DESCRIPTION CONTENT="Learn to use GLSL attributes in a shader program.">
+
+        <link REL="stylesheet" TYPE="text/css" href="../../../layout/lazy.css">
+
+        <script src="main.js">
+        </script>
+
+    </head>
+
+    <body>
+
+        <div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>        
+        <div class="content">
+
+            <div class="tutPreface"><h1 class="tutHead">Multi-Color Polygons and Attributes</h1>
+            <div class="tutImg"><img src="preview.png"></div>
+            <h6>Last Updated 10/19/14</h6>
+            In the old fixed function pipeline, they had built in attributes for vertex positions, vertex color, vertex normals, vertex texture coordinates, etc. When GLSL
+            rolled in they let the user define their own custom attributes. When the big API clean up with OpenGL 3.0+ came around, the designers realized that all the built
+            in attributes were just vectors, so they could just have the user define the features that they needed.<br>
+            <br>
+            For this tutorial, we could have used the built in glColorPointer() function from OpenGL 2.1 to render a multicolor polygon. Instead we're going to define our own
+            vertex position and vertex color attributes so the code is forward compatible with OpenGL 3.0+.
+            </div>
+
+<div class="tutCodeHeader">From LMultiColorPolygonProgram2D.glvs</div>
+<div class="tutCode">//Transformation Matrices
+uniform mat4 LProjectionMatrix;
+uniform mat4 LModelViewMatrix;
+
+#if __VERSION__ >= 130
+
+//Vertex position attribute
+in vec2 LVertexPos2D;
+
+//Multicolor attribute
+in vec3 LMultiColor;
+out vec4 multiColor;
+</div>
+
+<div class="tutText">
+At the top of our vertex shader, we have our uniform variables from the plain polygon shader. Then we use the "#if" preprocessor to check which version of GLSL we have available
+to us. The reason is if the GLSL version is 1.30 or greater we want to compile the code you see above, otherwise we want to compile with the code you'll see next.<br>
+<br>
+What you see above is the declaration of GLSL attribute variables done in the modern OpenGL 3.0+ way. We have a 2D vector we take <b>in</b> named "LVertexPos2D". This variable will
+define the position of the vertex. The built in "gl_Vertex" attribute from GLSL version 1.20 was deprecated in the OpenGL 3.0 release.<br>
+<br>
+We also take <b>in</b> a 4 dimensional vector "LMultiColor" which represents the r, g, b, a values of a vertex color. Finally we send <b>out</b> a "multiColor" attribute for every
+vertex we process. Where does it go out to? The fragment shader because we need to know the color of the vertex to properly color the fragments.
+</div>
+
+<div class="tutCode">#else
+
+//Vertex position attribute
+attribute vec2 LVertexPos2D;
+
+//Multicolor attribute
+attribute vec3 LMultiColor;
+varying vec4 multiColor;
+
+#endif
+</div>
+
+<div class="tutText">
+What you see here is pretty much the same as the previous chunk of code only it's done with OpenGL 2 style attribute declaration. "attribute" variables are attributes that go into
+the vertex shader. "varying" variables go out from the vertex shader into the fragment shader.<br>
+<br>
+If you're making a large scale program it's probably best to have your C++/C/Java/Python/whatever OpenGL program detect at runtime what GLSL version your GPU supports and then load
+a GLSL shader file that has the code for the particular version of GLSL want to support. For the sake of not having to distribute multiple shader files with this tutorial, I put
+the shader source in one file and used preprocessors to have it compile differently based on the GLSL version. 
+</div>
+
+<div class="tutCodeHeader">From LMultiColorPolygonProgram2D.glvs</div>
+<div class="tutCode">void main()
+{
+    //Process color
+    multiColor = LMultiColor;
+    
+    //Process vertex
+    gl_Position = LProjectionMatrix * LModelViewMatrix * vec4( LVertexPos2D.x, LVertexPos2D.y, 0.0, 1.0 );
+}
+</div>
+
+<div class="tutText">
+There the main function that gets called on every vertex we process.<br>
+<br>
+For "LMultiColor", we just pass it through to "multiColor". If we wanted to, we could do matrix tranformations on the color (it is a vector after all) to do effects like greyscale
+or sephia tone.<br>
+<br>
+Calculating the vertex position pretty much works the same as before only now we're not using the built in vertex attribute and we're converting the 2D positions into a 4D vector.
+</div>
+
+<div class="tutCodeHeader">From LMultiColorPolygonProgram2D.glfs</div>
+<div class="tutCode">#if __VERSION__ >= 130
+
+//Multicolor attribute
+in vec4 multiColor;
+
+//Final color
+out vec4 gl_FragColor;
+
+#else
+
+//Multicolor attribute
+varying vec4 multiColor;
+
+#endif
+</div>
+
+<div class="tutText">
+Here's the top of the fragment shader with some more voodoo to get this to compile with both GLSL 1.3 and 1.2.<br>
+<br>
+With the GLSL 1.3 code, we take in the "multicolor" variable from the vertex shader and we declare "gl_FragColor" to send out to the color buffer.<br>
+<br>
+With the GLSL 1.2 code, we declare the varying "multicolor". If you're passing one variable from one shader to another it should have the same name in both shaders no matter which
+version of GLSL you're using.<br>
+<br>
+If you're wondering why I don't declare "gl_FragColor" in the GLSL 1.2 code, it's because it's already built into GLSL 1.2 as the color that goes out to the color buffer.
+If this shader source was only designed to support GLSL 1.3, I would have probably have named the out variable for the color buffer something besides a reserved word from GLSL 1.2.<br>
+<br>
+This is another case of me trying to support GLSL 1.2 and 1.3+ with the same source file.
+</div>
+
+<div class="tutCodeHeader">From LMultiColorPolygonProgram2D.glfs</div>
+<div class="tutCode">void main()
+{
+    //Set fragment
+    LFragment = multiColor;
+}
+</div>
+
+<div class="tutText">
+For the fragment shader, we have the "multiColor" taken in from the vertex shader and a fragment color we're going to be sending out to be used for rasterization. For this
+shader all we do is use the color from the vertex shader and send it out to the rasterizer to color to polygon.
+</div>
+
+<div class="tutCodeHeader">From LColorRGBA.h</div>
+<div class="tutCode">#include "LOpenGL.h"
+
+struct LColorRGBA
+{
+    GLfloat r;
+    GLfloat g;
+    GLfloat b;
+    GLfloat a;
+};
+</div>
+
+<div class="tutText">
+Here's the data type we're going to be using to define a RGBA color.
+</div>
+
+<div class="tutCodeHeader">From LMultiColorVertex2D.h</div>
+<div class="tutCode">#include "LVertexPos2D.h"
+#include "LColorRGBA.h"
+
+struct LMultiColorVertex2D
+{
+    LVertexPos2D pos;
+    LColorRGBA rgba;
+};
+</div>
+
+<div class="tutText">
+And here's the data type that defines the data for a colored vertex.
+</div>
+
+<div class="tutCodeHeader">From LMultiColorPolygonProgram2D.h</div>
+<div class="tutCode">#include "LShaderProgram.h"
+#include &#060glm/glm.hpp&#062
+
+class LMultiColorPolygonProgram2D : public LShaderProgram
+{
+    public:
+        LMultiColorPolygonProgram2D();
+        /*
+        Pre Condition:
+         -None
+        Post Condition:
+         -Initializes variables
+        Side Effects:
+         -None
+        */
+
+        bool loadProgram();
+        /*
+        Pre Condition:
+         -A valid OpenGL context
+        Post Condition:
+         -Loads multicolor polygon program
+        Side Effects:
+         -None
+        */
+
+        void setVertexPointer( GLsizei stride, const GLvoid* data );
+        /*
+        Pre Condition:
+         -Bound LMultiColorPolygonProgram2D
+        Post Condition:
+         -Sets vertex position attribute pointer
+        Side Effects:
+         -None
+        */
+
+        void setColorPointer( GLsizei stride, const GLvoid* data );
+        /*
+        Pre Condition:
+         -Bound LMultiColorPolygonProgram2D
+        Post Condition:
+         -Sets vertex color attribute pointer
+        Side Effects:
+         -None
+        */
+
+        void enableVertexPointer();
+        /*
+        Pre Condition:
+         -Bound LMultiColorPolygonProgram2D
+        Post Condition:
+         -Enables vertex position attribute
+        Side Effects:
+         -None
+        */
+
+        void disableVertexPointer();
+        /*
+        Pre Condition:
+         -Bound LMultiColorPolygonProgram2D
+        Post Condition:
+         -Disables vertex position attribute
+        Side Effects:
+         -None
+        */
+
+        void enableColorPointer();
+        /*
+        Pre Condition:
+         -Bound LMultiColorPolygonProgram2D
+        Post Condition:
+         -Enables vertex color attribute
+        Side Effects:
+         -None
+        */
+
+        void disableColorPointer();
+        /*
+        Pre Condition:
+         -Bound LMultiColorPolygonProgram2D
+        Post Condition:
+         -Disables vertex color attribute
+        Side Effects:
+         -None
+        */
+
+        void setProjection( glm::mat4 matrix );
+        /*
+        Pre Condition:
+         -None
+        Post Condition:
+         -Sets member projection matrix
+        Side Effects:
+         -None
+        */
+
+        void setModelView( glm::mat4 matrix );
+        /*
+        Pre Condition:
+         -None
+        Post Condition:
+         -Sets member modelview matrix
+        Side Effects:
+         -None
+        */
+
+        void leftMultProjection( glm::mat4 matrix );
+        /*
+        Pre Condition:
+         -None
+        Post Condition:
+         -Left multiplies member projection matrix
+        Side Effects:
+         -None
+        */
+
+        void leftMultModelView( glm::mat4 matrix );
+        /*
+        Pre Condition:
+         -None
+        Post Condition:
+         -Left multiplies member modelview matrix
+        Side Effects:
+         -None
+        */
+
+        void updateProjection();
+        /*
+        Pre Condition:
+         -Bound LMultiColorPolygonProgram2D
+        Post Condition:
+         -Updates shader program projection matrix with member projection matrix
+        Side Effects:
+         -None
+        */
+
+        void updateModelView();
+        /*
+        Pre Condition:
+         -Bound LMultiColorPolygonProgram2D
+        Post Condition:
+         -Updates shader program modelview matrix with member modelview matrix
+        Side Effects:
+         -None
+        */
+
+    private:
+        //Attribute locations
+        GLint mVertexPos2DLocation;
+        GLint mMultiColorLocation;
+
+        //Projection matrix
+        glm::mat4 mProjectionMatrix;
+        GLint mProjectionMatrixLocation;
+
+        //Modelview matrix
+        glm::mat4 mModelViewMatrix;
+        GLint mModelViewMatrixLocation;
+};
+</div>
+
+<div class="tutText">
+The new LMultiColorPolygonProgram2D should largely familiar, only now it has new functions to handle the custom attributes which we'll go over in detail in their implementations.<br>
+<br>
+As with uniform variables, attributes have locations that we use to set them in the shader program. "mVertexPos2DLocation" and "mMultiColorLocation" will specify the location of
+our attributes in the shader.
+</div>
+
+<div class="tutCodeHeader">From LMultiColorPolygonProgram2D.cpp</div>
+<div class="tutCode">bool LMultiColorPolygonProgram2D::loadProgram()
+{
+    //Generate program
+    mProgramID = glCreateProgram();
+
+    //Load vertex shader
+    GLuint vertexShader = loadShaderFromFile( "33_multi-color_polygons_and_attributes/LMultiColorPolygonProgram2D.glvs", GL_VERTEX_SHADER );
+
+    //Check for errors
+    if( vertexShader == 0 )
+    {
+        glDeleteProgram( mProgramID );
+        mProgramID = 0;
+        return false;
+    }
+
+    //Attach vertex shader to program
+    glAttachShader( mProgramID, vertexShader );
+
+
+    //Create fragment shader
+    GLuint fragmentShader = loadShaderFromFile( "33_multi-color_polygons_and_attributes/LMultiColorPolygonProgram2D.glfs", GL_FRAGMENT_SHADER );
+
+    //Check for errors
+    if( fragmentShader == 0 )
+    {
+        glDeleteShader( vertexShader );
+        glDeleteProgram( mProgramID );
+        mProgramID = 0;
+        return false;
+    }
+
+    //Attach fragment shader to program
+    glAttachShader( mProgramID, fragmentShader );
+
+    //Link program
+    glLinkProgram( mProgramID );
+
+    //Check for errors
+    GLint programSuccess = GL_TRUE;
+    glGetProgramiv( mProgramID, GL_LINK_STATUS, &programSuccess );
+    if( programSuccess != GL_TRUE )
+    {
+        printf( "Error linking program %d!\n", mProgramID );
+        printProgramLog( mProgramID );
+        glDeleteShader( vertexShader );
+        glDeleteShader( fragmentShader );
+        glDeleteProgram( mProgramID );
+        mProgramID = 0;
+        return false;
+    }
+
+    //Clean up excess shader references
+    glDeleteShader( vertexShader );
+    glDeleteShader( fragmentShader );
+
+    
+    //Get variable locations
+    mVertexPos2DLocation = glGetAttribLocation( mProgramID, "LVertexPos2D" );
+    if( mVertexPos2DLocation == -1 )
+    {
+        printf( "%s is not a valid glsl program variable!\n", "LVertexPos2D" );
+    }
+
+    mMultiColorLocation = glGetAttribLocation( mProgramID, "LMultiColor" );
+    if( mMultiColorLocation == -1 )
+    {
+        printf( "%s is not a valid glsl program variable!\n", "LMultiColor" );
+    }
+
+    mProjectionMatrixLocation = glGetUniformLocation( mProgramID, "LProjectionMatrix" );
+    if( mProjectionMatrixLocation == -1 )
+    {
+        printf( "%s is not a valid glsl program variable!\n", "LProjectionMatrix" );
+    }
+
+    mModelViewMatrixLocation = glGetUniformLocation( mProgramID, "LModelViewMatrix" );
+    if( mModelViewMatrixLocation == -1 )
+    {
+        printf( "%s is not a valid glsl program variable!\n", "LModelViewMatrix" );
+    }
+
+    return true;
+}
+</div>
+
+<div class="tutText">
+Our shader program loading code is mostly the same only now we use glGetAttribLocation() to get the location of our attributes from the shader much in the same way we used
+glGetUniformLocation() to get the location of our uniform variables.
+</div>
+
+<div class="tutCodeHeader">From LMultiColorPolygonProgram2D.cpp</div>
+<div class="tutCode">void LMultiColorPolygonProgram2D::setVertexPointer( GLsizei stride, const GLvoid* data )
+{
+    glVertexAttribPointer( mVertexPos2DLocation, 2, GL_FLOAT, GL_FALSE, stride, data );
+}
+
+void LMultiColorPolygonProgram2D::setColorPointer( GLsizei stride, const GLvoid* data )
+{
+    glVertexAttribPointer( mMultiColorLocation, 4, GL_FLOAT, GL_FALSE, stride, data );
+}
+</div>
+
+<div class="tutText">
+The function glVertexAttribPointer() allows us to set the data for an array of attributes, much in the same way we did with glVertexPointer() and glTexCoordPointer(). This generic
+function is what we'll use to send our custom vertex attribute data.<br>
+<br>
+The first argument is the location for the attribute you want to set data for. The second argument is how many elements per attributes there are. For the 2D vertex position
+there's two elements and for the RGBA color there are 4 elements. The third argument is the data type. The fourth argument says whether you want to normalize the vector data you're
+sending. The fifth argument is the stride (which as you'll remember is the space in bytes between each attribute), and the last argument is the address the data pointer is pointing
+to.<br>
+<br>
+Our shader program has the wrapper functions setVertexPointer() and setColorPointer() to prevent us from having to write a lot of redundant code.
+</div>
+
+<div class="tutCodeHeader">From LMultiColorPolygonProgram2D.cpp</div>
+<div class="tutCode">void LMultiColorPolygonProgram2D::enableVertexPointer()
+{
+    glEnableVertexAttribArray( mVertexPos2DLocation );
+}
+
+void LMultiColorPolygonProgram2D::disableVertexPointer()
+{
+    glDisableVertexAttribArray( mVertexPos2DLocation );
+}
+
+void LMultiColorPolygonProgram2D::enableColorPointer()
+{
+    glEnableVertexAttribArray( mMultiColorLocation );
+}
+
+void LMultiColorPolygonProgram2D::disableColorPointer()
+{
+    glDisableVertexAttribArray( mMultiColorLocation );
+}
+</div>
+
+<div class="tutText">
+Just like how glVertexPointer() and glTexCoordPointer() had glEnableClientState() and glDisableClientState(), the custom vertex attributes have glEnableVertexAttribArray() and 
+glDisableVertexAttribArray() to enable/disable the attributes.
+</div>
+
+<div class="tutCodeHeader">From LMultiColorPolygonProgram2D.cpp</div>
+<div class="tutCode">void LMultiColorPolygonProgram2D::setProjection( glm::mat4 matrix )
+{
+    mProjectionMatrix = matrix;
+}
+
+void LMultiColorPolygonProgram2D::setModelView( glm::mat4 matrix )
+{
+    mModelViewMatrix = matrix;
+}
+
+void LMultiColorPolygonProgram2D::leftMultProjection( glm::mat4 matrix )
+{
+    mProjectionMatrix = matrix * mProjectionMatrix;
+}
+
+void LMultiColorPolygonProgram2D::leftMultModelView( glm::mat4 matrix )
+{
+    mModelViewMatrix = matrix * mModelViewMatrix;
+}
+
+void LMultiColorPolygonProgram2D::updateProjection()
+{
+    glUniformMatrix4fv( mProjectionMatrixLocation, 1, GL_FALSE, glm::value_ptr( mProjectionMatrix ) );
+}
+
+void LMultiColorPolygonProgram2D::updateModelView()
+{
+    glUniformMatrix4fv( mModelViewMatrixLocation, 1, GL_FALSE, glm::value_ptr( mModelViewMatrix ) );
+}
+</div>
+
+<div class="tutText">
+And the rest of these matrix functions should all look familiar.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">bool loadMedia()
+{
+    //VBO data
+    LMultiColorVertex2D quadVertices[ 4 ];
+    GLuint indices[ 4 ];
+
+    //Set quad verticies
+    quadVertices[ 0 ].pos.x = -50.f;
+    quadVertices[ 0 ].pos.y = -50.f;
+    quadVertices[ 0 ].rgba.r = 1.f;
+    quadVertices[ 0 ].rgba.g = 0.f;
+    quadVertices[ 0 ].rgba.b = 0.f;
+    quadVertices[ 0 ].rgba.a = 1.f;
+
+    quadVertices[ 1 ].pos.x =  50.f;
+    quadVertices[ 1 ].pos.y = -50.f;
+    quadVertices[ 1 ].rgba.r = 1.f;
+    quadVertices[ 1 ].rgba.g = 1.f;
+    quadVertices[ 1 ].rgba.b = 0.f;
+    quadVertices[ 1 ].rgba.a = 1.f;
+
+    quadVertices[ 2 ].pos.x =  50.f;
+    quadVertices[ 2 ].pos.y =  50.f;
+    quadVertices[ 2 ].rgba.r = 0.f;
+    quadVertices[ 2 ].rgba.g = 1.f;
+    quadVertices[ 2 ].rgba.b = 0.f;
+    quadVertices[ 2 ].rgba.a = 1.f;
+
+    quadVertices[ 3 ].pos.x = -50.f;
+    quadVertices[ 3 ].pos.y =  50.f;
+    quadVertices[ 3 ].rgba.r = 0.f;
+    quadVertices[ 3 ].rgba.g = 0.f;
+    quadVertices[ 3 ].rgba.b = 1.f;
+    quadVertices[ 3 ].rgba.a = 1.f;
+
+    //Set rendering indices
+    indices[ 0 ] = 0;
+    indices[ 1 ] = 1;
+    indices[ 2 ] = 2;
+    indices[ 3 ] = 3;
+
+    //Create VBO
+    glGenBuffers( 1, &gVBO );
+    glBindBuffer( GL_ARRAY_BUFFER, gVBO );
+    glBufferData( GL_ARRAY_BUFFER, 4 * sizeof(LMultiColorVertex2D), quadVertices, GL_STATIC_DRAW );
+
+    //Create IBO
+    glGenBuffers( 1, &gIBO );
+    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, gIBO );
+    glBufferData( GL_ELEMENT_ARRAY_BUFFER, 4 * sizeof(GLuint), indices, GL_STATIC_DRAW );
+
+    return true;
+}
+</div>
+
+<div class="tutText">
+In our loadMedia() function we set the vertex position and vertex color attribute data and create the VBO from it.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">void render()
+{
+    //Clear color buffer
+    glClear( GL_COLOR_BUFFER_BIT );
+
+    //Multicolor quad in the center
+    gMultiColorPolygonProgram2D.setModelView( glm::translate<GLfloat>( glm::vec3( SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f, 0.f ) ) );
+    gMultiColorPolygonProgram2D.updateModelView();
+
+    //Enable vertex attributes
+    gMultiColorPolygonProgram2D.enableVertexPointer();
+    gMultiColorPolygonProgram2D.enableColorPointer();
+
+        //Set vertex data
+        glBindBuffer( GL_ARRAY_BUFFER, gVBO );
+        gMultiColorPolygonProgram2D.setVertexPointer( sizeof(LMultiColorVertex2D), (GLvoid*)offsetof( LMultiColorVertex2D, pos ) );
+        gMultiColorPolygonProgram2D.setColorPointer( sizeof(LMultiColorVertex2D), (GLvoid*)offsetof( LMultiColorVertex2D, rgba ) );
+
+        //Draw quad using vertex data and index data
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, gIBO );
+        glDrawElements( GL_TRIANGLE_FAN, 4, GL_UNSIGNED_INT, NULL );
+
+    //Disable vertex attributes
+    gMultiColorPolygonProgram2D.disableVertexPointer();
+    gMultiColorPolygonProgram2D.disableColorPointer();
+
+    //Update screen
+    glutSwapBuffers();
+}
+</div>
+
+<div class="tutText">
+Finally in the render() function we translate to the center of the screen, enable our attributes for drawing, bind the VBO, set the data pointers in the VBO, draw the quad (using
+a triangle fan) and disable the attributes after we're done drawing.<br>
+<br>
+Setting attribute arrays work largely the same as using the fixed function attributes only now you have to specify a location in the shader.
+</div>
+
+<div class="tutCodeHeader">From main.cpp</div>
+<div class="tutCode">    //Create OpenGL 2.1 context
+    glutInitContextVersion( 2, 1 );
+</div>
+
+<div class="tutText">
+Remember this old code snipped that set your OpenGL context version? If your computer supports it, try changing it to 3.1 instead of 2.1. OpenGL 3.1 is when all the old deprecated
+functionality was removed from OpenGL. Since our code no longer uses deprecated functionality, it should run the same.<br>
+<br>
+Congratuations, you are now using 100% programmable OpenGL code.
+</div>
+
+            <div class="tutFooter">
+            Download the media and source code for this tutorial <a class="tutLink" href="33_multi-color_polygons_and_attributes.zip">here</a>.
+            <br>
+            <a class="leftNav" href="../index.php.html#Multi-Color Polygons and Attributes">Back to OpenGL Tutorials</a><br>
+            </div>
+
+        </div>
+
+        <div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+    </body>
+</html>

@@ -1,0 +1,427 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+	<head>
+
+		<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+
+		<title>Lazy Foo' Productions - The Viewport</title>
+		<META NAME=KEYWORDS CONTENT="freeGLUT glut C++ OpenGL Tutorial 2D Windows Linux Mac Viewport Split Screen Zoom">
+		<META NAME=DESCRIPTION CONTENT="Learn to control rendering in your OpenGL Window using the viewport.">
+		<link REL="stylesheet" TYPE="text/css" href="../../../layout/lazy.css">
+
+		<script src="main.js">
+		</script>
+
+	</head>
+
+	<body>
+
+		<div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>		
+		<div class="content">
+
+			<div class="tutPreface"><h1 class="tutHead">The Viewport</h1>
+			<div class="tutImg"><img src="preview.png"></div>
+            <h6>Last Updated 8/09/12</h6>
+			So we know how to define our coordinate system using the projection matrix, but what if we only want to render to part of the screen? This is where the viewport comes
+			in.<br>
+			<br>
+			The viewport defines the rectangular area of the screen we want to render to. Here we'll be playing with it to do things like split screen rendering.
+			</div>
+
+<div class="tutCodeHeader">From LUtil.h</div>
+<div class="tutCode">//Viewport mode
+enum ViewPortMode
+{
+    VIEWPORT_MODE_FULL,
+    VIEWPORT_MODE_HALF_CENTER,
+    VIEWPORT_MODE_HALF_TOP,
+    VIEWPORT_MODE_QUAD,
+    VIEWPORT_MODE_RADAR
+};
+</div>
+
+<div class="tutText">
+Just so you're not confused when we get to the rendering code, we have some enumerated constants that define the different ways we're going to be using the viewport.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">#include "LUtil.h"
+
+//Viewport mode
+int gViewportMode = VIEWPORT_MODE_FULL;
+
+bool initGL()
+{
+    //Set the viewport
+    glViewport( 0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT );
+
+    //Initialize Projection Matrix
+    glMatrixMode( GL_PROJECTION );
+    glLoadIdentity();
+    glOrtho( 0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, 1.0, -1.0 );
+
+    //Initialize Modelview Matrix
+    glMatrixMode( GL_MODELVIEW );
+    glLoadIdentity();
+
+    //Initialize clear color
+    glClearColor( 0.f, 0.f, 0.f, 1.f );
+
+    //Check for error
+    GLenum error = glGetError();
+    if( error != GL_NO_ERROR )
+    {
+        printf( "Error initializing OpenGL! %s\n", gluErrorString( error ) );
+        return false;
+    }
+
+    return true;
+}
+</div>
+
+<div class="tutText">
+Here's the top of our LUtil.cpp file. Near the top, we have global variable "gViewportMode", which defines how we're going to use the viewport.<br>
+<br>
+Our initGL() function is pretty much the same as before, but now it has a call to glViewport() to initialize the viewport. glViewport() defines what part of the screen we want to
+render to by defining the x coordinate, y coordinate, width, and height of the rendering area. As you can see here, we're just telling it to render to the whole screen.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">void render()
+{
+    //Clear color buffer
+    glClear( GL_COLOR_BUFFER_BIT );
+
+    //Reset modelview matrix
+    glLoadIdentity();
+
+    //Move to center of the screen
+    glTranslatef( SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f, 0.f );
+</div>
+
+<div class="tutText">
+At the top of our rendering function, we clear the screen and reset the modelview matrix as usual. After that we translate to the center of the screen. For the rest of our 
+rendering notice how we make no other transformation to either the projection or modelview matrices.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //Full View
+    if( gViewportMode == VIEWPORT_MODE_FULL )
+    {
+        //Fill the screen
+        glViewport( 0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT );
+
+        //Red quad
+        glBegin( GL_QUADS );
+            glColor3f( 1.f, 0.f, 0.f );
+            glVertex2f( -SCREEN_WIDTH / 2.f, -SCREEN_HEIGHT / 2.f );
+            glVertex2f(  SCREEN_WIDTH / 2.f, -SCREEN_HEIGHT / 2.f );
+            glVertex2f(  SCREEN_WIDTH / 2.f,  SCREEN_HEIGHT / 2.f );
+            glVertex2f( -SCREEN_WIDTH / 2.f,  SCREEN_HEIGHT / 2.f );
+        glEnd();
+    }
+</div>
+
+<div class="tutText">
+In "VIEWPORT_MODE_FULL", we set the viewport to be the full screen and we render a full screen quad.<br>
+<br>
+It may seem redundant to set the viewport again, but in this demo we're going to be changing up the viewport depending on "gViewportMode".
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //View port at center of screen
+    else if( gViewportMode == VIEWPORT_MODE_HALF_CENTER )
+    {
+        //Center viewport
+        glViewport( SCREEN_WIDTH / 4.f, SCREEN_HEIGHT / 4.f, SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f );
+
+        //Green quad
+        glBegin( GL_QUADS );
+            glColor3f( 0.f, 1.f, 0.f );
+            glVertex2f( -SCREEN_WIDTH / 2.f, -SCREEN_HEIGHT / 2.f );
+            glVertex2f(  SCREEN_WIDTH / 2.f, -SCREEN_HEIGHT / 2.f );
+            glVertex2f(  SCREEN_WIDTH / 2.f,  SCREEN_HEIGHT / 2.f );
+            glVertex2f( -SCREEN_WIDTH / 2.f,  SCREEN_HEIGHT / 2.f );
+        glEnd();
+    }
+</div>
+
+<div class="tutText">
+Here we render the same 640x480 quad in a viewport that's half the width/height of the screen in the middle of our rendering area. It results in this:
+<div class="tutImg">
+<img src="half_center.png">
+<br>
+Note: coordinate information added in
+</div><br>
+So the rendering coordinates are still 640x480 even if the viewport is 320x240.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //Viewport centered at the top
+    else if( gViewportMode == VIEWPORT_MODE_HALF_TOP )
+    {
+        //Viewport at top
+        glViewport( SCREEN_WIDTH / 4.f, SCREEN_HEIGHT / 2.f, SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f );
+
+        //Blue quad
+        glBegin( GL_QUADS );
+            glColor3f( 0.f, 0.f, 1.f );
+            glVertex2f( -SCREEN_WIDTH / 2.f, -SCREEN_HEIGHT / 2.f );
+            glVertex2f(  SCREEN_WIDTH / 2.f, -SCREEN_HEIGHT / 2.f );
+            glVertex2f(  SCREEN_WIDTH / 2.f,  SCREEN_HEIGHT / 2.f );
+            glVertex2f( -SCREEN_WIDTH / 2.f,  SCREEN_HEIGHT / 2.f );
+        glEnd();
+    }
+</div>
+
+<div class="tutText">
+Here's a 640x480 quad, render in a 320x240 viewport, render at viewport position x = 80, y = 240. On GLUT, it turns out like this:
+<div class="tutImg"><img src="half_top.png"></div><br>
+<br>
+An important thing to note is while our projection coordinates have Y+ as down and Y- as up, the viewport coordinates aren't guaranteed. On GLUT, Y+ is up and Y- is down for
+viewport coordinates. On some windowing systems, Y+ is down and Y- is up for viewport coordinates. So when working with different windowing systems, don't assume the viewport
+coordinates are the same.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //Four viewports
+    else if( gViewportMode == VIEWPORT_MODE_QUAD )
+    {
+        //Bottom left red quad
+        glViewport( 0.f, 0.f, SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f );
+        glBegin( GL_QUADS );
+            glColor3f( 1.f, 0.f, 0.f );
+            glVertex2f( -SCREEN_WIDTH / 4.f, -SCREEN_HEIGHT / 4.f );
+            glVertex2f(  SCREEN_WIDTH / 4.f, -SCREEN_HEIGHT / 4.f );
+            glVertex2f(  SCREEN_WIDTH / 4.f,  SCREEN_HEIGHT / 4.f );
+            glVertex2f( -SCREEN_WIDTH / 4.f,  SCREEN_HEIGHT / 4.f );
+        glEnd();
+
+        //Bottom right green quad
+        glViewport( SCREEN_WIDTH / 2.f, 0.f, SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f );
+        glBegin( GL_QUADS );
+            glColor3f( 0.f, 1.f, 0.f );
+            glVertex2f( -SCREEN_WIDTH / 4.f, -SCREEN_HEIGHT / 4.f );
+            glVertex2f(  SCREEN_WIDTH / 4.f, -SCREEN_HEIGHT / 4.f );
+            glVertex2f(  SCREEN_WIDTH / 4.f,  SCREEN_HEIGHT / 4.f );
+            glVertex2f( -SCREEN_WIDTH / 4.f,  SCREEN_HEIGHT / 4.f );
+        glEnd();
+
+        //Top left blue quad
+        glViewport( 0.f, SCREEN_HEIGHT / 2.f, SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f );
+        glBegin( GL_QUADS );
+            glColor3f( 0.f, 0.f, 1.f );
+            glVertex2f( -SCREEN_WIDTH / 4.f, -SCREEN_HEIGHT / 4.f );
+            glVertex2f(  SCREEN_WIDTH / 4.f, -SCREEN_HEIGHT / 4.f );
+            glVertex2f(  SCREEN_WIDTH / 4.f,  SCREEN_HEIGHT / 4.f );
+            glVertex2f( -SCREEN_WIDTH / 4.f,  SCREEN_HEIGHT / 4.f );
+        glEnd();
+
+        //Top right yellow quad
+        glViewport( SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f, SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f );
+        glBegin( GL_QUADS );
+            glColor3f( 1.f, 1.f, 0.f );
+            glVertex2f( -SCREEN_WIDTH / 4.f, -SCREEN_HEIGHT / 4.f );
+            glVertex2f(  SCREEN_WIDTH / 4.f, -SCREEN_HEIGHT / 4.f );
+            glVertex2f(  SCREEN_WIDTH / 4.f,  SCREEN_HEIGHT / 4.f );
+            glVertex2f( -SCREEN_WIDTH / 4.f,  SCREEN_HEIGHT / 4.f );
+        glEnd();
+    }
+</div>
+
+<div class="tutText">
+Here we have multiple viewports, which is useful for splitscreen games and simulations. The same quad is rendered 4 times, just with different colors and viewport locations.
+<div class="tutImg"><img src="split_screen.png"></div>
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">    //Viewport with radar subview port
+    else if( gViewportMode == VIEWPORT_MODE_RADAR )
+    {
+        //Full size quad
+        glViewport( 0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT );
+        glBegin( GL_QUADS );
+            glColor3f( 1.f, 1.f, 1.f );
+            glVertex2f( -SCREEN_WIDTH / 8.f, -SCREEN_HEIGHT / 8.f );
+            glVertex2f(  SCREEN_WIDTH / 8.f, -SCREEN_HEIGHT / 8.f );
+            glVertex2f(  SCREEN_WIDTH / 8.f,  SCREEN_HEIGHT / 8.f );
+            glVertex2f( -SCREEN_WIDTH / 8.f,  SCREEN_HEIGHT / 8.f );
+            glColor3f( 0.f, 0.f, 0.f );
+            glVertex2f( -SCREEN_WIDTH / 16.f, -SCREEN_HEIGHT / 16.f );
+            glVertex2f(  SCREEN_WIDTH / 16.f, -SCREEN_HEIGHT / 16.f );
+            glVertex2f(  SCREEN_WIDTH / 16.f,  SCREEN_HEIGHT / 16.f );
+            glVertex2f( -SCREEN_WIDTH / 16.f,  SCREEN_HEIGHT / 16.f );
+        glEnd();
+
+        //Radar quad
+        glViewport( SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f, SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f );
+        glBegin( GL_QUADS );
+            glColor3f( 1.f, 1.f, 1.f );
+            glVertex2f( -SCREEN_WIDTH / 8.f, -SCREEN_HEIGHT / 8.f );
+            glVertex2f(  SCREEN_WIDTH / 8.f, -SCREEN_HEIGHT / 8.f );
+            glVertex2f(  SCREEN_WIDTH / 8.f,  SCREEN_HEIGHT / 8.f );
+            glVertex2f( -SCREEN_WIDTH / 8.f,  SCREEN_HEIGHT / 8.f );
+            glColor3f( 0.f, 0.f, 0.f );
+            glVertex2f( -SCREEN_WIDTH / 16.f, -SCREEN_HEIGHT / 16.f );
+            glVertex2f(  SCREEN_WIDTH / 16.f, -SCREEN_HEIGHT / 16.f );
+            glVertex2f(  SCREEN_WIDTH / 16.f,  SCREEN_HEIGHT / 16.f );
+            glVertex2f( -SCREEN_WIDTH / 16.f,  SCREEN_HEIGHT / 16.f );
+        glEnd();
+    }
+
+    //Update screen
+    glutSwapBuffers();
+}
+</div>
+
+<div class="tutText">
+And for our last of the viewport demos, we render a full sized scene, and then render a smaller version on the top left corner.<br>
+<br>
+Having a viewport inside of a viewport might be useful for things like rendering a radar on the screen.<br>
+<br>
+Of course, at the end of our rendering function we update the screen. 
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">void handleKeys( unsigned char key, int x, int y )
+{
+    //If the user presses q
+    if( key == 'q' )
+    {
+        //Cycle through viewport modes
+        gViewportMode++;
+        if( gViewportMode > VIEWPORT_MODE_RADAR )
+        {
+            gViewportMode = VIEWPORT_MODE_FULL;
+        }
+    }
+}
+</div>
+
+<div class="tutText">
+Lastly, here's our key handler. All it does is cycle through the viewport rendering modes when the user presses q.<br>
+<br>
+We would go over our main() function, but as you'll see in the source code it's indentical to the previous tutorial.
+</div>
+
+			<div class="tutFooter">
+			Download the media and source code for this tutorial <a class="tutLink" href="03_the_viewport.zip">here</a>.
+			<br>
+			<a class="leftNav" href="../index.php.html#The Viewport">Back to OpenGL Tutorials</a><br>
+			</div>
+
+		</div>
+
+		<div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+	</body>
+</html>

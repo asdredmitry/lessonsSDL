@@ -1,0 +1,314 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+	<head>
+
+		<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+		<META NAME=KEYWORDS CONTENT="SDL 2 C++ Tutorial 2D Windows Install SDL 2 Android">
+		<META NAME=DESCRIPTION CONTENT="Install SDL 2 on Windows Android.">
+
+		<title>Lazy Foo' Productions - Setting up SDL 2 on Windows Android Studio 2.3.3</title>
+
+		<link REL="stylesheet" TYPE="text/css" href="../../../../layout/lazy.css">
+
+	</head>
+
+	<body>
+
+		<div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../../../OpenGL/index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../../index.php.html">News</a>
+<a class="nav" href="../../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>
+		<div class="content">
+
+			<div class="tutPreface"><h1 class="tutHead">Setting up SDL 2 on Windows Android Studio 3.0.1</h1>
+            <h6>Last Updated 1/06/18</h6>
+			</div>
+
+<div class="tutText">
+<a class="tutLink" name="1" href="index.php.html#1">1)</a> Get ready to download. A lot. Like over a gigabyte of data. If you have a limited connection, I'm sorry the android SDK is huge and it's
+just the way things are. I recommend having a movie or TV show to watch ready if a gigabyte takes a long time for you to download.<br/>
+<br/>
+First, download the Java Development Kit (JDK) on <a class="tutLink" href="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html">this page</a>.
+I am assuming you're running 64bit windows, so download the 64bit version:<br>
+<div class="tutImg"><img src="download_jdk.png"></div>
+<br>
+<a class="tutLink" name="2" href="index.php.html#2">2)</a> Download Android Studio on <a class="tutLink" href="https://developer.android.com/studio/index.html">this page</a>.<br/>
+<div class="tutImg"><img src="download_android_studio.png"></div>
+<br/>
+<a class="tutLink" name="3" href="index.php.html#3">3)</a> Download the SDL2 source. Not just the development libraries you use for desktop development, the full source. You can find the full
+source on <a class="tutLink" href="https://www.libsdl.org/download-2.0.php">this page</a>.
+<div class="tutImg"><img src="download_sdl_source.png"></div>
+<br/>
+<a class="tutLink" name="4" href="index.php.html#4">4)</a> Install the JDK. This should be a simple next, next, next,... finish installation.<br/>
+<br/>
+<a class="tutLink" name="5" href="index.php.html#5">5)</a> Install the Android Studio. It's mostly a next, next, and finish installation but make sure to change a couple things. In the
+configurations setting menu make sure to set the android sdk path to some place accessible. For this tutorial we are placing it at "C:\androidsdk".
+<div class="tutImg"><img src="android_sdk_location.png"></div>
+<br/>
+<a class="tutLink" name="6" href="index.php.html#6">6)</a> Start Android Studio. The first time you start Android Studio it will run a set up wizard. Make sure to select the Custom Install.
+<div class="tutImg"><img src="custom_install_type.png"></div>
+<br/>
+In the SDK Components Setup, make sure it pointed to the sdk directory we set when installing (which was at "C:\androidsdk").
+<div class="tutImg"><img src="sdk_components_setup.png"></div>
+Keep going through the installation and hit finish so it can start downloading.<br/>
+<br/>
+<a class="tutLink" name="7" href="index.php.html#7">7)</a> Starting Android Studio again, open up the sdk manager:
+<div class="tutImg"><img src="configure_sdk_manager.png"></div>
+<br/>
+Check Show Package Details, select Android version 16, and hit Apply to install:
+<div class="tutImg"><img src="install_android_16.png"></div>
+<br/>
+<a class="tutLink" name="8" href="index.php.html#8">8)</a> Click on SDK Tools and make sure to install:
+<ul>
+<li>CMake</li>
+<li>Google USB Driver</li>
+<li>NDK</li>
+</ul>
+<div class="tutImg"><img src="sdk_tools.png"></div>
+<br/>
+<a class="tutLink" name="9" href="index.php.html#9">9)</a> Extract the SDL2 source code to some accessable directory that is ideally dedicated to containing Android libraries. For this tutorial
+we will put them in the directory "C:\androidlib". After extracting the SDL2 source code you should have an Android makefile at "C:\androidlib\SDL2-2.0.5\Android.mk". Depending on
+your version of SDL, it could be at "C:\androidlib\SDL2-2.0.4\Android.mk" or "C:\androidlib\SDL2-2.0.6\Android.mk" and so on.<br/>
+<br/>
+<a class="tutLink" name="10" href="index.php.html#10">10)</a> Start up Android Studio again and import the android project from the SDL2 source code which should be at 
+"C:\androidlib\SDL2-2.0.5\android-project"
+<div class="tutImg"><img src="import_project.png"></div>
+<br/>
+<a class="tutLink" name="11" href="index.php.html#11">11)</a> Set the destination to a new folder inside of some accessable directory that is ideally dedicated to containing Android projects. For
+this tutorial we will put the project in "C:\androidprojects\SDL".
+<div class="tutImg"><img src="project_destination.png"></div>
+Select the directory and import the project with the default settings.<br/>
+<br/>
+<a class="tutLink" name="12" href="index.php.html#12">12)</a> If you try to hit Build -> Make Project you'll get the following error:
+<h5>Minimum supported Gradle version is 4.1. Current version is 2.14.1.</h5>
+
+This means our project is set to use the wrong version of Gradle. To fix this, set the Project window to project mode, "C:\androidprojects\SDL\gradle\wrapper\gradle-wrapper.properties" and change
+<h5>distributionUrl=https\://services.gradle.org/distributions/gradle-2.14.1-all.zip</h5>
+to 
+<h5>distributionUrl=https\://services.gradle.org/distributions/gradle-4.1-all.zip</h5>
+Make project again (it may take a while to download Gradle 4.1) and you'll get a new error:
+<h5>cannot find symbol class Objects</h5>
+
+<a class="tutLink" name="13" href="index.php.html#13">13)</a> That error was due to the fact that Android Studio cannot find the Java Objects class. It can't find it because it is pointed at an old JDK. To make sure it compiles against the latest
+version of Java, go to File -> Project Structure.
+<div class="tutImg"><img src="project_structure.png"></div>
+<br/>
+Select app under Modules and the set the Source/Target Compatibility to the latest version (currently 1.8): 
+<div class="tutImg"><img src="compatibility.png"></div>
+<br/>
+Build again and you should get a new error.<br/>
+<br/>
+<a class="tutLink" name="14" href="index.php.html#14">14)</a> The new error will say:
+<h5>Error:Execution failed for task ':app:compileDebugNdk'.
+> Error: Your project contains C++ files but it is not using a supported native build system.
+Consider using CMake or ndk-build integration with the stable Android Gradle plugin:
+https://developer.android.com/studio/projects/add-native-code.html
+or use the experimental plugin:
+https://developer.android.com/studio/build/experimental-plugin.html.</h5>
+
+This is complaining that the NDK setup is broken for our project.<br/>
+<br/>
+Let's back up a bit and talk about how SDL 2 on Android works. Android development is mostly Java based and SDL is a C based library.
+The <b>N</b>ative <b>D</b>evelopment <b>K</b>it that allows Java to interface with native C/C++ code using the <b>J</b>ava <b>N</b>ative <b>I</b>nterface. With the NDK, we'll build
+SDL2 as a <b>s</b>hared <b>o</b>bject that will interface with Java, and we'll build our game as another shared object that will interface with SDL 2.<br/>
+<br/>
+What we need to do is tell gradle (the build tool used by Android Studio) to use the Android make file for our project. Open up the project window, right click on app and select
+"Link C++ with Gradle".
+<div class="tutImg"><img src="link_cpp_with_gradle.png"></div>
+<br/>
+Set the Build System to ndk-build and set the project path to point to the Android make file which should be at "C:\androidprojects\SDL\app\src\main\jni\Android.mk".
+<div class="tutImg"><img src="select_android_mk.png"></div>
+Hit Build -> Make Project and you'll get a bunch of new errors saying something like
+<h5>Error:(688) Android NDK: Module main depends on undefined modules: SDL2    </h5>
+<a class="tutLink" name="15" href="index.php.html#15">15)</a> What the previous error was complaining about was that it can't find the SDL 2 module. What we need to do is set up a symbolic link to
+the SDL 2 source we extracted.<br/>
+<br/>
+Next, go to the start menu and run cmd as administrator:
+<div class="tutImg"><img src="run_cmd_as_admin.png"></div>
+
+Go to the JNI directory inside the project using this command:
+<h5>cd "C:\androidprojects\SDL\app\src\main\jni"</h5>
+
+And create a hard symbolic link directory to the SDL 2 source directory we extracted (<b>REMEMBER: This path will vary depending on your version of SDL 2</b>):
+<h5>mklink /D SDL2 C:\androidlib\SDL2-2.0.5</h5>
+
+You should get the following message back
+<h5>symbolic link created for SDL2 <<===>> C:\androidlib\SDL2-2.0.5</h5>
+
+Try to rebuild the project. You'll new a new error:
+<h5>Error:A problem occurred configuring project ':app'.
+> executing external native build for ndkBuild C:\androidprojects\SDL\app\src\main\jni\Android.mk</h5>
+
+but at least now you'll see symbolic link in the project:
+<div class="tutImg"><img src="symbolic_link_in_project.png"></div>
+<br/>
+<a class="tutLink" name="16" href="index.php.html#16">16)</a> That gradle error didn't tell us much so we'll have to open up the gradle console:
+
+<div class="tutImg"><img src="open_gradle_console.png"></div>
+Scroll up a bit and you'll see some errors from the ndk-build.
+<h5>
+`C:/androidprojects/SDL/app/src/main/jni/src/YourSourceHere.c', needed by `C:/androidprojects/SDL/app/build/intermediates/ndkBuild/debug/obj/local/armeabi/objs-debug/main/YourSourceHere.o'.  Stop.
+</h5>
+In this case, the error "No rule to make target" actually means it can't find the file you're asking to compile. It's trying to compile "C:/androidprojects/SDL/app/src/main/jni/src/YourSourceHere.c" but can't find it which
+makes sense because it doesn't exist. YourSourceHere.c is a place holder for our  application source file so we need to replace it with ours.<br/>
+<br/>
+Download the <a class="tutLink" href="../52_hello_mobile.zip">source for lesson 52</a> and place 52_hello_mobile.cpp at
+"C:\androidprojects\SDL\app\src\main\jni\src\52_hello_mobile.cpp". Open up "C:\androidprojects\SDL\app\src\main\jni\src\Android.mk" and change "YourSourceHere.c" to
+"52_hello_mobile.cpp". Build and you should get a new error in the gradle build menu.<br/>
+<br/>
+<a class="tutLink" name="17" href="index.php.html#17">17)</a> The error
+<h5>Error:(7, 10) fatal error: 'string' file not found</h5>
+is due to the fact that the project is not set up to use the standard C++ library. To fix this, open up "C:\androidprojects\SDL\app\src\main\jni\Application.mk" and change
+<h5># APP_STL := stlport_static </h5>
+to
+<h5>APP_STL := stlport_static </h5>
+so it's no longer commmented out. Build again and you should get no errors.<br/>
+<br/>
+<a class="tutLink" name="18" href="index.php.html#18">18)</a> Open "C:\androidprojects\SDL\app\src\main\res\values\strings.xml" and change 
+<h5>&lt;string name="app_name"&gt;SDL App&lt;/string&gt;</h5>
+to
+<h5>&lt;string name="app_name"&gt;SDL Tutorial&lt;/string&gt;</h5>
+
+This will change the name under the App's icon from "SDL App" to "SDL Tutorial".<br>
+<br>
+<a class="tutLink" name="19" href="index.php.html#19">19)</a> At this point the app will run our code but it will fail because it can't load the media files for the tutorial. Media files go in
+the asset directory. Create a folder called "assets" at "C:\androidprojects\SDL\app\src\main\assets". Copy the directory inside of the zip we downloaded and place it in the assets
+directory. If the application needs to open "52_hello_mobile\hello.bmp", it needs to be at "C:\androidprojects\SDL\app\src\main\assets\52_hello_mobile\hello.bmp" when building.<br/>
+<br/>
+<a class="tutLink" name="20" href="index.php.html#20">20)</a> Our SDL application is ready to build and run, but first we need to set up our device. You can use an Android emulator, but the
+emulator is can be really, really slow so I recommend getting an Android device if you can.<br/>
+<br/>
+First you'll need to enable USB debugging on your device. That is version/device specific which is why I won't go over it here. Google search "android enable usb debugging" with your device name and they'll show you how to do
+it.<br/>
+<br/>
+Make sure you have the device drivers installed on your Windows machine. The driver you downloaded from Android Studio should be located at "C:\androidsdk\extras\google\usb_driver" which may work with your device or your
+device may require a driver from the manufacturer. Either way, make sure to check in the Windows Device Manager that your device has its drivers installed. Without the drivers, ADB (Android Debug Bridge) won't connect and you
+won't be able to deploy and debug on your device.<br/>
+<br/>
+After you set up your Android device, go to Run -> run App.
+<div class="tutImg"><img src="run_app.png"></div>
+<br/>
+If you want to see the console output of the app, you can see it in the Android Monitor:
+<br/>
+<div class="tutImg"><img src="android_monitor.png"></div>
+The Android Monitor can also show you if there are any ADB errors.<br/> 
+<br>
+Now that you have SDL 2 running on your device, it's time to go onto part 2 of the tutorial.
+</div>
+
+			<div class="tutFooter">
+			<a class="tutLink" href="../index2.php.html">Hello Mobile Part 2: Your First Mobile SDL 2 App</a><br>
+			</div>
+
+		</div>
+
+		<div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../../../OpenGL/index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../../index.php.html">News</a>
+<a class="nav" href="../../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+	</body>
+</html>

@@ -1,0 +1,211 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+
+<html>
+
+	<head>
+
+		<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+		<META NAME=KEYWORDS CONTENT="freeGLUT glut C++ OpenGL Tutorial 2D Linux install freeGLUT">
+		<META NAME=DESCRIPTION CONTENT="Install OpenGL freeGLUT on Linux.">
+
+		<title>Lazy Foo' Productions - Setting up freeGLUT on Linux</title>
+
+		<link REL="stylesheet" TYPE="text/css" href="../../../../layout/lazy.css">
+
+		<script src="http://lazyfoo.net/tutorials/OpenGL/01_hello_opengl/linux/main.js">
+		</script>
+
+	</head>
+
+	<body>
+
+		<div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../../index.php.html">News</a>
+<a class="nav" href="../../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>
+		<div class="content">
+
+			<div class="tutPreface"><h1 class="tutHead">Setting up freeGLUT in Linux</h1>
+            <h6>Last Updated 8/09/12</h6>
+			Since there are so many flavors of Linux these tutorials might not work on your Linux set up. If you've tried everything and are still having problems,
+			<a href="../../../../contact.php.html" class="tutLink">contact me</a> and I'll try to add on a distro specific fix.
+			</div>
+
+			<div class="tutText">
+			In the age of packaging managers, a lot of the work is done for you when installing libraries. You'll need root privileges to install packages so make sure to use "su"
+			or "sudo" if you're not logged in as root.<br>
+			<br>
+			<a class="tutLink" name="1" href="index.php.html#1">1)</a>
+			For those of you who have Advanced Packaging Tool available (ie Ubuntu and Debian) you'll want to search the apt-get cache to find the current freeGLUT version to install.
+			You can search the apt-get available packages using the command:
+
+			<h6>apt-cache search freeglut</h6>
+
+			You'll want to download the development version of freeGLUT. As of the last update of this tutorial, the development package of freeglut is <b>freeglut3-dev</b>. You can install
+			this package using the command
+			<h6>apt-get install freeglut3-dev</h6>
+
+			<a class="tutLink" name="2" href="index.php.html#2">2)</a>
+			If you use the Yellow dog Updater, Modified (used in Fedora and CentOS) you can enter the command:
+
+			<h6>yum search freeglut</h6>
+
+			To search for the freeGLUT developers package. As of the last update of this tutorial, the developer package for freeglut is <b>freeglut-devel</b>. You can install this package
+			using the command:
+
+			<h6>yum install freeglut-devel</h6>
+
+			<a class="tutLink" name="3" href="index.php.html#3">3)</a>
+			If somehow you don't have a package manager, you can install from the source the classic Unix way. Download the latest source from the
+			<a class="tutLink" href="http://freeglut.sourceforge.net/">freeGLUT website</a>.
+			<div class="tutImg"><img src="download.png"></div>
+			<br>
+			Extract the archive and cd to the folder that got extracted. Configure the installation using
+			
+			<h6>./configure</h6>
+			
+			Compile the source using the make command
+			
+			<h6>make all</h6>
+			
+			Finally, install the package using the make command
+			
+			<h6>make install</h6>
+			
+			<a class="tutLink" name="4" href="index.php.html#4">4)</a>
+			Now that you've installed the development libraries, it's time to start up your IDE/compiler.
+			</div>
+
+			<table class="tutToC">
+			<col width="1%">
+				<tr>
+				<td class="ToCTitle" colspan="2">Select Your IDE/Compiler</td>
+				</tr>
+				
+				<tr>
+					<td class="tutLink"><a href="codeblocks/index.php.html" class="tutLink"><img src="codeblocks/logo.png"></a></td>
+					<td class="tutLink"><a href="codeblocks/index.php.html" class="tutLink">Code::Blocks 10.05</a></td>
+				</tr>
+				
+				<tr>
+					<td class="tutLink"><a href="cli/index.php.html" class="tutLink"><img src="cli/logo.jpg"></a></td>
+					<td class="tutLink"><a href="cli/index.php.html" class="tutLink">Command Line</a></td>
+				</tr>
+
+				<tr>
+				<td colspan="2" class="tutLink"><a href="../index.php.html" class="tutLink">Back</a></td>
+				</tr>
+			</table>
+			
+		</div>
+		
+		<div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../../index.php.html">News</a>
+<a class="nav" href="../../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+	</body>
+	
+</html>

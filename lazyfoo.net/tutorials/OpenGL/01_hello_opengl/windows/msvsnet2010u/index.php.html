@@ -1,0 +1,241 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+	<head>
+
+		<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+		<META NAME=KEYWORDS CONTENT="freeGLUT glut C++ OpenGL Tutorial 2D Windows freeGLUT Visual Studio">
+		<META NAME=DESCRIPTION CONTENT="Install OpenGL freeGLUT on Visual Studio.">
+
+		<title>Lazy Foo' Productions - Setting up freeGLUT on Visual Studio 2010 Ultimate</title>
+
+		<link REL="stylesheet" TYPE="text/css" href="../../../../../layout/lazy.css">
+
+		<script src="main.js">
+		</script>
+
+	</head>
+
+	<body>
+
+		<div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../../../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../../../index.php.html">News</a>
+<a class="nav" href="../../../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>
+		<div class="content">
+
+			<div class="tutPreface"><h1 class="tutHead">Setting up freeGLUT on Visual Studio 2010 Ultimate</h1>
+            <h6>Last Updated 11/22/12</h6>
+			</div>
+
+			<div class="tutText">
+			<a class="tutLink" name="1" href="index.php.html#1">1)</a>First thing you need to do is download freeGLUT headers and binaries. You will find them on the freeGLUT website, specifically
+			on <a class="tutLink" href="http://freeglut.sourceforge.net/index.php#download">this page</a>.<br>
+			<br>
+			Scroll down to the Prepackaged Releases section and click on the prepackaged windows binaries page.<br>
+			<div class="tutImg"><img src="../download.png"></div>
+			<br>
+			Then download the Visual Studio binaries archive.<br>
+			<div class="tutImg"><img src="msvc_package.png"></div>
+			<br>
+			Open the zip archive and there should be a folder called "freeglut". Copy that entire folder and put it anywhere you'd like. For these tutorials I'm putting it in a 
+			directory I created called C:\vs_dev_lib<br>
+			<br>
+			<a class="tutLink" name="2" href="index.php.html#2">2)</a>Start up Visual Studio and create a new empty project.<br>
+			<div class="tutImg"><img src="new_project.png"></div>
+			<br>
+			<a class="tutLink" name="3" href="index.php.html#3">3)</a>Go to project properties.<br>
+			<div class="tutImg"><img src="project_properties.png"></div>
+			<br>
+			<!--Include-->
+			<a class="tutLink" name="4" href="index.php.html#4">4)</a>Now we have to tell Visual C++ to search for header files in the freeglut folder we just extracted.
+			Under Configuration Properties in the VC++ Directories menu, select the Include Directories field, click the
+			tiny down arrow button, and click edit.<br>
+			<div class="tutImg"><img src="include_directories.png"></div>
+			<br>		
+			<a class="tutLink" name="5" href="index.php.html#5">5)</a>Click the folder icon, and then click the button that pops up.<br>
+			<div class="tutImg"><img src="add_include.png"></div>
+			<br>	
+			<a class="tutLink" name="6" href="index.php.html#6">6)</a>Now go find the freeGLUT folder you extracted, and select the include folder<br>
+			<div class="tutImg">
+			<img src="select_include.png"><br>
+			and click OK.<br>
+			<img src="new_include.png">
+			</div>
+			<br>	
+			<!--Lib-->
+			<a class="tutLink" name="7" href="index.php.html#7">7)</a>Next we going to tell Visual C++ to search for library files in the freeglut folder we just extracted.
+			Select the Library Directories field, click the tiny down arrow button, and click edit.<br>
+			<div class="tutImg"><img src="library_directories.png"></div>
+			<br>		
+			<a class="tutLink" name="8" href="index.php.html#8">8)</a>Click the folder icon, and then click the button that pops up.<br>
+			<div class="tutImg"><img src="add_library.png"></div>
+			<br>	
+			<a class="tutLink" name="9" href="index.php.html#9">9)</a>Now go find the freeGLUT folder you extracted, and select the lib folder<br>
+			<div class="tutImg">
+			<img src="select_library.png"><br>
+			and click OK.<br>
+			<img src="new_library.png">
+			</div>
+			<br>	
+
+			<!--Link-->
+			<a class="tutLink" name="10" href="index.php.html#10">10)</a>In order to compile OpenGL and freeGLUT code, we have to tell the Visual C++ to link against the libraries.
+			Go under Linker in the Input menu, edit the additional dependencies.<br>
+			<div class="tutImg"><img src="additional_dependencies.png"></div>
+			<br>
+			
+			<a class="tutLink" name="11" href="index.php.html#11">11)</a>Now paste
+			<h6>
+			OpenGL32.lib;<br>
+			freeglut.lib;
+			</h6>
+			<div class="tutImg">
+			into the Additional dependencies field and click OK.<br>
+			<img src="linker.png">
+			</div>
+			<br>
+			
+			<!--Sybsystem-->
+			<a class="tutLink" name="12" href="index.php.html#12">12)</a>Under Linker in the System menu, set the subsystem.<br>
+			<div class="tutImg"><img src="subsystem.png"></div>
+			I recommend setting it to windows if you don't want console output, and console if you do want console output. Note: if you do set it to windows, you have to define
+			the entry point. To do that go to Advanced under the Linker menu and set the Entry Point field to <b>mainCRTStartup</b>. This sets it so your program will use
+			<h6>int main( int argc, char* args[] ) as your main.</h6>
+			As the starting point for your program.<br>
+			<br>
+			
+			<a class="tutLink" name="13" href="index.php.html#13">13)</a>When our OpenGL/freeGLUT application runs, the operating system needs to be able to find the dll file.<br>
+			<br>
+			Go find the freeGLUT folder you extracted and from the bin folder inside copy freeglut.dll and put it either
+			where your executable will run, or inside of the system directory. C:\WINDOWS\SYSTEM32 is the 32bit windows system directory and C:\Windows\SysWOW64 is the
+			64bit system directory of 32bit applications. For these tutorials, I'm assuming we're making 32bit applications.<br>
+			<br>
+			
+			<a class="tutLink" name="14" href="index.php.html#14">14)</a>Now go download the <a class="tutLink" href="../../01_hello_freeglut.zip">source for lesson 01</a>. Add the source
+			files inside to your project.<br>
+			<br>
+			Now build. If there are any errors, make sure you didn't skip a step.<br>
+			<br>
+			Now that you have OpenGL and freeGLUT compiling, it time to go onto part 2 of the tutorial.
+			</div>
+
+			<div class="tutFooter">
+			The documentation for OpenGL can be found <a class="tutLink" href="http://www.opengl.org/documentation/">here</a>.<br>
+			The documentation for GLUT (the API freeGLUT is based on) can be found <a class="tutLink" href="http://www.opengl.org/documentation/specs/glut/spec3/spec3.html">here</a>.<br>
+			The documentation for freeGLUT can be found <a class="tutLink" href="http://freeglut.sourceforge.net/docs/api.php">here</a>.<br>
+			<br>
+			<a class="tutLink" href="../../index2.php.html">Hello OpenGL Part 2: Your First Polygon</a><br>
+			</div>
+
+		</div>
+
+		<div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../../../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../../../index.php.html">News</a>
+<a class="nav" href="../../../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+	</body>
+</html>

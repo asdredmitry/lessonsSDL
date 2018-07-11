@@ -1,0 +1,947 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+    <head>
+
+        <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+        <META NAME=KEYWORDS CONTENT="freeGLUT glut C++ OpenGL Tutorial 2D Windows Linux Mac Texture Mapping GLSL">
+        <META NAME=DESCRIPTION CONTENT="Learn to render a texture using OpenGL 3.0 GLSL.">
+
+        <title>Lazy Foo' Productions - GLSL Texturing</title>
+
+        <link REL="stylesheet" TYPE="text/css" href="../../../layout/lazy.css">
+
+        <script src="http://lazyfoo.net/tutorials/OpenGL/34_glsl_texturing/main.js">
+        </script>
+
+    </head>
+
+    <body>
+
+        <div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>        
+        <div class="content">
+
+            <div class="tutPreface"><h1 class="tutHead">GLSL Texturing</h1>
+            <div class="tutImg"><img src="preview.png"></div>
+            <h6>Last Updated 10/19/14</h6>
+            So we already know how to handle vertex data in shaders. Now it's time to use our texture to render our geometry.
+            </div>
+
+<div class="tutCodeHeader">From LTexturedPolygonProgram2D.glvs</div>
+<div class="tutCode">//Transformation Matrices
+uniform mat4 LProjectionMatrix;
+uniform mat4 LModelViewMatrix;
+
+#if __VERSION__ >= 130
+
+//Vertex position attribute
+in vec2 LVertexPos2D;
+
+//Texture coordinate attribute
+in vec2 LTexCoord;
+out vec2 texCoord;
+
+#else
+
+//Vertex position attribute
+attribute vec2 LVertexPos2D;
+
+//Texture coordinate attribute
+attribute vec2 LTexCoord;
+varying vec2 texCoord;
+
+#endif
+
+void main()
+{
+    //Process texCoord
+    texCoord = LTexCoord;
+    
+    //Process vertex
+    gl_Position = LProjectionMatrix * LModelViewMatrix * vec4( LVertexPos2D.x, LVertexPos2D.y, 0.0, 1.0 );
+}
+</div>
+
+<div class="tutText">
+In the textured polygon vertex shader, we just want to pass the texture coordinates on to the fragment shader and apply the tranformation matrices to the vertex position.<br>
+<br>
+Texture look up is a fragment operation so you'll be doing the actual texturing in the fragment shader.
+</div>
+
+<div class="tutCodeHeader">From LTexturedPolygonProgram2D.glfs</div>
+<div class="tutCode">//Texture Color
+uniform vec4 LTextureColor;
+
+//Texture Unit
+uniform sampler2D LTextureUnit;
+
+#if __VERSION__ >= 130
+
+//Texture coordinate
+in vec2 texCoord;
+
+//Final color
+out vec4 gl_FragColor;
+
+#else
+
+//Texture coordinate
+varying vec2 texCoord;
+
+#endif
+</div>
+
+<div class="tutText">
+The fragment shader has a texture color (a color that's applied to all the texels), texture coordinates passed in from the vertex shader, an output fragment color, and something new.<br>
+<br>
+A sampler is something we use the ID (in this case) a 2D texture. OpenGL has multitexturing capabilities, but since we're only using the first texture we're just going to use
+texture unit 0. 
+</div>
+
+<div class="tutCodeHeader">From LTexturedPolygonProgram2D.glfs</div>
+<div class="tutCode">void main()
+{
+    //Set fragment
+    gl_FragColor = texture( LTextureUnit, texCoord ) * LTextureColor;
+}
+</div>
+
+<div class="tutText">
+To use our texture for rendering, we need to grab a fragment from the texture using the GLSL texture function. The first argument is the sampler ID which will be zero since we're
+only using one texture. The second argument is the texture coordinate from where to grab texels to make fragments.<br>
+<br>
+We take the vec4 vector the returned from texture function and multiply it (as a dot product) against the uniform texture color to get the final fragment color.
+</div>
+
+<div class="tutCodeHeader">From LTexturedPolygonProgram2D.h</div>
+<div class="tutCode">#include "LShaderProgram.h"
+#include &#062glm/glm.hpp&#062
+#include "LColorRGBA.h"
+
+class LTexturedPolygonProgram2D : public LShaderProgram
+{
+    public:
+        LTexturedPolygonProgram2D();
+        /*
+        Pre Condition:
+         -None
+        Post Condition:
+         -Initializes variables
+        Side Effects:
+         -None
+        */
+
+        bool loadProgram();
+        /*
+        Pre Condition:
+         -A valid OpenGL context
+        Post Condition:
+         -Loads textured polygon program
+        Side Effects:
+         -None
+        */
+
+        void setVertexPointer( GLsizei stride, const GLvoid* data );
+        /*
+        Pre Condition:
+         -Bound LTexturedPolygonProgram2D
+        Post Condition:
+         -Sets vertex position attribute pointer
+        Side Effects:
+         -None
+        */
+
+        void setTexCoordPointer( GLsizei stride, const GLvoid* data );
+        /*
+        Pre Condition:
+         -Bound LTexturedPolygonProgram2D
+        Post Condition:
+         -Sets texture coordinate attribute pointer
+        Side Effects:
+         -None
+        */
+
+        void enableVertexPointer();
+        /*
+        Pre Condition:
+         -Bound LTexturedPolygonProgram2D
+        Post Condition:
+         -Enables vertex position attribute
+        Side Effects:
+         -None
+        */
+
+        void disableVertexPointer();
+        /*
+        Pre Condition:
+         -Bound LTexturedPolygonProgram2D
+        Post Condition:
+         -Disables vertex position attribute
+        Side Effects:
+         -None
+        */
+
+        void enableTexCoordPointer();
+        /*
+        Pre Condition:
+         -Bound LTexturedPolygonProgram2D
+        Post Condition:
+         -Enables texture coordinate attribute
+        Side Effects:
+         -None
+        */
+
+        void disableTexCoordPointer();
+        /*
+        Pre Condition:
+         -Bound LTexturedPolygonProgram2D
+        Post Condition:
+         -Enables texture coordinate attribute
+        Side Effects:
+         -None
+        */
+
+        void setProjection( glm::mat4 matrix );
+        /*
+        Pre Condition:
+         -None
+        Post Condition:
+         -Sets member projection matrix
+        Side Effects:
+         -None
+        */
+
+        void setModelView( glm::mat4 matrix );
+        /*
+        Pre Condition:
+         -None
+        Post Condition:
+         -Sets member modelview matrix
+        Side Effects:
+         -None
+        */
+
+        void leftMultProjection( glm::mat4 matrix );
+        /*
+        Pre Condition:
+         -None
+        Post Condition:
+         -Left multiplies member projection matrix
+        Side Effects:
+         -None
+        */
+
+        void leftMultModelView( glm::mat4 matrix );
+        /*
+        Pre Condition:
+         -None
+        Post Condition:
+         -Left multiplies member modelview matrix
+        Side Effects:
+         -None
+        */
+
+        void updateProjection();
+        /*
+        Pre Condition:
+         -Bound LTexturedPolygonProgram2D
+        Post Condition:
+         -Updates shader program projection matrix with member projection matrix
+        Side Effects:
+         -None
+        */
+
+        void updateModelView();
+        /*
+        Pre Condition:
+         -Bound LTexturedPolygonProgram2D
+        Post Condition:
+         -Updates shader program modelview matrix with member modelview matrix
+        Side Effects:
+         -None
+        */
+
+        void setTextureColor( LColorRGBA color );
+        /*
+        Pre Condition:
+         -Bound LTexturedPolygonProgram2D
+        Post Condition:
+         -Updates shader program textured polygon color
+        Side Effects:
+         -None
+        */
+
+        void setTextureUnit( GLuint unit );
+        /*
+        Pre Condition:
+         -Bound LTexturedPolygonProgram2D
+        Post Condition:
+         -Updates shader program multitexture unit
+        Side Effects:
+         -None
+        */
+
+    private:
+        //Attribute locations
+        GLint mVertexPos2DLocation;
+        GLint mTexCoordLocation;
+
+        //Coloring location
+        GLint mTextureColorLocation;
+
+        //Texture unit location
+        GLint mTextureUnitLocation;
+
+        //Projection matrix
+        glm::mat4 mProjectionMatrix;
+        GLint mProjectionMatrixLocation;
+
+        //Modelview matrix
+        glm::mat4 mModelViewMatrix;
+        GLint mModelViewMatrixLocation;
+};
+</div>
+
+<div class="tutText">
+As usual, we also have to create the OpenGL code to interface with the GLSL shader.<br>
+<br>
+Focusing on the variables for now, you notice that we have a vertex position location, texture coordinate location, texture unit location, and matrix locations.
+</div>
+
+<div class="tutCodeHeader">From LTexturedPolygonProgram2D.cpp</div>
+<div class="tutCode">#include "LTexturedPolygonProgram2D.h"
+#include &#060glm/gtc/type_ptr.hpp&#062
+
+LTexturedPolygonProgram2D::LTexturedPolygonProgram2D()
+{
+    mVertexPos2DLocation = 0;
+    mTexCoordLocation = 0;
+
+    mProjectionMatrixLocation = 0;
+    mModelViewMatrixLocation = 0;
+    mTextureColorLocation = 0;
+    mTextureUnitLocation = 0;
+}
+
+bool LTexturedPolygonProgram2D::loadProgram()
+{
+    //Generate program
+    mProgramID = glCreateProgram();
+
+    //Load vertex shader
+    GLuint vertexShader = loadShaderFromFile( "34_glsl_texturing/LTexturedPolygonProgram2D.glvs", GL_VERTEX_SHADER );
+
+    //Check for errors
+    if( vertexShader == 0 )
+    {
+        glDeleteProgram( mProgramID );
+        mProgramID = 0;
+        return false;
+    }
+
+    //Attach vertex shader to program
+    glAttachShader( mProgramID, vertexShader );
+
+
+    //Create fragment shader
+    GLuint fragmentShader = loadShaderFromFile( "34_glsl_texturing/LTexturedPolygonProgram2D.glfs", GL_FRAGMENT_SHADER );
+
+    //Check for errors
+    if( fragmentShader == 0 )
+    {
+        glDeleteShader( vertexShader );
+        glDeleteProgram( mProgramID );
+        mProgramID = 0;
+        return false;
+    }
+
+    //Attach fragment shader to program
+    glAttachShader( mProgramID, fragmentShader );
+
+    //Link program
+    glLinkProgram( mProgramID );
+
+    //Check for errors
+    GLint programSuccess = GL_TRUE;
+    glGetProgramiv( mProgramID, GL_LINK_STATUS, &programSuccess );
+    if( programSuccess != GL_TRUE )
+    {
+        printf( "Error linking program %d!\n", mProgramID );
+        printProgramLog( mProgramID );
+        glDeleteShader( vertexShader );
+        glDeleteShader( fragmentShader );
+        glDeleteProgram( mProgramID );
+        mProgramID = 0;
+        return false;
+    }
+
+    //Clean up excess shader references
+    glDeleteShader( vertexShader );
+    glDeleteShader( fragmentShader );
+
+    //Get variable locations
+    mVertexPos2DLocation = glGetAttribLocation( mProgramID, "LVertexPos2D" );
+    if( mVertexPos2DLocation == -1 )
+    {
+        printf( "%s is not a valid glsl program variable!\n", "LVertexPos2D" );
+    }
+
+    mTexCoordLocation = glGetAttribLocation( mProgramID, "LTexCoord" );
+    if( mTexCoordLocation == -1 )
+    {
+        printf( "%s is not a valid glsl program variable!\n", "LTexCoord" );
+    }
+
+    mTextureColorLocation = glGetUniformLocation( mProgramID, "LTextureColor" );
+    if( mTextureColorLocation == -1 )
+    {
+        printf( "%s is not a valid glsl program variable!\n", "LTextureColor" );
+    }
+
+    mTextureUnitLocation = glGetUniformLocation( mProgramID, "LTextureUnit" );
+    if( mTextureUnitLocation == -1 )
+    {
+        printf( "%s is not a valid glsl program variable!\n", "LTextureUnit" );
+    }
+
+    mProjectionMatrixLocation = glGetUniformLocation( mProgramID, "LProjectionMatrix" );
+    if( mProjectionMatrixLocation == -1 )
+    {
+        printf( "%s is not a valid glsl program variable!\n", "LProjectionMatrix" );
+    }
+
+    mModelViewMatrixLocation = glGetUniformLocation( mProgramID, "LModelViewMatrix" );
+    if( mModelViewMatrixLocation == -1 )
+    {
+        printf( "%s is not a valid glsl program variable!\n", "LModelViewMatrix" );
+    }
+
+    return true;
+}
+</div>
+
+<div class="tutText">
+Here we initialize and load the shader much like we did in our previous shader programs. The thing to look for here is that the sampler2D "LTextureUnit" is a uniform.
+This makes sense because we don't change our texture for every individual vertex we render.
+</div>
+
+<div class="tutCodeHeader">From LTexturedPolygonProgram2D.cpp</div>
+<div class="tutCode">void LTexturedPolygonProgram2D::setVertexPointer( GLsizei stride, const GLvoid* data )
+{
+    glVertexAttribPointer( mVertexPos2DLocation, 2, GL_FLOAT, GL_FALSE, stride, data );
+}
+
+void LTexturedPolygonProgram2D::setTexCoordPointer( GLsizei stride, const GLvoid* data )
+{
+    glVertexAttribPointer( mTexCoordLocation, 2, GL_FLOAT, GL_FALSE, stride, data );
+}
+
+void LTexturedPolygonProgram2D::enableVertexPointer()
+{
+    glEnableVertexAttribArray( mVertexPos2DLocation );
+}
+
+void LTexturedPolygonProgram2D::disableVertexPointer()
+{
+    glDisableVertexAttribArray( mVertexPos2DLocation );
+}
+
+void LTexturedPolygonProgram2D::enableTexCoordPointer()
+{
+    glEnableVertexAttribArray( mTexCoordLocation );
+}
+
+void LTexturedPolygonProgram2D::disableTexCoordPointer()
+{
+    glDisableVertexAttribArray( mTexCoordLocation );
+}
+</div>
+
+<div class="tutText">
+Here we handle vertex/texture coordinates much in the same way we did with glTexCoordPointer().
+</div>
+
+<div class="tutCodeHeader">From LTexturedPolygonProgram2D.cpp</div>
+<div class="tutCode">void LTexturedPolygonProgram2D::setProjection( glm::mat4 matrix )
+{
+    mProjectionMatrix = matrix;
+}
+
+void LTexturedPolygonProgram2D::setModelView( glm::mat4 matrix )
+{
+    mModelViewMatrix = matrix;
+}
+
+void LTexturedPolygonProgram2D::leftMultProjection( glm::mat4 matrix )
+{
+    mProjectionMatrix = matrix * mProjectionMatrix;
+}
+
+void LTexturedPolygonProgram2D::leftMultModelView( glm::mat4 matrix )
+{
+    mModelViewMatrix = matrix * mModelViewMatrix;
+}
+
+void LTexturedPolygonProgram2D::updateProjection()
+{
+    glUniformMatrix4fv( mProjectionMatrixLocation, 1, GL_FALSE, glm::value_ptr( mProjectionMatrix ) );
+}
+
+void LTexturedPolygonProgram2D::updateModelView()
+{
+    glUniformMatrix4fv( mModelViewMatrixLocation, 1, GL_FALSE, glm::value_ptr( mModelViewMatrix ) );
+}
+
+void LTexturedPolygonProgram2D::setTextureColor( LColorRGBA color )
+{
+    glUniform4fv( mTextureColorLocation, 4, (const GLfloat*)&color );
+}
+
+void LTexturedPolygonProgram2D::setTextureUnit( GLuint unit )
+{
+    glUniform1i( mTextureUnitLocation, unit );
+}
+</div>
+
+<div class="tutText">
+Matrix operations are pretty much the same as they were with the previous shader programs.<br>
+<br>
+Notice when we set the texture unit we use glUniform1i() because we're updating a single int in the shader.
+</div>
+
+<div class="tutCodeHeader">From LTexture.h</div>
+<div class="tutCode">    protected:
+        //Rendering program
+        static LTexturedPolygonProgram2D* mTexturedPolygonProgram2D;
+
+        GLuint powerOfTwo( GLuint num );
+        /*
+        Pre Condition:
+         -None
+        Post Condition:
+         -Returns nearest power of two integer that is greater
+        Side Effects:
+         -None
+        */
+
+        void initVBO();
+        /*
+        Pre Condition:
+         -A valid OpenGL context
+         -A loaded member texture
+        Post Condition:
+         -Generates VBO and IBO to use for rendering
+        Side Effects:
+         -Binds NULL VBO and IBO
+        */
+
+        void freeVBO();
+        /*
+        Pre Condition:
+         -A generated VBO
+        Post Condition:
+         -Frees VBO and IBO
+        Side Effects:
+         -None
+        */
+
+        //Texture name
+        GLuint mTextureID;
+
+        //Current pixels
+        GLuint* mPixels32;
+        GLubyte* mPixels8;
+
+        //Pixel format
+        GLuint mPixelFormat;
+
+        //Texture dimensions
+        GLuint mTextureWidth;
+        GLuint mTextureHeight;
+
+        //Unpadded image dimensions
+        GLuint mImageWidth;
+        GLuint mImageHeight;
+
+        //VBO IDs
+        GLuint mVBOID;
+        GLuint mIBOID;
+};
+</div>
+
+<div class="tutText">
+We want our texture class to be able to use the textured polygon shader to render, so we gave the class the static member "mTexturedPolygonProgram2D" to point to a global
+shader program for all texture objects to use.
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">//Initialize class variables
+GLenum DEFAULT_TEXTURE_WRAP = GL_REPEAT;
+LTexturedPolygonProgram2D* LTexture::mTexturedPolygonProgram2D = NULL;
+
+void LTexture::setTexturedPolygonProgram2D( LTexturedPolygonProgram2D* program )
+{
+    //Set class rendering program
+    mTexturedPolygonProgram2D = program;
+}
+</div>
+
+<div class="tutText">
+Here's the static function that sets the program pointer for us to use in rendering.
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">bool LTexture::loadTextureFromFile32( std::string path )
+{
+    //Texture loading success
+    bool textureLoaded = false;
+
+    //Generate and set current image ID
+    ILuint imgID = 0;
+    ilGenImages( 1, &imgID );
+    ilBindImage( imgID );
+
+    //Load image
+    ILboolean success = ilLoadImage( path.c_str() );
+
+    //Image loaded successfully
+    if( success == IL_TRUE )
+    {
+        //Convert image to RGBA
+        success = ilConvertImage( IL_RGBA, IL_UNSIGNED_BYTE );
+        if( success == IL_TRUE )
+        {
+            //Initialize dimensions
+            GLuint imgWidth = (GLuint)ilGetInteger( IL_IMAGE_WIDTH );
+            GLuint imgHeight = (GLuint)ilGetInteger( IL_IMAGE_HEIGHT );
+
+            //Calculate required texture dimensions
+            GLuint texWidth = powerOfTwo( imgWidth );
+            GLuint texHeight = powerOfTwo( imgHeight );
+
+            //Texture is the wrong size
+            if( imgWidth != texWidth || imgHeight != texHeight )
+            {
+                //Place image at upper left
+                iluImageParameter( ILU_PLACEMENT, ILU_UPPER_LEFT );
+
+                //Resize image
+                iluEnlargeCanvas( (int)texWidth, (int)texHeight, 1 );
+            }
+
+            //Create texture from file pixels
+            textureLoaded = loadTextureFromPixels32( (GLuint*)ilGetData(), imgWidth, imgHeight, texWidth, texHeight );
+        }
+
+        //Delete file from memory
+        ilDeleteImages( 1, &imgID );
+
+        //Set pixel format
+        mPixelFormat = GL_RGBA;
+    }
+
+    //Report error
+    if( !textureLoaded )
+    {
+        printf( "Unable to load %s\n", path.c_str() );
+    }
+
+    return textureLoaded;
+}
+</div>
+
+<div class="tutText">
+Here's one of our texture loading functions. It hasn't changed because how we load data hasn't changed, only how we're sending the vertex data.
+</div>
+
+<div class="tutCodeHeader">From LTexture.cpp</div>
+<div class="tutCode">void LTexture::render( GLfloat x, GLfloat y, LFRect* clip )
+{
+    //If the texture exists
+    if( mTextureID != 0 )
+    {
+        //Texture coordinates
+        GLfloat texTop = 0.f;
+        GLfloat texBottom = (GLfloat)mImageHeight / (GLfloat)mTextureHeight;
+        GLfloat texLeft = 0.f;
+        GLfloat texRight = (GLfloat)mImageWidth / (GLfloat)mTextureWidth;
+
+        //Vertex coordinates
+        GLfloat quadWidth = mImageWidth;
+        GLfloat quadHeight = mImageHeight;
+
+        //Handle clipping
+        if( clip != NULL )
+        {
+            //Texture coordinates
+            texLeft = clip->x / mTextureWidth;
+            texRight = ( clip->x + clip->w ) / mTextureWidth;
+            texTop = clip->y / mTextureHeight;
+            texBottom = ( clip->y + clip->h ) / mTextureHeight;
+
+            //Vertex coordinates
+            quadWidth = clip->w;
+            quadHeight = clip->h;
+        }
+
+        //Move to rendering point
+        mTexturedPolygonProgram2D->leftMultModelView( glm::translate( glm::vec3( x, y, 0.f ) ) );
+        mTexturedPolygonProgram2D->updateModelView();
+
+        //Set vertex data
+        LTexturedVertex2D vData[ 4 ];
+
+        //Texture coordinates
+        vData[ 0 ].texCoord.s =  texLeft; vData[ 0 ].texCoord.t =    texTop;
+        vData[ 1 ].texCoord.s = texRight; vData[ 1 ].texCoord.t =    texTop;
+        vData[ 2 ].texCoord.s = texRight; vData[ 2 ].texCoord.t = texBottom;
+        vData[ 3 ].texCoord.s =  texLeft; vData[ 3 ].texCoord.t = texBottom;
+
+        //Vertex positions
+        vData[ 0 ].position.x =       0.f; vData[ 0 ].position.y =        0.f;
+        vData[ 1 ].position.x = quadWidth; vData[ 1 ].position.y =        0.f;
+        vData[ 2 ].position.x = quadWidth; vData[ 2 ].position.y = quadHeight;
+        vData[ 3 ].position.x =       0.f; vData[ 3 ].position.y = quadHeight;
+
+        //Set texture ID
+        glBindTexture( GL_TEXTURE_2D, mTextureID );
+
+        //Enable vertex and texture coordinate arrays
+        mTexturedPolygonProgram2D->enableVertexPointer();
+        mTexturedPolygonProgram2D->enableTexCoordPointer();
+
+            //Bind vertex buffer
+            glBindBuffer( GL_ARRAY_BUFFER, mVBOID );
+
+            //Update vertex buffer data
+            glBufferSubData( GL_ARRAY_BUFFER, 0, 4 * sizeof(LTexturedVertex2D), vData );
+
+            //Set texture coordinate data
+            mTexturedPolygonProgram2D->setTexCoordPointer( sizeof(LTexturedVertex2D), (GLvoid*)offsetof( LTexturedVertex2D, texCoord ) );
+
+            //Set vertex data
+            mTexturedPolygonProgram2D->setVertexPointer( sizeof(LTexturedVertex2D), (GLvoid*)offsetof( LTexturedVertex2D, position ) );
+
+            //Draw quad using vertex data and index data
+            glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, mIBOID );
+            glDrawElements( GL_TRIANGLE_FAN, 4, GL_UNSIGNED_INT, NULL );
+
+        //Disable vertex and texture coordinate arrays
+        mTexturedPolygonProgram2D->disableVertexPointer();
+        mTexturedPolygonProgram2D->disableTexCoordPointer();
+    }
+}
+</div>
+
+<div class="tutText">
+As you can see, texture rendering hasn't changed all that much. Instead of sending the data to the old fixed function pipeline, we send it to the shader program in pretty
+much the same way.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">//Textured polygon shader
+LTexturedPolygonProgram2D gTexturedPolygonProgram2D;
+
+//Loaded texture
+LTexture gOpenGLTexture;
+LColorRGBA gTextureColor = { 1.f, 1.f, 1.f, 0.75f };
+</div>
+
+<div class="tutText">
+At the top of LUtil.cpp, we have our shader program object, the texture we're going to load, and the color we're going to give it. We're going to make the rendered textured polygon
+semitransparent.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">bool loadGP()
+{
+    //Load textured shader program
+    if( !gTexturedPolygonProgram2D.loadProgram() )
+    {
+        printf( "Unable to load textured polygon program!\n" );
+        return false;
+    }
+
+    //Bind textured shader program
+    gTexturedPolygonProgram2D.bind();
+
+    //Initialize projection
+    gTexturedPolygonProgram2D.setProjection( glm::ortho&#060GLfloat&#062( 0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, 1.0, -1.0 ) );
+    gTexturedPolygonProgram2D.updateProjection();
+
+    //Initialize modelview
+    gTexturedPolygonProgram2D.setModelView( glm::mat4() );
+    gTexturedPolygonProgram2D.updateModelView();
+
+    //Set texture unit
+    gTexturedPolygonProgram2D.setTextureUnit( 0 );
+
+    //Set program for texture
+    LTexture::setTexturedPolygonProgram2D( &gTexturedPolygonProgram2D );
+
+    return true;
+}
+
+bool loadMedia()
+{
+    //Load texture
+    if( !gOpenGLTexture.loadTextureFromFile32( "34_glsl_texturing/opengl.png" ) )
+    {
+        printf( "Unable to load texture!\n" );
+        return false;
+    }
+
+    return true;
+}
+</div>
+
+<div class="tutText">
+We load the shader program and the texture much in the same way as before. This time we set initialize the texture unit to the first one (index 0), and also set the class wide
+shader program for the LTexture class.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">void render()
+{
+    //Clear color buffer
+    glClear( GL_COLOR_BUFFER_BIT );
+
+    //Reset transformations
+    gTexturedPolygonProgram2D.setModelView( glm::mat4() );
+
+    //Render texture centered
+    gTexturedPolygonProgram2D.setTextureColor( gTextureColor );
+    gOpenGLTexture.render( ( SCREEN_WIDTH - gOpenGLTexture.imageWidth() ) / 2.f, ( SCREEN_HEIGHT - gOpenGLTexture.imageHeight() ) / 2.f );
+
+    //Update screen
+    glutSwapBuffers();
+}
+</div>
+
+<div class="tutText">
+Finally, we render our texture with the shader program.<br>
+<br>
+Now, in this tutorial we actually broke our OpenGL 3.0+ compatibility. In OpenGL 3.0+, GL_ALPHA is not a supported texture format, even though GL_RED, GL_GREEN, GL_BLUE are
+supported. Fortunately using GLSL shaders there are ways to get around that so you can render fonts.
+</div>
+
+            <div class="tutFooter">
+            Download the media and source code for this tutorial <a class="tutLink" href="34_glsl_texturing.zip">here</a>.
+            <br>
+            <a class="leftNav" href="../index.php.html#GLSL Texturing">Back to OpenGL Tutorials</a><br>
+            </div>
+
+        </div>
+
+        <div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+    </body>
+</html>

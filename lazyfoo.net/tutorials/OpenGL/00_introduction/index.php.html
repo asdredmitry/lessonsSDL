@@ -1,0 +1,196 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+	<head>
+
+		<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+
+		<title>Lazy Foo' Productions - The Introduction to Introduction to OpenGL</title>
+		<META NAME=KEYWORDS CONTENT="freeGLUT glut C++ OpenGL Tutorial 2D">
+		<META NAME=DESCRIPTION CONTENT="What we will be covering in this OpenGL Tutorial.">
+
+		<link REL="stylesheet" TYPE="text/css" href="../../../layout/lazy.css">
+
+		<script src="main.js">
+		</script>
+
+	</head>
+
+	<body>
+
+		<div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>		
+		<div class="content">
+
+			<div class="tutPreface"><h1 class="tutHead">The Introduction to Introduction to OpenGL</h1>
+            <h6>Last Updated 8/09/12</h6>
+			Welcome to Introduction to OpenGL, a tutorial set designed to getting newbie programmers started with OpenGL.
+			</div>
+
+
+
+<div class="tutText">
+<h2>What we'll be covering</h2>
+In OpenGL, pretty much all rendering is done by rendering polygons. In this tutorial, we'll  be
+<ul>
+<li>Rendering polygons in 2D.</li>
+<li>Texturing the polygons to render bitmaps.</li>
+<li>Applying transformations like scaling and rotation to the polygons.</li>
+<li>Rendering fonts using textured polygons.</li>
+<li>Using OpenGL buffers to render.</li>
+<li>Using programmable shader programs to render.</li>
+<li>Transitioning from the old fixed function pipeline rendering to the modern OpenGL programmable pipeline.</li>
+</ul>
+
+<h2>What we won't be covering</h2>
+This tutorial set was designed to get OpenGL programmers with 2D concepts. We will not be covering 3D rendering. To make a decent 3D tutorial set, I would have to make the tutorial
+set roughly 3 times as big which is something I just don't currently have time for.<br>
+<br>
+Whether rendering in 2D or 3D, OpenGL still renders with polygons. To move over to 3D rendering, just using a perspective matrix as opposed to an orthographic matrix. If you didn't
+understand that last sentence, you'll find out later in the tutorial set it isn't that hard to do.<br>
+<br>
+<h2>What is fixed function pipeline?</h2>
+A pipeline is just a set of functionality to process data. For the first part of this tutorial, we use fixed function pipeline calls. Back in the early days of OpenGL, the API
+had calls built in to handle things like matrix transformations and lighting. It made it easy to start rendering things, but you were limited to the built in functionality
+(hence "Fixed Function Pipeline").<br>
+<br>
+Then programmable pipelines came along which allowed programmers to make their own GPU pipelines.  Eventually, fixed function pipelines became obsolete because programmable
+pipelines could do everything they could and far more. Hardware today actually almost always uses programmable pipelines, even to do fixed function stuff.<br>
+<br>
+<h2>Why are you using fixed function if it's so outdated?</h2>
+In the initial versions of the tutorials, I was going to use programmable pipelines from the beginning. Then I started testing the tutorials on people new to graphics programming.
+This is where I found out if you want to create a sea of blank stares, talk about vertex shaders and fragment shaders to people who have never rendered a polygon.<br>
+<br>
+I then thought of making a wrapper framework to abstract the low level programmable pipeline calls. At that point I realized that if I used my own framework, I'm still teaching new
+programmers non-standard code that they are probably never going to use. As far as I saw, if I wanted to make the tutorials accessible to new OpenGL programmers I might as well just
+ use the old easier to use fixed function calls and then transition them to modern programmable pipelines.<br>
+<br>
+Just compare <a class="tutLink" href="../02_matrices_and_coloring_polygons/index.php.html">tutorial 2</a> and <a class="tutLink" href="../33_multi-color_polygons_and_attributes/index.php.html">tutorial 33</a>,
+both of which do the simple task of rendering a multicolored quad. Contrast the amount of things that could go wrong in either one of them. I would rather allow the new programmer
+to get their hands dirty with simpler code than be overwhelmed with complex code which they can't mess with for fear that they'll break something.<br>
+<br>
+Besides, as much as OpenGL programmers bemoan the existence of legacy OpenGL, it's going to be sticking around for a while. There's lots of old systems that still use it, and as
+recently as 2011 I worked with systems that only had OpenGL 1.3. Their knowledge of old OpenGL may prove useful at some point. Considering during the protyping stage for these
+tutorials I had users with GPUs that didn't support OpenGL 2.0, legacy OpenGL is still alive and kicking.<br>
+<br>
+As I see it, by the end of the tutorial set they're using OpenGL 3.0+ code anyway so they are learning what they should be learning. When they see the power that modern OpenGL
+offers and they learn how to use it, I doubt new programmers will ever want to go back to the old ways.
+</div>
+
+			<div class="tutFooter">
+			<a class="tutLink" href="../01_hello_opengl/index.php.html">Now let's get started with OpenGL</a>.
+			</div>
+
+		</div>
+
+		<div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+	</body>
+</html>

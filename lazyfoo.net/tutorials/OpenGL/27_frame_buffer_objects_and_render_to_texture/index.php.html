@@ -1,0 +1,426 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+    <head>
+
+        <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+		<META NAME=KEYWORDS CONTENT="freeGLUT glut C++ OpenGL Tutorial 2D Windows Linux Mac Framebuffer Objects FBO render to texture">
+		<META NAME=DESCRIPTION CONTENT="Learn to render your scene to a taxture using a Frame Buffer Object (FBO).">
+
+        <title>Lazy Foo' Productions - Frame Buffer Objects and Render to Texture</title>
+
+        <link REL="stylesheet" TYPE="text/css" href="../../../layout/lazy.css">
+
+        <script src="main.js">
+        </script>
+
+    </head>
+
+    <body>
+
+        <div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>        
+        <div class="content">
+
+            <div class="tutPreface"><h1 class="tutHead">Frame Buffer Objects and Render to Texture</h1>
+            <div class="tutImg"><img src="preview.png"></div>
+            <h6>Last Updated 8/09/12</h6>
+            The buffers on the screen aren't the only ones you can render to. You can also generate additional frame buffer objects, and use them for other rendering operations
+            like rendering to a texture.
+            </div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">//Rotating texture
+LTexture gOpenGLTexture;
+GLfloat gAngle = 0.f;
+
+//Framebuffer
+GLuint gFBO = NULL;
+LTexture gFBOTexture;
+</div>
+
+<div class="tutText">
+For this tutorial, we're going to render a scene using a texture and 4 quads and in the background we're going to have a rotating snap shot of the screen on a texture.<br>
+<br>
+First, we have the texture we're going to render and the rotation angle we're going to use. Then we have the variable "gFBO". Just like an VBO and IBO have integer names, an FBO
+has an integer name. Lastly, we have the texture the FBO is going to render to.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">bool initGL()
+{
+    //Initialize GLEW
+    GLenum glewError = glewInit();
+    if( glewError != GLEW_OK )
+    {
+        printf( "Error initializing GLEW! %s\n", glewGetErrorString( glewError ) );
+        return false;
+    }
+
+    //Make sure OpenGL 2.1 is supported
+    if( !GLEW_VERSION_2_1 )
+    {
+        printf( "OpenGL 2.1 not supported!\n" );
+        return false;
+    }
+
+    //Set the viewport
+    glViewport( 0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT );
+
+    //Initialize Projection Matrix
+    glMatrixMode( GL_PROJECTION );
+    glLoadIdentity();
+    glOrtho( 0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, 1.0, -1.0 );
+
+    //Initialize Modelview Matrix
+    glMatrixMode( GL_MODELVIEW );
+    glLoadIdentity();
+
+    //Initialize clear color
+    glClearColor( 0.f, 0.f, 0.f, 1.f );
+
+    //Enable texturing
+    glEnable( GL_TEXTURE_2D );
+
+    //Set blending
+    glEnable( GL_BLEND );
+    glDisable( GL_DEPTH_TEST );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
+    //Generate framebuffer name
+    glGenFramebuffers( 1, &gFBO );
+
+    //Check for error
+    GLenum error = glGetError();
+    if( error != GL_NO_ERROR )
+    {
+        printf( "Error initializing OpenGL! %s\n", gluErrorString( error ) );
+        return false;
+    }
+
+    //Initialize DevIL and DevILU
+    ilInit();
+    iluInit();
+    ilClearColour( 255, 255, 255, 000 );
+
+    //Check for error
+    ILenum ilError = ilGetError();
+    if( ilError != IL_NO_ERROR )
+    {
+        printf( "Error initializing DevIL! %s\n", iluErrorString( ilError ) );
+        return false;
+    }
+
+    return true;
+}
+</div>
+
+<div class="tutText">
+In initGL(), we generate a FBO name using glGenFramebuffers().<br>
+<br>
+Now we're cheating a little bit here. Frame Buffer Objects didn't become part of the OpenGL core until version 3.0. They were a commonly available extension in version 2.1. As an
+extension, the function glGenFramebuffers() is called glGenFramebuffersEXT(). When binding a FBO, you didn't use "GL_FRAMEBUFFER" but "GL_FRAMEBUFFER_EXT". Fortunately GLEW gives
+us the non-extension names even with the OpenGL 2.1 context so we don't have to add EXT to all of our function calls.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">bool loadMedia()
+{
+    //Load texture
+    if( !gOpenGLTexture.loadTextureFromFile32( "27_frame_buffer_objects_and_render_to_texture/opengl.png" ) )
+    {
+        printf( "Unable to load texture!\n" );
+        return false;
+    }
+
+    return true;
+}
+
+void update()
+{
+    //Update rotation
+    gAngle += 6.f;
+}
+</div>
+
+<div class="tutText">
+In loadMedia() we load the texture and in update() we update the rotation angle.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">void renderScene()
+{
+    //Render texture
+    glLoadIdentity();
+    glTranslatef( SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f, 0.f );
+    glRotatef( gAngle, 0.f, 0.f, 1.f );
+    glTranslatef( gOpenGLTexture.imageWidth() / -2.f, gOpenGLTexture.imageHeight() / -2.f, 0.f );
+    glColor3f( 1.f, 1.f, 1.f );
+    gOpenGLTexture.render( 0.f, 0.f );
+
+    //Unbind texture for geometry
+    glBindTexture( GL_TEXTURE_2D, NULL );
+
+    //Red quad
+    glLoadIdentity();
+    glTranslatef( SCREEN_WIDTH * 1.f / 4.f, SCREEN_HEIGHT * 1.f / 4.f, 0.f );
+    glRotatef( gAngle, 0.f, 0.f, 1.f );
+    glBegin( GL_QUADS );
+        glColor3f( 1.f, 0.f, 0.f );
+        glVertex2f( -SCREEN_WIDTH / 16.f, -SCREEN_HEIGHT / 16.f );
+        glVertex2f(  SCREEN_WIDTH / 16.f, -SCREEN_HEIGHT / 16.f );
+        glVertex2f(  SCREEN_WIDTH / 16.f,  SCREEN_HEIGHT / 16.f );
+        glVertex2f( -SCREEN_WIDTH / 16.f,  SCREEN_HEIGHT / 16.f );
+    glEnd();
+
+    //Green quad
+    glLoadIdentity();
+    glTranslatef( SCREEN_WIDTH * 3.f / 4.f, SCREEN_HEIGHT * 1.f / 4.f, 0.f );
+    glRotatef( gAngle, 0.f, 0.f, 1.f );
+    glBegin( GL_QUADS );
+        glColor3f( 0.f, 1.f, 0.f );
+        glVertex2f( -SCREEN_WIDTH / 16.f, -SCREEN_HEIGHT / 16.f );
+        glVertex2f(  SCREEN_WIDTH / 16.f, -SCREEN_HEIGHT / 16.f );
+        glVertex2f(  SCREEN_WIDTH / 16.f,  SCREEN_HEIGHT / 16.f );
+        glVertex2f( -SCREEN_WIDTH / 16.f,  SCREEN_HEIGHT / 16.f );
+    glEnd();
+
+    //Blue quad
+    glLoadIdentity();
+    glTranslatef( SCREEN_WIDTH * 1.f / 4.f, SCREEN_HEIGHT * 3.f / 4.f, 0.f );
+    glRotatef( gAngle, 0.f, 0.f, 1.f );
+    glBegin( GL_QUADS );
+        glColor3f( 0.f, 0.f, 1.f );
+        glVertex2f( -SCREEN_WIDTH / 16.f, -SCREEN_HEIGHT / 16.f );
+        glVertex2f(  SCREEN_WIDTH / 16.f, -SCREEN_HEIGHT / 16.f );
+        glVertex2f(  SCREEN_WIDTH / 16.f,  SCREEN_HEIGHT / 16.f );
+        glVertex2f( -SCREEN_WIDTH / 16.f,  SCREEN_HEIGHT / 16.f );
+    glEnd();
+
+    //Yellow quad
+    glLoadIdentity();
+    glTranslatef( SCREEN_WIDTH * 3.f / 4.f, SCREEN_HEIGHT * 3.f / 4.f, 0.f );
+    glRotatef( gAngle, 0.f, 0.f, 1.f );
+    glBegin( GL_QUADS );
+        glColor3f( 1.f, 1.f, 0.f );
+        glVertex2f( -SCREEN_WIDTH / 16.f, -SCREEN_HEIGHT / 16.f );
+        glVertex2f(  SCREEN_WIDTH / 16.f, -SCREEN_HEIGHT / 16.f );
+        glVertex2f(  SCREEN_WIDTH / 16.f,  SCREEN_HEIGHT / 16.f );
+        glVertex2f( -SCREEN_WIDTH / 16.f,  SCREEN_HEIGHT / 16.f );
+    glEnd();
+}
+</div>
+
+<div class="tutText">
+Now we have a new function called renderScene() which renders the scene in a way that can be used by both the FBO and the screen. The only real difference is renderScene()
+doesn't make a call to glutSwapBuffers().<br>
+<br>
+What this function renders is a rotating texture and 4 different colored quads. We'll be rendering this both to the screen and to the FBO.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">void handleKeys( unsigned char key, int x, int y )
+{
+    //If the user presses q
+    if( key == 'q' )
+    {
+        //Bind framebuffer for use
+        glBindFramebuffer( GL_FRAMEBUFFER, gFBO );
+</div>
+
+<div class="tutText">
+In this tutorial, we're going to be rendering the to the FBO when the user presses 'q'. We're going to be taking a snapshot of the current scene and remdering to the texture.<br>
+<br>
+First thing we have to do is bind our frame buffer with glBindFramebuffer(). 
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">        //If FBO texture doesn't exist
+        if( gFBOTexture.getTextureID() == 0 )
+        {
+            //Create it
+            gFBOTexture.createPixels32( SCREEN_WIDTH, SCREEN_HEIGHT );
+            gFBOTexture.padPixels32();
+            gFBOTexture.loadTextureFromPixels32();
+        }
+
+        //Bind texture
+        glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gFBOTexture.getTextureID(), 0 );
+</div>
+
+<div class="tutText">
+In order for a FBO to render to a texture, the texture needs to be big enough to hold the screen's content. If "gFBOTexture" doesn't have a texture, we generate one big enough to
+hold the screen.<br>
+<br>
+Then we have the FBO use the texture with glFramebufferTexture2D(). This function will render an FBO to the first color attachment "GL_COLOR_ATTACHMENT0" to a 2D texture using
+"gFBOTexture".
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">        //Clear framebuffer
+        glClear( GL_COLOR_BUFFER_BIT );
+
+        //Render scene to framebuffer
+        renderScene();
+
+        //Unbind framebuffer
+        glBindFramebuffer( GL_FRAMEBUFFER, NULL );
+    }
+}
+</div>
+
+<div class="tutText">
+With our FBO bound using our texture, we clear it's color buffer. Remember since "gFBO" is bound, this call to glClear() operates on the FBO not the screen. With the FBO cleared
+we render the scene to it. Then we unbind the FBO with glBindFramebuffer() so now our rendering calls will be done to the screen.
+</div>
+
+<div class="tutCodeHeader">From LUtil.cpp</div>
+<div class="tutCode">void render()
+{
+    //Clear color and buffer
+    glClear( GL_COLOR_BUFFER_BIT );
+
+    //Render FBO texture
+    if( gFBOTexture.getTextureID() != 0 )
+    {
+        glLoadIdentity();
+        glTranslatef( SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f, 0.f );
+        glRotatef( -gAngle, 0.f, 0.f, 1.f );
+        glTranslatef( gFBOTexture.imageWidth() / -2.f, gFBOTexture.imageHeight() / -2.f, 0.f );
+        glColor3f( 1.f, 1.f, 1.f );
+        gFBOTexture.render( 0.f, 0.f );
+    }
+
+    //Render scene
+    renderScene();
+
+    //Update screen
+    glutSwapBuffers();
+}
+</div>
+
+<div class="tutText">
+In render(), we clear the screen as usual and render the spinning snap shot of the screen if it exists. Then we render the scene normally on top of it.<br>
+<br>
+If you're wondering why the snap shot doesn't show up in next snap shot, it's because you shouldn't render with a texture you're rendering to.
+</div>
+
+            <div class="tutFooter">
+            Download the media and source code for this tutorial <a class="tutLink" href="27_frame_buffer_objects_and_render_to_texture.zip">here</a>.
+			<br>
+			<a class="leftNav" href="../index.php.html#Frame Buffer Objects and Render to Texture">Back to OpenGL Tutorials</a><br>
+            </div>
+
+        </div>
+
+        <div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../SDL/index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../index.php.html">News</a>
+<a class="nav" href="../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+    </body>
+</html>

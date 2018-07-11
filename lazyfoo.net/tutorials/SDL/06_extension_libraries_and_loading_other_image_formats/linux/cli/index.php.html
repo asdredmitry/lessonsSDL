@@ -1,0 +1,200 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" 
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+
+	<head>
+
+		<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+        <META NAME=KEYWORDS CONTENT="SDL_image SDL_ttf SDL_mixer SDL2_image SDL2_ttf SDL2_mixer Tutorial Install g++ set up">
+        <META NAME=DESCRIPTION CONTENT="Install SDL_image (or SDL_ttf/SDL_mixer) on MinGW.">
+
+		<title>Lazy Foo' Productions - Setting up SDL Extension Libraries on g++</title>
+
+		<link REL="stylesheet" TYPE="text/css" href="../../../../../layout/lazy.css">
+
+	</head>
+
+	<body>
+
+		<div class="header">
+
+<h1 style="margin-bottom:0px;padding-bottom:0px;border-bottom:0px;">Lazy Foo' Productions</h1>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../../index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../../../../OpenGL/index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../../../index.php.html">News</a>
+<a class="nav" href="../../../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../../../donate.php.html">Donations</a>
+
+</div><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32350292-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!--Init facebook-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!--Init twitter-->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<!--Init google+-->
+<script src="https://apis.google.com/js/plusone.js"></script>
+</div>
+		<div class="content">
+
+			<div class="tutPreface"><h1 class="tutHead">Setting up SDL Extension Libraries on g++</h1>
+            <h6>Last Updated 6/21/14</h6>
+			</div>
+
+			<div class="tutText">		
+			<a class="tutLink" name="1" href="index.php.html#1">1)</a>Go download the
+			<a class="tutLink" href="../../06_extension_libraries_and_loading_other_image_formats.zip">source for lesson 06</a>. Extract the source
+			somewhere. Now compile by entering this command:
+			
+			<h6>g++ 06_extension_libraries_and_loading_other_image_formats.cpp -w -lSDL2 -lSDL2_image -o 06_extension_libraries_and_loading_other_image_formats</h6>
+			
+			Now you may get an error saying it can't find SDL_image.h. For linux, we'll have to include the SDL headers like this:
+			
+			<h6>#include&#060SDL2/SDL_image.h&#062</h6>
+			
+			For SDL_ttf and SDL_mixer, we have to include them like this:
+			
+			<h6>#include&#060SDL2/SDL_ttf.h&#062</h6>
+			<h6>#include&#060SDL2/SDL_mixer.h&#062</h6>
+			
+			If you're using a makefile, you can just change the values of some of the macros:
+			</div>
+		
+			
+			<div class="tutCodeHeader">From Makefile</div>
+<div class="tutCode">#OBJS specifies which files to compile as part of the project
+OBJS = 06_extension_libraries_and_loading_other_image_formats.cpp
+
+#CC specifies which compiler we're using
+CC = g++
+
+#COMPILER_FLAGS specifies the additional compilation options we're using
+# -w suppresses all warnings
+COMPILER_FLAGS = -w
+
+#LINKER_FLAGS specifies the libraries we're linking against
+LINKER_FLAGS = -lSDL2 -lSDL2_image
+
+#OBJ_NAME specifies the name of our exectuable
+OBJ_NAME = 06_extension_libraries_and_loading_other_image_formats
+
+#This is the target that compiles our executable
+all : $(OBJS)
+	$(CC) $(OBJS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(OBJ_NAME)
+</div>
+
+			<div class="tutText">
+			As you can see it was as easy as changing the file name of the source and executable and adding
+			
+			<h6>-lSDL2_image</h6>
+			
+			to the linker. If we were linking SDL_ttf, we'd add
+			
+			<h6>-lSDL2_ttf</h6>
+			
+			and for SDL_mixer we'd put:
+			
+			<h6>-lSDL2_mixer</h6>
+			
+			Now that you have the extension library compiling, it's time to go onto part 2 of the tutorial.
+            </div>
+
+            <div class="tutFooter">
+            <a class="tutLink" href="../../index2.php.html">Extension Libraries and Loading Other Image Formats Part 2: Loading PNGs with SDL_image</a><br>
+            </div>
+
+		</div>
+
+		<div class="footer">
+
+<div style="text-align: center;">
+<!--Facebook-->
+<span style="line-height: 10px;" class="fb-share-button" data-href="http://lazyfoo.net/" data-type="button_count"></span>
+
+<!--Google+-->
+<g:plus action="share" annotation="bubble" height=20 href="http://lazyfoo.net/"></g:plus>
+
+<!--Twitter-->
+<a style="line-height: 0px;" href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a>
+
+</div>
+<div class="nav">
+<a class="nav" href="http://forums.libsdl.org/">SDL Forums</a>
+<a class="nav" href="../../../index.php.html">SDL Tutorials</a>
+<a class="nav" href="../../../../../articles/index.php.html">Articles</a>
+<a class="nav" href="../../../../OpenGL/index.php.html">OpenGL Tutorials</a>
+<a class="nav" href="http://www.opengl.org/discussion_boards/forum.php">OpenGL Forums</a>
+<div class="ads">
+<script type="text/javascript"><!--
+google_ad_client = "pub-5880704953225255";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "6699CC";
+google_color_bg = "003366";
+google_color_link = "FFFFFF";
+google_color_url = "AECCEB";
+google_color_text = "AECCEB";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div><a class="nav" href="../../../../../index.php.html">News</a>
+<a class="nav" href="../../../../../faq.php.html">FAQs</a>
+<!--<a class="nav" href="http://lazyfoo.net/games/index.php">Games</a>-->
+<a class="nav" href="../../../../../contact.php.html">Contact</a>
+<a class="nav" href="../../../../../donate.php.html">Donations</a>
+
+</div>
+<h6>
+Copyright Lazy Foo' Productions 2004-2018
+</h6>
+
+</div>
+	</body>
+</html>

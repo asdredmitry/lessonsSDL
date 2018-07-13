@@ -48,7 +48,7 @@ bool init()
             }
             else
             {
-                SDL_SetRenderDrawColor(gRenderer, 0, 0 ,0 , 1);
+                SDL_SetRenderDrawColor(gRenderer, 150, 0 ,0 , 255);
 
                 int imgFlags = IMG_INIT_PNG;
                 if(!(IMG_Init(imgFlags)  & imgFlags))
@@ -122,7 +122,7 @@ int main(int argc, char ** argv)
                         quit = true;
                 }
                 SDL_RenderClear(gRenderer);
-                SDL_RenderCopy(gRenderer, gTexture, NULL, NULL);
+                //SDL_RenderCopy(gRenderer, gTexture, NULL, NULL);
                 SDL_RenderPresent(gRenderer);
             }
         }

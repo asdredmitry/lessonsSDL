@@ -17,6 +17,83 @@ SDL_Window * gWindow(NULL);
 SDL_Texture * gTexture(NULL);
 SDL_Renderer * gRenderer(NULL);
 
+class LTexture
+{
+    public:
+    LTexture();
+    ~LTexture();
+    bool loadFromFile(std :: string path);
+    void free();
+    void render(int x, int y);
+    int getWidth();
+    int getHeight();
+
+    private:
+    SDL_Texture * mTexture;
+
+    int mWidth;
+    int mHeight;
+};
+
+LTexture gFooTexture;
+LTexture gBackGroundTexture;
+
+LTexture :: LTexture():
+mTexture(NULL),
+mWidth(0),
+mHeight(0)
+{}
+LTexture :: ~LTexture()
+{
+    free();
+}
+bool LTexture :: loadFromFile( std :: string path)
+{
+    free();
+    SDL_Texture * newTexture(NULL);
+    SDL_Surface * loadedSurface = IMG_Load(path.c_str());
+    if(loadedSurface == NULL)
+        std :: cout << "Unable to load image " << IMG_GetError() << std :: endl;
+    else
+    {
+        SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, 0, 255, 255));
+        newTexture = SDL_CreateTextureFromSurface(gRenderer, loadedSurface);
+        if(newTexture == NULL)
+            std :: cout << "Unable to create texture form file" << SDL_GetError() << std :: endl;
+        else 
+        {
+            mWidth = loadedSurface->w;
+            mHeight = loadedSurface->h;
+        }
+        SDL_FreeSurface(loadedSurface);
+        loadedSurface = NULL;
+    }
+    mTexture = newTexture;
+    return mTexture != NULL;
+}
+void LTexture :: free()
+{
+    if(mTexture != NULL)
+    {
+        SDL_DestroyTexture(mTexture);
+        mTexture = NULL;
+        mWidth = 0;
+        mHeight = 0;
+    }
+}
+void LTexture :: render( int x, int y)
+{
+    SDL_Rect renderQuad = {x, y, mWidth, mHeight};
+    SDL_RenderCopy(gRenderer, mTexture, NULL, &renderQuad);
+}
+int LTexture :: getWidth()
+{
+    return mWidth;
+}
+int LTexture :: getHeight()
+{
+    return mHeight;
+}
 bool init()
 {
     bool success(true);
@@ -53,7 +130,19 @@ bool init()
 bool loadMedia()
 {
     bool success(true);
-    gTexture = loadTexture("media.png");
+    if(!gFooTexture.loadFromFile("foo.png"))
+    {
+        std :: cout << "Failde to load from file " << std :: endl;
+        success = false;
+    }
+    if(!gBackGroundTexture.loadFromFile("background.png"))
+    {
+        std :: cout << "Failed to load image " << std :: endl;
+        success = false;
+    }
+    return success;
+    /*bool success(true);
+    gTexture = loadTexture("Una.png");
     if(gTexture == NULL)
     {
         std :: cout << "Cannot load texture" << std :: endl;
@@ -61,10 +150,21 @@ bool loadMedia()
         return success;
     }
     return success;
+    */
 }
 void close()
 {
-    SDL_DestroyTexture(gTexture);
+    gFooTexture.free();
+    gBackGroundTexture.free();
+
+    SDL_DestroyRenderer(gRenderer);
+    SDL_DestroyWindow(gWindow);
+    gWindow = NULL;
+    gRenderer = NULL;
+
+    IMG_Quit();
+    SDL_Quit();
+    /*SDL_DestroyTexture(gTexture);
     gTexture = NULL;
     SDL_DestroyWindow(gWindow);
     gWindow = NULL;
@@ -72,11 +172,12 @@ void close()
     gRenderer = NULL;
     IMG_Quit();
     SDL_Quit();
+    */
 }
 SDL_Texture * loadTexture(std :: string path)
 {
     SDL_Texture * newTexture(NULL);
-    SDL_Surface * newSurface = IMG_Load("media.png");
+    SDL_Surface * newSurface = IMG_Load(path.c_str());
     if(newSurface == NULL)
     {
         std :: cout << "media file could not be loaded " << IMG_GetError() << std :: endl;
@@ -104,15 +205,37 @@ int main(int argc, char ** argv)
                     if(e.type == SDL_QUIT)
                         quit = true;
                 }
-                SDL_RenderClear(gRenderer);
+                SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
+                SDL_RenderClear(gRenderer),
+
+                gBackGroundTexture.render(0,0);
+                gFooTexture.render(240, 190);
+
+                SDL_RenderPresent(gRenderer);
+                /*SDL_RenderClear(gRenderer);
                 SDL_Rect topLeftViewPort;
                 topLeftViewPort.x = 0;
                 topLeftViewPort.y = 0;
                 topLeftViewPort.w = SCREEN_WIDTH/2;
                 topLeftViewPort.h = SCREEN_HEIGHT/2;
+                SDL_Rect middleViewPort;
+                middleViewPort.x = SCREEN_WIDTH/2;
+                middleViewPort.y = 0;
+                middleViewPort.w = SCREEN_WIDTH/2;
+                middleViewPort.h = SCREEN_HEIGHT/2;
+                SDL_Rect downViewPort;
+                downViewPort.x = 0;
+                downViewPort.y = SCREEN_HEIGHT/2;
+                downViewPort.w = SCREEN_WIDTH;
+                downViewPort.h = SCREEN_HEIGHT/2;
                 SDL_RenderSetViewport(gRenderer, &topLeftViewPort);
                 SDL_RenderCopy(gRenderer,gTexture, NULL, NULL);
+                SDL_RenderSetViewport(gRenderer, &middleViewPort);
+                SDL_RenderCopy(gRenderer,gTexture, NULL, NULL);
+                SDL_RenderSetViewport(gRenderer, &downViewPort);
+                SDL_RenderCopy(gRenderer, gTexture, NULL, NULL);
                 SDL_RenderPresent(gRenderer);
+                */
             }
         }
     }

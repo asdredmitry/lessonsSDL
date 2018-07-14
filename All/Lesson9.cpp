@@ -24,7 +24,7 @@ class LTexture
     ~LTexture();
     bool loadFromFile(std :: string path);
     void free();
-    void render(int x, int y);
+    void render(int x, int y, SDL_Rect * clip = NULL);
     int getWidth();
     int getHeight();
 
@@ -37,6 +37,8 @@ class LTexture
 
 LTexture gFooTexture;
 LTexture gBackGroundTexture;
+SDL_Rect gSpriteClips[4];
+LTexture gSpriteSheetTexture;
 
 LTexture :: LTexture():
 mTexture(NULL),
@@ -81,10 +83,15 @@ void LTexture :: free()
         mHeight = 0;
     }
 }
-void LTexture :: render( int x, int y)
+void LTexture :: render( int x, int y, SDL_Rect * clip)
 {
     SDL_Rect renderQuad = {x, y, mWidth, mHeight};
-    SDL_RenderCopy(gRenderer, mTexture, NULL, &renderQuad);
+    if(clip != NULL)
+    {
+        renderQuad.w = clip->w;
+        renderQuad.h = clip->h;
+    }
+    SDL_RenderCopy(gRenderer, mTexture, clip, &renderQuad);
 }
 int LTexture :: getWidth()
 {
@@ -130,11 +137,40 @@ bool init()
 bool loadMedia()
 {
     bool success(true);
+    if(!gSpriteSheetTexture.loadFromFile("dots.png"))
+    {
+        std :: cout << "Failed to load sprite sheet texture" << std :: endl;
+        success = true;
+    }
+    else
+    {
+        gSpriteClips[0].x = 0;
+        gSpriteClips[0].y = 0;
+        gSpriteClips[0].w = 100;
+        gSpriteClips[0].h = 100;
+
+        gSpriteClips[1].x = 100;
+        gSpriteClips[1].y = 0;
+        gSpriteClips[1].w = 100;
+        gSpriteClips[1].h = 100;
+
+        gSpriteClips[2].x = 0;
+        gSpriteClips[2].y = 100;
+        gSpriteClips[2].w = 100;
+        gSpriteClips[2].h = 100;
+        
+        gSpriteClips[3].x = 100;
+        gSpriteClips[3].y = 100;
+        gSpriteClips[3].w = 100;
+        gSpriteClips[3].h = 100;
+    }
+    /*bool success(true);
     if(!gFooTexture.loadFromFile("foo.png"))
     {
         std :: cout << "Failde to load from file " << std :: endl;
         success = false;
     }
+    */
     if(!gBackGroundTexture.loadFromFile("background.png"))
     {
         std :: cout << "Failed to load image " << std :: endl;
@@ -206,12 +242,21 @@ int main(int argc, char ** argv)
                         quit = true;
                 }
                 SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
+                SDL_RenderClear(gRenderer);
+                gBackGroundTexture.render(0, 0, NULL);
+                gSpriteSheetTexture.render(100,100, &gSpriteClips[0]);
+                gSpriteSheetTexture.render(200, 200, &gSpriteClips[1]);
+                gSpriteSheetTexture.render(300 , 300, &gSpriteClips[2]);
+                gSpriteSheetTexture.render(400, 400, &gSpriteClips[3]);
+                SDL_RenderPresent(gRenderer);
+                /*SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
                 SDL_RenderClear(gRenderer),
 
                 gBackGroundTexture.render(0,0);
                 gFooTexture.render(240, 190);
 
                 SDL_RenderPresent(gRenderer);
+                */
                 /*SDL_RenderClear(gRenderer);
                 SDL_Rect topLeftViewPort;
                 topLeftViewPort.x = 0;

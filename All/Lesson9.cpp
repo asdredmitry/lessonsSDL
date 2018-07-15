@@ -27,6 +27,9 @@ class LTexture
     void render(int x, int y, SDL_Rect * clip = NULL);
     int getWidth();
     int getHeight();
+    void setColor(Uint8 red, Uint8 green, Uint8 blue);
+    void setBlendMod(SDL_BlendMode blending);
+    void setAlpha(Uint8 alpha);
 
     private:
     SDL_Texture * mTexture;
@@ -37,8 +40,11 @@ class LTexture
 
 LTexture gFooTexture;
 LTexture gBackGroundTexture;
-SDL_Rect gSpriteClips[4];
+//SDL_Rect gSpriteClips[4];
 LTexture gSpriteSheetTexture;
+LTexture gModulatedTexture;
+const int WALKING_ANIMATION_FRAMES = 4;
+SDL_Rect gSpriteClips[WALKING_ANIMATION_FRAMES];
 
 LTexture :: LTexture():
 mTexture(NULL),
@@ -117,7 +123,8 @@ bool init()
         success = false;
         return success;
     }
-    gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
+    gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    //gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
     if(gRenderer == NULL)
     {
         std :: cout << "Renderer coudl not be created " << SDL_GetError() << std :: endl;
@@ -134,9 +141,68 @@ bool init()
     }
     return success;
 }
+void LTexture :: setColor(Uint8 red, Uint8 green, Uint8 blue)
+{
+    SDL_SetTextureColorMod(mTexture, red, green, blue);
+}
+void LTexture :: setBlendMod(SDL_BlendMode blending)
+{
+    SDL_SetTextureBlendMode(mTexture, blending);
+}
+void LTexture :: setAlpha(Uint8 alpha)
+{
+    SDL_SetTextureAlphaMod(mTexture, alpha);
+}
 bool loadMedia()
 {
     bool success(true);
+    if(!gSpriteSheetTexture.loadFromFile("foo.png"))
+    {
+        std :: cout << "Failed to load walking animagtion texture" << std :: endl;
+        success = false;
+    }
+    else
+    {
+        gSpriteClips[0].x = 0;
+        gSpriteClips[0].y = 0;
+        gSpriteClips[0].w = 64;
+        gSpriteClips[0].h = 205;
+        
+        gSpriteClips[1].x = 64;
+        gSpriteClips[1].y = 0;
+        gSpriteClips[1].w = 64;
+        gSpriteClips[1].h = 205;
+
+        gSpriteClips[2].x = 128;
+        gSpriteClips[2].y = 0;
+        gSpriteClips[2].w = 64;
+        gSpriteClips[2].h = 205;
+
+        gSpriteClips[3].x = 196;
+        gSpriteClips[3].y = 0;
+        gSpriteClips[3].w = 64;
+        gSpriteClips[3].h = 205;
+    }
+    return success;
+    /*bool success(true);
+
+    if(!gModulatedTexture.loadFromFile("fadeout.png"))
+    {
+        std :: cout << "Failed to load front texture" << std :: endl;
+        success = false;
+    }
+    else
+    {
+        gModulatedTexture.setBlendMod(SDL_BLENDMODE_BLEND);
+    }
+    if(!gBackGroundTexture.loadFromFile("fadein.png"))
+    {
+        std :: cout << "cannot load background texture" << std :: endl;
+        success = false;
+    }
+    */
+    //return success;
+    /*bool success(true);
     if(!gSpriteSheetTexture.loadFromFile("dots.png"))
     {
         std :: cout << "Failed to load sprite sheet texture" << std :: endl;
@@ -164,6 +230,7 @@ bool loadMedia()
         gSpriteClips[3].w = 100;
         gSpriteClips[3].h = 100;
     }
+    */
     /*bool success(true);
     if(!gFooTexture.loadFromFile("foo.png"))
     {
@@ -225,6 +292,64 @@ SDL_Texture * loadTexture(std :: string path)
 int main(int argc, char ** argv)
 {
     if(!init())
+    {
+        std :: cout << "Cannot init sdl" << std :: endl;
+    }
+    else
+    {
+        if(!loadMedia())
+            std :: cout << "Cannot load media" << std :: endl;
+        else
+        {
+            bool quit(false);
+            SDL_Event e;
+            int frame(0);
+
+            while(!quit)
+            {
+                while(SDL_PollEvent(&e))
+                {
+                    if(e.type == SDL_QUIT)
+                        quit = true;
+                }
+                SDL_Rect * currentClip = &gSpriteClips[frame/4];
+                gSpriteSheetTexture.render((SCREEN_WIDTH - currentClip->w)/2, (SCREEN_HEIGHT - currentClip->h)/2, currentClip);
+
+                SDL_RenderPresent(gRenderer);
+                ++frame;
+                if(frame/4 >= WALKING_ANIMATION_FRAMES)
+                {
+                    frame  = 0;
+                }
+            }
+            /*bool quit(false);
+            SDL_Event e;
+            Uint8 a = 255;
+            while(!quit)
+            {
+                while(SDL_PollEvent(&e))
+                {
+                    if(e.type == SDL_QUIT)
+                        quit = true;
+                    else if(e.type == SDL_KEYDOWN)
+                    {
+                        if(e.key.keysym.sym == SDLK_w)
+                            a += 32;
+                    }
+                }
+                SDL_SetRenderDrawColor(gRenderer,0 , 0, 0, 255);
+                gBackGroundTexture.render(0,0);
+                gModulatedTexture.setAlpha(a);
+                gModulatedTexture.render(0, 0);
+                SDL_RenderPresent(gRenderer);
+            }
+            */
+            close();
+            return 0;
+        }
+    }
+    /*Uint8 r(0), g(0), b(0);
+    if(!init())
         std :: cout << "Cannot init SDL " << std :: endl;
     else
     {
@@ -240,15 +365,39 @@ int main(int argc, char ** argv)
                 {
                     if(e.type == SDL_QUIT)
                         quit = true;
+                    else if(e.type == SDL_KEYDOWN)
+                    {
+                        switch(e.key.keysym.sym)
+                        {
+                            case SDLK_q:
+                            r += 32;
+                            break;
+                            
+                            case SDLK_w:
+                            g =+ 32;
+                            break;
+
+                            case SDLK_e:
+                            b += 32;
+                            break;
+                        }
+                    }
                 }
                 SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
                 SDL_RenderClear(gRenderer);
+                gModulatedTexture.loadFromFile("colors.png");
+                gModulatedTexture.setColor(r, g, b);
+                gModulatedTexture.render(0, 0);
+                SDL_RenderPresent(gRenderer);
+                */
+                /*SDL_RenderClear(gRenderer);
                 gBackGroundTexture.render(0, 0, NULL);
                 gSpriteSheetTexture.render(100,100, &gSpriteClips[0]);
                 gSpriteSheetTexture.render(200, 200, &gSpriteClips[1]);
                 gSpriteSheetTexture.render(300 , 300, &gSpriteClips[2]);
                 gSpriteSheetTexture.render(400, 400, &gSpriteClips[3]);
                 SDL_RenderPresent(gRenderer);
+                */
                 /*SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
                 SDL_RenderClear(gRenderer),
 
@@ -281,9 +430,9 @@ int main(int argc, char ** argv)
                 SDL_RenderCopy(gRenderer, gTexture, NULL, NULL);
                 SDL_RenderPresent(gRenderer);
                 */
-            }
-        }
-    }
-    close();
-    return 0;
+            //}
+        //}
+    //}
+    //close();
+    //return 0;
 }
